@@ -38,7 +38,23 @@ Para configurar el proyecto AquaNova-Hidroponia, sigue los siguientes pasos:
    git clone https://github.com/cristaalm/AquaNova-Hidroponia.git
    ```
 
-2. Instala las dependencias necesarias desde el archivo `requirements.txt` utilizando el siguiente comando:
+2. Crea un entorno virtual (venv) y actívalo:
+
+   - En Windows:
+
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\activate
+   ```
+
+   - En Linux:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Instala las dependencias necesarias desde el archivo `requirements.txt` utilizando el siguiente comando:
 
    - En Windows:
 
@@ -54,7 +70,7 @@ Para configurar el proyecto AquaNova-Hidroponia, sigue los siguientes pasos:
 
 ## Ejecución del proyecto
 
-3. Para ejecutar el proyecto, utiliza uno de los siguientes comandos según tu sistema operativo:
+4. Para ejecutar el proyecto, utiliza uno de los siguientes comandos según tu sistema operativo:
 
    - En Windows:
 

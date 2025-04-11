@@ -4,10 +4,13 @@ from .Graphs.Water.LvlWater import GraphLvlWater
 from .Graphs.Water.CE import GraphCE as GraphCEWater
 from .Graphs.Ambient.Temp import GraphTemp as GraphTempAmbient
 from .Graphs.Ambient.humidity import GraphHU as GraphHumidityAmbient
+from .Serial.AsyncSerialWorker import SerialWorker
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
 from PyQt6.QtGui import QPalette, QColor
 from PyQt6.QtCore import Qt
+from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
+
 
 class ContentContainer(QWidget):
     def __init__(self):
@@ -47,6 +50,16 @@ class ContentContainer(QWidget):
         )
         self.layout.addItem(self.spacer)
 
+        # Parte inferior derecha: Notificación (hacer que se sobreponga a la gráfica y al contenedor)
+        self.notification = NotificationWidget(self)
+        self.notification.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground, True
+        )
+        self.notification.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+        self.notification.setAttribute(
+            Qt.WidgetAttribute.WA_TransparentForMouseEvents, True
+        )
+
         # Configurar tema claro
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -76,6 +89,49 @@ class ContentContainer(QWidget):
         # Instance variable to track content state
         self.content_state = 0
 
+        # Configuración del serial
+        self.serial_worker = SerialWorker()
+        self.serial_worker.data_received.connect(self.handle_serial_data)
+        self.serial_worker.error_occurred.connect(self.handle_serial_error)
+        self.serial_worker.status_changed.connect(self.handle_serial_status)
+        self.serial_worker.start()
+
+    def handle_serial_data(self, data):
+        """Actualiza todas las gráficas con los datos recibidos"""
+        print("Datos recibidos:", data)  # Debug
+
+        try:
+            if "ph" in data:
+                self.graph_hp_water.updateHp(float(data["ph"]))
+            if "temp" in data:
+                self.graph_temp_water.updateTemp(float(data["temp"]))
+            if "dist" in data:
+                self.graph_lvl_water.updateLvlWater(float(data["dist"]))
+            if "ec" in data:
+                self.graph_ce_water.updateCE(float(data["ec"]))
+            if "humidity" in data and data["humidity"] is not None:
+                self.graph_humidity_ambient.updateHU(float(data["humidity"]))
+            if "dht_temp" in data and data["dht_temp"] is not None:
+                self.graph_temp_ambient.updateTemp(float(data["dht_temp"]))
+        except (ValueError, TypeError) as e:
+            print(f"Error procesando datos: {e}")
+
+    def handle_serial_error(self, error_msg):
+        print(f"ERROR SERIAL: {error_msg}")
+        # Puedes mostrar esto en la UI
+        self.notification.show_message(error_msg, "error")
+
+    def handle_serial_status(self, status_msg):
+        print(f"ESTADO SERIAL: {status_msg}")
+        # Puedes mostrar esto en la UI
+        self.notification.show_message(status_msg, "success")
+
+    def closeEvent(self, event):
+        """Cierre seguro de todos los recursos"""
+        if self.serial_worker.isRunning():
+            self.serial_worker.stop()
+        super().closeEvent(event)
+
     def update_content(self):
         # Limpiar el contenedor de contenido
         for i in reversed(range(self.content_layout.count())):
@@ -94,7 +150,9 @@ class ContentContainer(QWidget):
             self.content_layout.addWidget(self.graph_lvl_water)
         elif self.content_state == 2:
             self.title_label.setText("Nivel de pH")
-            self.content_layout.addWidget(self.ph_component)  # Usar el componente completo
+            self.content_layout.addWidget(
+                self.ph_component
+            )  # Usar el componente completo
         elif self.content_state == 3:
             self.title_label.setText("Gráfica de Temperatura")
             self.content_layout.addWidget(self.graph_temp_water)

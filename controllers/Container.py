@@ -7,7 +7,7 @@ from .Graphs.Ambient.humidity import GraphHU as GraphHumidityAmbient
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
 from PyQt6.QtGui import QPalette, QColor
 from PyQt6.QtCore import Qt
-
+from components.pHComponent import phComponent
 
 class ContentContainer(QWidget):
     def __init__(self):
@@ -30,16 +30,16 @@ class ContentContainer(QWidget):
         )  # Estilo del título con tema claro
         self.layout.addWidget(self.title_label)
 
-        # Parte central: Contenedor para la gráfica (ocupará solo la parte superior)
-        self.graph_container = QWidget()
-        self.graph_layout = QVBoxLayout(self.graph_container)
-        self.graph_layout.setAlignment(
+        # Parte central: Contenedor para la gráfica o componente (ocupará solo la parte superior)
+        self.content_container = QWidget()
+        self.content_layout = QVBoxLayout(self.content_container)
+        self.content_layout.setAlignment(
             Qt.AlignmentFlag.AlignCenter
-        )  # Centrar la gráfica
-        self.graph_layout.setContentsMargins(10, 10, 10, 10)  # Márgenes internos
+        )  # Centrar el contenido
+        self.content_layout.setContentsMargins(10, 10, 10, 10)  # Márgenes internos
 
-        # Añadir el contenedor de gráficas al layout principal
-        self.layout.addWidget(self.graph_container)
+        # Añadir el contenedor de contenido al layout principal
+        self.layout.addWidget(self.content_container)
 
         # Añadir un espaciador que empujará todo hacia arriba
         self.spacer = QSpacerItem(
@@ -70,13 +70,16 @@ class ContentContainer(QWidget):
         self.graph_temp_ambient = GraphTempAmbient()
         self.graph_humidity_ambient = GraphHumidityAmbient()
 
+        # Initialize components
+        self.ph_component = phComponent(self.graph_hp_water)
+
         # Instance variable to track content state
         self.content_state = 0
 
     def update_content(self):
-        # Limpiar el contenedor de la gráfica
-        for i in reversed(range(self.graph_layout.count())):
-            widget = self.graph_layout.itemAt(i).widget()
+        # Limpiar el contenedor de contenido
+        for i in reversed(range(self.content_layout.count())):
+            widget = self.content_layout.itemAt(i).widget()
             if widget is not None:
                 widget.setParent(None)
 
@@ -85,30 +88,30 @@ class ContentContainer(QWidget):
             self.title_label.setText("Contenido Principal")
             default_msg = QLabel("Seleccione una gráfica")
             default_msg.setStyleSheet("color: #666666; font-size: 16px;")
-            self.graph_layout.addWidget(default_msg)
+            self.content_layout.addWidget(default_msg)
         elif self.content_state == 1:
             self.title_label.setText("Gráfica de Nivel de Agua")
-            self.graph_layout.addWidget(self.graph_lvl_water)
+            self.content_layout.addWidget(self.graph_lvl_water)
         elif self.content_state == 2:
-            self.title_label.setText("Gráfica de HP")
-            self.graph_layout.addWidget(self.graph_hp_water)
+            self.title_label.setText("Nivel de pH")
+            self.content_layout.addWidget(self.ph_component)  # Usar el componente completo
         elif self.content_state == 3:
             self.title_label.setText("Gráfica de Temperatura")
-            self.graph_layout.addWidget(self.graph_temp_water)
+            self.content_layout.addWidget(self.graph_temp_water)
         elif self.content_state == 4:
             self.title_label.setText("Gráfica de Conductividad")
-            self.graph_layout.addWidget(self.graph_ce_water)
+            self.content_layout.addWidget(self.graph_ce_water)
         elif self.content_state == 5:
             self.title_label.setText("Gráfica de Temperatura Ambiente")
-            self.graph_layout.addWidget(self.graph_temp_ambient)
+            self.content_layout.addWidget(self.graph_temp_ambient)
         elif self.content_state == 6:
             self.title_label.setText("Gráfica de Humedad Ambiente")
-            self.graph_layout.addWidget(self.graph_humidity_ambient)
+            self.content_layout.addWidget(self.graph_humidity_ambient)
         else:
             self.title_label.setText("Estado Desconocido")
             error_msg = QLabel("Estado no válido")
             error_msg.setStyleSheet("color: #cc0000; font-size: 16px;")
-            self.graph_layout.addWidget(error_msg)
+            self.content_layout.addWidget(error_msg)
 
     def set_content_state(self, state):
         self.content_state = state

@@ -42,9 +42,14 @@ class MainWindow(QMainWindow):
         self.sidebar_width = 250  # Ancho fijo en píxeles
         self.splitter.setSizes([self.sidebar_width, self.width() - self.sidebar_width])
 
-        # Deshabilitar el redimensionamiento del splitter
-        splitter_handle = self.splitter.handle(1)
-        splitter_handle.setDisabled(True)  # Deshabilitar el handle del splitter
+        # self.splitter.setHandleWidth(0)  # Hace invisible la línea divisoria
+        
+        self.splitter.setHandleWidth(1)
+        self.splitter.setStyleSheet("""
+            QSplitter::handle {
+                background-color: #B6F1ED;
+            }
+        """)
 
     def resizeEvent(self, event):
         """Mantener el ancho fijo del sidebar al redimensionar la ventana"""

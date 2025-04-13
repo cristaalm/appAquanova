@@ -21,7 +21,7 @@ class Sidebar(QWidget):
         # Configurar el fondo claro
         self.setAutoFillBackground(True)
         palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, QColor(240, 240, 240))
+        palette.setColor(QPalette.ColorRole.Window, QColor(240, 255, 254))
         self.setPalette(palette)
 
         self.sidebar_layout = QVBoxLayout()
@@ -37,9 +37,9 @@ class Sidebar(QWidget):
 
         # Logo más grande (64x64)
         self.logo_label = QLabel()
-        self.logo_pixmap = QPixmap("media/logo.png").scaled(
-            80,
-            80,
+        self.logo_pixmap = QPixmap("resources/media/logo_text.png").scaled(
+            100,
+            100,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )
@@ -47,14 +47,14 @@ class Sidebar(QWidget):
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Nombre de la compañía con estilo mejorado
-        self.company_name_label = QLabel("AQUA NOVA")
-        self.company_name_label.setStyleSheet(
-            "font-size: 22px; font-weight: bold; color: #4da5a6; margin-top: 5px;"
-        )
-        self.company_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # self.company_name_label = QLabel("AQUANOVA")
+        # self.company_name_label.setStyleSheet(
+        #     "font-size: 22px; font-weight: bold; color: #4da5a6; margin-top: 5px;"
+        # )
+        # self.company_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.logo_layout.addWidget(self.logo_label)
-        self.logo_layout.addWidget(self.company_name_label)
+        # self.logo_layout.addWidget(self.company_name_label)
 
         # Añadir espacio después del logo
         self.logo_layout.addSpacing(15)
@@ -70,9 +70,7 @@ class Sidebar(QWidget):
         self.add_button("Conductividad", "tapon-de-agua-circular", 4)
 
         # Categoría: Ambiente
-        self.add_category_separator("AMBIENTE")
-        self.add_button("Temperatura", "temperatura-baja", 5)
-        self.add_button("Humedad", "humedad1", 6)
+        self.add_button("Ambiente", "temperatura-baja", 5)
 
         # Categoría: Configuración
         self.add_category_separator("CONFIGURACIÓN")
@@ -123,7 +121,7 @@ class Sidebar(QWidget):
         # Cargar ícono (si existe)
         icon_label = QLabel()
         try:
-            icon = QPixmap(f"icons/{icon_name}.png").scaled(
+            icon = QPixmap(f"resources/icons/{icon_name}.png").scaled(
                 24,
                 24,
                 Qt.AspectRatioMode.KeepAspectRatio,
@@ -162,12 +160,14 @@ class Sidebar(QWidget):
             QPushButton:hover {
                 background-color: #f5f5f5;
                 border: 1px solid #d0d0d0;
+                cursor: pointer;
             }
             QPushButton:pressed {
                 background-color: #e8e8e8;
             }
             QPushButton:focus {
-                border: 1px solid #2c7be5;
+                background-color: #fff;
+                border: 1px solid #97DFDB;
             }
             """
         )

@@ -10,6 +10,7 @@ from PyQt6.QtGui import QPalette, QColor
 from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
+from views.ambient import Ambient
 
 
 class ContentContainer(QWidget):
@@ -64,7 +65,7 @@ class ContentContainer(QWidget):
         self.setAutoFillBackground(True)
         palette = self.palette()
         palette.setColor(
-            QPalette.ColorRole.Window, QColor(240, 240, 240)
+            QPalette.ColorRole.Window, QColor(240, 255, 254)
         )  # Fondo claro
         palette.setColor(
             QPalette.ColorRole.WindowText, QColor(51, 51, 51)
@@ -75,8 +76,12 @@ class ContentContainer(QWidget):
         palette.setColor(QPalette.ColorRole.Text, QColor(0, 0, 0))  # Texto en widgets
         self.setPalette(palette)
 
+        # values 
+        self.temp_value = 20.3
+        self.hum_value = 58
+        
         # Initialize graphs
-        self.graph_hp_water = GraphHpWater()
+        self.graph_ph_water = GraphHpWater()
         self.graph_temp_water = GraphTempWater()
         self.graph_lvl_water = GraphLvlWater()
         self.graph_ce_water = GraphCEWater()
@@ -84,7 +89,11 @@ class ContentContainer(QWidget):
         self.graph_humidity_ambient = GraphHumidityAmbient()
 
         # Initialize components
-        self.ph_component = phComponent(self.graph_hp_water)
+        self.ph_component = phComponent(self.graph_ph_water)
+        self.ambient = Ambient(self.graph_temp_ambient, 
+                            self.temp_value,
+                            self.hum_value, 
+                            self.graph_humidity_ambient)
 
         # Instance variable to track content state
         self.content_state = 0
@@ -102,7 +111,7 @@ class ContentContainer(QWidget):
 
         try:
             if "ph" in data:
-                self.graph_hp_water.updateHp(float(data["ph"]))
+                self.graph_ph_water.updateHp(float(data["ph"]))
             if "temp" in data:
                 self.graph_temp_water.updateTemp(float(data["temp"]))
             if "dist" in data:
@@ -160,8 +169,8 @@ class ContentContainer(QWidget):
             self.title_label.setText("Gráfica de Conductividad")
             self.content_layout.addWidget(self.graph_ce_water)
         elif self.content_state == 5:
-            self.title_label.setText("Gráfica de Temperatura Ambiente")
-            self.content_layout.addWidget(self.graph_temp_ambient)
+            self.title_label.setText("Supervisión medioambiental")
+            self.content_layout.addWidget(self.ambient)
         elif self.content_state == 6:
             self.title_label.setText("Gráfica de Humedad Ambiente")
             self.content_layout.addWidget(self.graph_humidity_ambient)

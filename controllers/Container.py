@@ -11,6 +11,14 @@ from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
 from views.ambient import Ambient
+
+# controladores Django
+from historiales.controllers.PHController import PHController
+from historiales.controllers.TempWaterController import TempWaterController
+from historiales.controllers.TempAmbientController import TempAmbientController
+from historiales.controllers.CEController import CEController
+from historiales.controllers.DistanceController import DistanceController
+from historiales.controllers.HUAmbientController import HUAmbientController
 from views.systems import Systems
 
 
@@ -50,9 +58,13 @@ class ContentContainer(QWidget):
 
         # Notificaciones
         self.notification = NotificationWidget(self)
-        self.notification.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        self.notification.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground, True
+        )
         self.notification.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
-        self.notification.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self.notification.setAttribute(
+            Qt.WidgetAttribute.WA_TransparentForMouseEvents, True
+        )
 
         # Tema claro
         self.setAutoFillBackground(True)
@@ -62,6 +74,14 @@ class ContentContainer(QWidget):
         palette.setColor(QPalette.ColorRole.Base, QColor(255, 255, 255))
         palette.setColor(QPalette.ColorRole.Text, QColor(0, 0, 0))
         self.setPalette(palette)
+
+        # inicialización de controladores
+        self.ph_controller = PHController()
+        self.temp_water_controller = TempWaterController()
+        self.temp_ambient_controller = TempAmbientController()
+        self.ce_controller = CEController()
+        self.distance_controller = DistanceController()
+        self.humidity_controller = HUAmbientController()
 
         # Valores ambientales simulados
         self.temp_value = 20.3
@@ -113,7 +133,12 @@ class ContentContainer(QWidget):
 
         # Componentes
         self.ph_component = phComponent(self.graph_ph_water)
-        self.ambient = Ambient(self.graph_temp_ambient, self.temp_value, self.hum_value, self.graph_humidity_ambient)
+        self.ambient = Ambient(
+            self.graph_temp_ambient,
+            self.temp_value,
+            self.hum_value,
+            self.graph_humidity_ambient,
+        )
         self.systems = Systems(company_list)
         # Estado inicial
         self.content_state = 0
@@ -133,16 +158,22 @@ class ContentContainer(QWidget):
         try:
             if "ph" in data:
                 self.graph_ph_water.updateHp(float(data["ph"]))
+                self.ph_controller.set_history(float(data["ph"]))
             if "temp" in data:
                 self.graph_temp_water.updateTemp(float(data["temp"]))
+                self.temp_water_controller.set_history(float(data["temp"]))
             if "dist" in data:
                 self.graph_lvl_water.updateLvlWater(float(data["dist"]))
+                self.distance_controller.set_history(float(data["dist"]))
             if "ec" in data:
                 self.graph_ce_water.updateCE(float(data["ec"]))
+                self.ce_controller.set_history(float(data["ec"]))
             if "humidity" in data and data["humidity"] is not None:
                 self.graph_humidity_ambient.updateHU(float(data["humidity"]))
+                self.humidity_controller.set_history(float(data["humidity"]))
             if "dht_temp" in data and data["dht_temp"] is not None:
                 self.graph_temp_ambient.updateTemp(float(data["dht_temp"]))
+                self.temp_ambient_controller.set_history(float(data["dht_temp"]))
         except (ValueError, TypeError) as e:
             print(f"Error procesando datos: {e}")
 

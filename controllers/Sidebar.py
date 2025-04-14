@@ -55,7 +55,7 @@ class Sidebar(QWidget):
         self.logo_label = ClickableLabel()
         pixmap = QPixmap("resources/media/logo_text.png")
         if not pixmap.isNull():
-            scaled = pixmap.scaled(100, 100, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            scaled = pixmap.scaled(150, 150, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             self.logo_label.setPixmap(scaled)
         else:
             print("No se pudo cargar el logo")
@@ -70,16 +70,16 @@ class Sidebar(QWidget):
 
         # Categoría: Supervisión
         self.add_category_separator("SUPERVISIÓN")
-        self.add_button("Nivel del Agua", "subida-de-agua", "subida-de-agua_w", 1)
+        self.add_button("Nivel del agua", "subida-de-agua", "subida-de-agua_w", 1)
         self.add_button("pH del agua", "humedad", "humedad_w", 2)
-        self.add_button("Temperatura agua", "calor", "calor_w", 3)
-        self.add_button("Conductividad", "tapon-de-agua-circular", "tapon-de-agua-circular_w", 4)
+        self.add_button("Temperatura del agua", "calor", "calor_w", 3)
+        self.add_button("Conductividad eléctrica", "tapon-de-agua-circular", "tapon-de-agua-circular_w", 4)
         self.add_button("Ambiente", "temperatura-baja", "temperatura-baja_w", 5)
 
         # Categoría: Configuración
         self.add_category_separator("CONFIGURACIÓN")
-        self.add_button("Contenedores", "botella-de-agua", "botella-de-agua_w", 7)
-        self.add_button("Configuración", "engranajes", "engranajes_w", 8)
+        self.add_button("Dispositivos", "engranajes", "engranajes_w", 6)
+        self.add_button("Sistemas", "empresa", "empresa_w", 7)
 
         # Espaciador final
         self.sidebar_layout.addItem(

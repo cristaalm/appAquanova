@@ -11,6 +11,7 @@ from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
 from views.ambient import Ambient
+from views.systems import Systems
 
 
 class ContentContainer(QWidget):
@@ -66,6 +67,42 @@ class ContentContainer(QWidget):
         self.temp_value = 20.3
         self.hum_value = 58
 
+        company_list = [
+            {
+                "company_name": "Empresa 1",
+                "trade_name": "Comercial Uno",
+                "legal_name": "S.A. de C.V. Uno",
+                "logo": "logo_text.png"
+            },
+            {
+                "company_name": "Empresa 2",
+                "trade_name": "Comercial Dos",
+                "legal_name": "S.A. de C.V. Dos",
+                "logo": "logo_text.png"
+            },{
+                "company_name": "Empresa 1",
+                "trade_name": "Comercial Uno",
+                "legal_name": "S.A. de C.V. Uno",
+                "logo": "logo_text.png"
+            },
+            {
+                "company_name": "Empresa 2",
+                "trade_name": "Comercial Dos",
+                "legal_name": "S.A. de C.V. Dos",
+                "logo": "logo_text.png"
+            },{
+                "company_name": "Empresa 1",
+                "trade_name": "Comercial Uno",
+                "legal_name": "S.A. de C.V. Uno",
+                "logo": "logo_text.png"
+            },
+            {
+                "company_name": "Empresa 2",
+                "trade_name": "Comercial Dos",
+                "legal_name": "S.A. de C.V. Dos",
+                "logo": "logo_text.png"
+            }
+        ]
         # Inicialización de gráficas
         self.graph_ph_water = GraphHpWater()
         self.graph_temp_water = GraphTempWater()
@@ -77,7 +114,7 @@ class ContentContainer(QWidget):
         # Componentes
         self.ph_component = phComponent(self.graph_ph_water)
         self.ambient = Ambient(self.graph_temp_ambient, self.temp_value, self.hum_value, self.graph_humidity_ambient)
-
+        self.systems = Systems(company_list)
         # Estado inicial
         self.content_state = 0
 
@@ -158,8 +195,10 @@ class ContentContainer(QWidget):
             self.title_label.setText("Supervisión medioambiental")
             self.content_layout.addWidget(self.ambient)
         elif self.content_state == 6:
-            self.title_label.setText("Gráfica de Humedad Ambiente")
-            self.content_layout.addWidget(self.graph_humidity_ambient)
+            self.title_label.setText("Dispositivos")
+        elif self.content_state == 7:
+            self.title_label.setText("Sistemas")
+            self.content_layout.addWidget(self.systems)
         else:
             self.title_label.setText("Estado Desconocido")
             error_msg = QLabel("Estado no válido")

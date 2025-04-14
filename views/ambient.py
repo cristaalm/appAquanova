@@ -1,7 +1,7 @@
 # componentes
-from components.currentAmbient import CurrentAmbient
-from components.graphicsAmbient import GraphicsAmbient
-from components.historyAmbient import HistoryAmbient
+from components.ambient.currentAmbient import CurrentAmbient
+from components.ambient.graphicsAmbient import GraphicsAmbient
+from components.ambient.historyAmbient import HistoryAmbient
 
 # widgets
 from PyQt6.QtWidgets import (
@@ -33,11 +33,11 @@ class Ambient(QWidget):
         self.setStyleSheet("background-color: white;")
         
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(10, 10, 10, 10)
-        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(10)
 
         grid_layout = QGridLayout()
-        grid_layout.setSpacing(20)
+        grid_layout.setSpacing(8)
 
         # Panel de ambiente actual
         ambient_panel = CurrentAmbient(self.temperature_value, self.humidity_value)
@@ -92,6 +92,7 @@ class Ambient(QWidget):
         scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none;
+                background-color: #F0FFFE;
                 border-radius: 12px;
             }
             QScrollBar:vertical {

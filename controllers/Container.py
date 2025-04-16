@@ -10,6 +10,7 @@ from PyQt6.QtGui import QPalette, QColor
 from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
+from components.WaterComponent import WaterComponent
 from views.ambient import Ambient
 
 # controladores Django
@@ -132,6 +133,7 @@ class ContentContainer(QWidget):
         self.graph_humidity_ambient = GraphHumidityAmbient()
 
         # Componentes
+        self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
         self.ambient = Ambient(
             self.graph_temp_ambient,
@@ -211,8 +213,8 @@ class ContentContainer(QWidget):
             welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.content_layout.addWidget(welcome_label)
         elif self.content_state == 1:
-            self.title_label.setText("Gráfica de Nivel de Agua")
-            self.content_layout.addWidget(self.graph_lvl_water)
+            self.title_label.setText("Nivel de Agua")
+            self.content_layout.addWidget(self.water_component)
         elif self.content_state == 2:
             self.title_label.setText("Nivel de pH")
             self.content_layout.addWidget(self.ph_component)

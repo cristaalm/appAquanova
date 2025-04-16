@@ -154,56 +154,6 @@ class WaterComponent(QWidget):
         emotion_layout.setContentsMargins(10, 15, 10, 15)
         emotion_layout.setSpacing(15)
 
-        emotion_title = QLabel("Estado")
-        emotion_title.setStyleSheet("""
-            font-size: 18px;
-            font-weight: bold;
-            color: #074e52;
-            text-align: center;
-        """)
-        emotion_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(emotion_title)
-
-        happy_face = QLabel("Bueno")
-        happy_face.setStyleSheet("""
-            font-size: 30px;
-            background-color: #dcfce7;
-            font-weight: bold;
-            border-radius: 5px;
-            padding: 5px;
-            color: #074e52;
-        """)
-        happy_face.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(happy_face)
-
-        neutral_face = QLabel("Regular")
-        neutral_face.setStyleSheet("""
-            font-size: 30px;
-            background-color: #fef3c7;
-            font-weight: bold;
-            border-radius: 5px;
-            padding: 5px;
-            color: #074e52;
-        """)
-        neutral_face.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(neutral_face)
-
-        sad_face = QLabel("Malo")
-        sad_face.setStyleSheet("""
-            font-size: 30px;
-            font-weight: bold;
-            background-color: #fee2e2;
-            border-radius: 5px;
-            padding: 5px;
-            color: #074e52;
-        """)
-        sad_face.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(sad_face)
-
-        emotion_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
-
-        return emotion_panel
-
     def update_level_status(self, level_value):
         level_value = float(level_value)
         if level_value < 10:

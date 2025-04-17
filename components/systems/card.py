@@ -11,7 +11,7 @@ SHADOW = os.getenv("SHADOW")
 MEDIA = os.getenv("MEDIA")
 
 class Card(QWidget):
-    def __init__(self, company_name, trade_name, legal_name, logo_path, parent=None):
+    def __init__(self, trade_name, legal_name, logo_path, parent=None):
         super().__init__(parent)
 
         self.setFixedHeight(120)
@@ -31,7 +31,7 @@ class Card(QWidget):
         frame.setGraphicsEffect(shadow)
 
         frame_layout = QHBoxLayout(frame)
-        frame_layout.setContentsMargins(15, 0, 15, 0)  # Añadir margen interno horizontal
+        frame_layout.setContentsMargins(15, 5, 15, 5)  # Añadir margen interno horizontal
 
         # Logo (izquierda)
         logo_label = QLabel()

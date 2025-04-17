@@ -65,7 +65,7 @@ class Sidebar(QWidget):
         self.logo_label.clicked.connect(lambda: self.handle_logo_click())
 
         self.logo_layout.addWidget(self.logo_label)
-        self.logo_layout.addSpacing(15)
+        self.logo_layout.addSpacing(5)
         self.sidebar_layout.addWidget(self.logo_container)
 
         # Categoría: Supervisión
@@ -119,14 +119,14 @@ class Sidebar(QWidget):
         button.setStyleSheet("""
             QPushButton {
                 background-color: #fff;
-                border: none;
-                font-size: 14px;
                 border-radius: 8px;
+                border: none;
                 color: #4CA4A5;
+                font-size: 14px;
                 font-weight: 500;  
+                padding-left: 15px;
                 padding: 10px 15px;
                 text-align: left;
-                padding-left: 15px;
             }
             QPushButton:hover {
                 background-color: #E4FFF3;

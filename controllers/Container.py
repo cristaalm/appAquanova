@@ -90,35 +90,29 @@ class ContentContainer(QWidget):
 
         company_list = [
             {
-                "company_name": "Empresa 1",
                 "trade_name": "Comercial Uno",
                 "legal_name": "S.A. de C.V. Uno",
                 "logo": "logo_text.png"
             },
             {
-                "company_name": "Empresa 2",
                 "trade_name": "Comercial Dos",
                 "legal_name": "S.A. de C.V. Dos",
                 "logo": "logo_text.png"
             },{
-                "company_name": "Empresa 1",
                 "trade_name": "Comercial Uno",
                 "legal_name": "S.A. de C.V. Uno",
                 "logo": "logo_text.png"
             },
             {
-                "company_name": "Empresa 2",
                 "trade_name": "Comercial Dos",
                 "legal_name": "S.A. de C.V. Dos",
                 "logo": "logo_text.png"
             },{
-                "company_name": "Empresa 1",
                 "trade_name": "Comercial Uno",
                 "legal_name": "S.A. de C.V. Uno",
                 "logo": "logo_text.png"
             },
             {
-                "company_name": "Empresa 2",
                 "trade_name": "Comercial Dos",
                 "legal_name": "S.A. de C.V. Dos",
                 "logo": "logo_text.png"

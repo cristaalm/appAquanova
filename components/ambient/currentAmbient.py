@@ -13,6 +13,24 @@ load_dotenv()
 ICONS = os.getenv("ICONS")
 SHADOW = os.getenv("SHADOW")
 
+
+class MarqueeLabel(QLabel):
+    def __init__(self, text, parent=None):
+        super().__init__(text, parent)
+        self.full_text = text + "     "  # Espacio extra para que el texto dé la vuelta
+        self.index = 0
+
+        self.setText(self.full_text)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.scroll_text)
+        self.timer.start(150)  # Menor valor = más rápido
+
+    def scroll_text(self):
+        scrolled = self.full_text[self.index:] + self.full_text[:self.index]
+        self.setText(scrolled)
+        self.index = (self.index + 1) % len(self.full_text)
+
+
 class CurrentAmbient(QWidget):
     def __init__(self, temperature_value, humidity_value, parent=None):
         super().__init__(parent)
@@ -20,12 +38,12 @@ class CurrentAmbient(QWidget):
         self.temperature_value = temperature_value
         self.humidity_value = humidity_value
 
-        # Cambiar a diseño vertical
+        # Diseño principal vertical
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 20, 0, 20)
         main_layout.setSpacing(20)
 
-        # Card de temperatura (arriba)
+        # Tarjeta de temperatura
         self.temperature_card = self.create_card(
             title="Temperatura actual",
             subtitle="Control de la temperatura en tiempo real",
@@ -34,7 +52,7 @@ class CurrentAmbient(QWidget):
         )
         main_layout.addWidget(self.temperature_card)
 
-        # Card de humedad (debajo)
+        # Tarjeta de humedad
         self.humidity_card = self.create_card(
             title="Humedad actual",
             subtitle="Control de la humedad en tiempo real",
@@ -42,7 +60,6 @@ class CurrentAmbient(QWidget):
             is_temperature=False
         )
         main_layout.addWidget(self.humidity_card)
-
 
     def create_card(self, title, subtitle, value, is_temperature=False):
         frame = QFrame()
@@ -69,9 +86,9 @@ class CurrentAmbient(QWidget):
         layout.setContentsMargins(15, 15, 15, 15)
         layout.setSpacing(10)
 
-        # Fila: Título + ícono en la esquina
+        # Título con ícono
         title_layout = QHBoxLayout()
-        title_label = QLabel(title)
+        title_label = MarqueeLabel(title)
         title_label.setStyleSheet("""
             font-size: 22px;
             font-weight: bold;
@@ -97,10 +114,10 @@ class CurrentAmbient(QWidget):
         title_layout.addWidget(corner_icon)
         layout.addLayout(title_layout)
 
-        # Fila: Descripción (izquierda) y valor con imagen (derecha)
+        # Subtítulo y valor
         bottom_layout = QHBoxLayout()
 
-        # Subtítulo (izquierda)
+        # Subtítulo
         subtitle_label = QLabel(subtitle)
         subtitle_label.setStyleSheet("""
             font-size: 12px;
@@ -111,7 +128,7 @@ class CurrentAmbient(QWidget):
         subtitle_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         bottom_layout.addWidget(subtitle_label, 1)
 
-        # Valor con imagen (derecha)
+        # Valor con ícono
         value_container = QHBoxLayout()
         image_label = QLabel()
         image_label.setFixedSize(32, 32)

@@ -4,9 +4,8 @@ from utils.BaseGraph import BaseGraph
 class GraphTemp(BaseGraph):
     def __init__(self):
         super().__init__(
-            title="Gráfica de Temperatura",
             x_label="Tiempo",
-            y_label="°C",
+            y_label="°C Temperatura",
             line_color="#2980b9",  # Azul
             data_range=(20.0, 25.0),  # Rango inicial
         )

@@ -11,6 +11,7 @@ from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
 from components.WaterComponent import WaterComponent
+from components.TempWaterComponent import tempWaterComponent
 from views.ambient import Ambient
 
 # controladores Django
@@ -129,6 +130,7 @@ class ContentContainer(QWidget):
         # Componentes
         self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
+        self.temp_water_component = tempWaterComponent(self.graph_temp_water) 
         self.ambient = Ambient(
             self.graph_temp_ambient,
             self.temp_value,
@@ -213,8 +215,8 @@ class ContentContainer(QWidget):
             self.title_label.setText("Nivel de pH")
             self.content_layout.addWidget(self.ph_component)
         elif self.content_state == 3:
-            self.title_label.setText("Gráfica de Temperatura")
-            self.content_layout.addWidget(self.graph_temp_water)
+            self.title_label.setText("Temperatura del Agua")
+            self.content_layout.addWidget(self.temp_water_component)
         elif self.content_state == 4:
             self.title_label.setText("Gráfica de Conductividad")
             self.content_layout.addWidget(self.graph_ce_water)

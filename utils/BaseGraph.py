@@ -8,7 +8,7 @@ from typing import List, Tuple, Optional
 class BaseGraph(pg.PlotWidget):
     def __init__(
         self,
-        title: str = "Gráfica",
+        title: str = "",
         x_label: str = "Eje X",
         y_label: str = "Eje Y",
         line_color: str = "#3498db",

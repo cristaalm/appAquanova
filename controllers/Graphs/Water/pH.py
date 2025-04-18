@@ -4,7 +4,7 @@ from utils.BaseGraph import BaseGraph
 class GraphHp(BaseGraph):
     def __init__(self):
         super().__init__(
-            title="Gráfica de pH",
+            title="",
             x_label="Tiempo",
             y_label="pH",
             line_color="#e63757",  # Rojo

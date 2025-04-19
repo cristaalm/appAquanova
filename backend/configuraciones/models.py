@@ -6,6 +6,9 @@ class configuraciones(models.Model):
     id_configuracion = models.AutoField(
         primary_key=True
     )  # Primary key and auto-increment
+    name = models.CharField(
+        max_length=50, db_column="nombre", default="Default Name"
+    )  # Unique name for each configuration
     id_dispositivo = models.ForeignKey(
         Dispositivo,
         on_delete=models.PROTECT,  # Matches "ON DELETE NO ACTION"

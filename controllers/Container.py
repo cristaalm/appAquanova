@@ -11,6 +11,7 @@ from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
 from components.WaterComponent import WaterComponent
+from components.devices.DevicesView import DevicesView
 from components.TempWaterComponent import tempWaterComponent
 from views.ambient import Ambient
 
@@ -93,31 +94,33 @@ class ContentContainer(QWidget):
             {
                 "trade_name": "Comercial Uno",
                 "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png"
+                "logo": "logo_text.png",
             },
             {
                 "trade_name": "Comercial Dos",
                 "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png"
-            },{
+                "logo": "logo_text.png",
+            },
+            {
                 "trade_name": "Comercial Uno",
                 "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png"
+                "logo": "logo_text.png",
             },
             {
                 "trade_name": "Comercial Dos",
                 "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png"
-            },{
+                "logo": "logo_text.png",
+            },
+            {
                 "trade_name": "Comercial Uno",
                 "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png"
+                "logo": "logo_text.png",
             },
             {
                 "trade_name": "Comercial Dos",
                 "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png"
-            }
+                "logo": "logo_text.png",
+            },
         ]
         # Inicialización de gráficas
         self.graph_ph_water = GraphHpWater()
@@ -130,7 +133,7 @@ class ContentContainer(QWidget):
         # Componentes
         self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
-        self.temp_water_component = tempWaterComponent(self.graph_temp_water) 
+        self.temp_water_component = tempWaterComponent(self.graph_temp_water)
         self.ambient = Ambient(
             self.graph_temp_ambient,
             self.temp_value,
@@ -138,6 +141,8 @@ class ContentContainer(QWidget):
             self.graph_humidity_ambient,
         )
         self.systems = Systems(company_list)
+
+        self.devices_view = DevicesView(self.notification)
         # Estado inicial
         self.content_state = 0
 
@@ -195,6 +200,14 @@ class ContentContainer(QWidget):
             if widget is not None:
                 widget.setParent(None)
 
+        # Configurar alineación del layout según el estado
+        if self.content_state == 6:  # Dispositivos
+            self.content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+            self.content_layout.setContentsMargins(10, 10, 10, 10)
+        else:
+            self.content_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.content_layout.setContentsMargins(10, 10, 10, 10)
+
         # Mostrar contenido según estado
         if self.content_state == 0:
             self.title_label.setText("Bienvenido a el monitor de AquaNova")
@@ -225,6 +238,7 @@ class ContentContainer(QWidget):
             self.content_layout.addWidget(self.ambient)
         elif self.content_state == 6:
             self.title_label.setText("Dispositivos")
+            self.content_layout.addWidget(self.devices_view)
         elif self.content_state == 7:
             self.title_label.setText("Sistemas")
             self.content_layout.addWidget(self.systems)

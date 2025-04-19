@@ -1,5 +1,10 @@
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QGraphicsDropShadowEffect
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QFrame,
+    QGraphicsDropShadowEffect,
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QPixmap
@@ -26,7 +31,7 @@ class MarqueeLabel(QLabel):
         self.timer.start(150)  # Menor valor = más rápido
 
     def scroll_text(self):
-        scrolled = self.full_text[self.index:] + self.full_text[:self.index]
+        scrolled = self.full_text[self.index :] + self.full_text[: self.index]
         self.setText(scrolled)
         self.index = (self.index + 1) % len(self.full_text)
 
@@ -48,7 +53,7 @@ class CurrentAmbient(QWidget):
             title="Temperatura actual",
             subtitle="Control de la temperatura en tiempo real",
             value=f"{self.temperature_value} °C",
-            is_temperature=True
+            is_temperature=True,
         )
         main_layout.addWidget(self.temperature_card)
 
@@ -57,7 +62,7 @@ class CurrentAmbient(QWidget):
             title="Humedad actual",
             subtitle="Control de la humedad en tiempo real",
             value=f"{self.humidity_value} %",
-            is_temperature=False
+            is_temperature=False,
         )
         main_layout.addWidget(self.humidity_card)
 
@@ -66,13 +71,15 @@ class CurrentAmbient(QWidget):
         frame.setFrameShape(QFrame.Shape.StyledPanel)
         frame.setMinimumWidth(220)
         frame.setMaximumWidth(280)
-        frame.setStyleSheet("""
+        frame.setStyleSheet(
+            """
             QFrame {
                 background-color: white;
                 border-radius: 12px;
                 border: none;
             }
-        """)
+        """
+        )
 
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(15)
@@ -89,23 +96,32 @@ class CurrentAmbient(QWidget):
         # Título con ícono
         title_layout = QHBoxLayout()
         title_label = MarqueeLabel(title)
-        title_label.setStyleSheet("""
+        title_label.setStyleSheet(
+            """
             font-size: 22px;
             font-weight: bold;
             color: #074e52;
-        """)
-        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        """
+        )
+        title_label.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
 
         corner_icon = QLabel()
         corner_icon.setFixedSize(22, 22)
         if is_temperature:
             timezone = pytz.timezone("America/Mexico_City")
             current_hour = datetime.now(timezone).hour
-            icon_path = f"{ICONS}sol.png" if 6 <= current_hour < 19 else f"{ICONS}luna.png"
+            icon_path = (
+                f"{ICONS}sol.png" if 6 <= current_hour < 19 else f"{ICONS}luna.png"
+            )
         else:
             icon_path = f"{ICONS}gota.png"
         corner_pixmap = QPixmap(icon_path).scaled(
-            22, 22, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+            22,
+            22,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
         )
         corner_icon.setPixmap(corner_pixmap)
 
@@ -119,13 +135,17 @@ class CurrentAmbient(QWidget):
 
         # Subtítulo
         subtitle_label = QLabel(subtitle)
-        subtitle_label.setStyleSheet("""
+        subtitle_label.setStyleSheet(
+            """
             font-size: 12px;
             font-style: italic;
             color: #6b7280;
-        """)
+        """
+        )
         subtitle_label.setWordWrap(True)
-        subtitle_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        subtitle_label.setAlignment(
+            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft
+        )
         bottom_layout.addWidget(subtitle_label, 1)
 
         # Valor con ícono
@@ -134,16 +154,21 @@ class CurrentAmbient(QWidget):
         image_label.setFixedSize(32, 32)
         image_path = f"{ICONS}thermometer.png" if is_temperature else f"{ICONS}nube.png"
         pixmap = QPixmap(image_path).scaled(
-            32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+            32,
+            32,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
         )
         image_label.setPixmap(pixmap)
 
         value_label = QLabel(value)
-        value_label.setStyleSheet("""
+        value_label.setStyleSheet(
+            """
             font-size: 28px;
             font-weight: bold;
             color: #074e52;
-        """)
+        """
+        )
         value_label.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         value_container.addWidget(image_label)

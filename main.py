@@ -1,7 +1,13 @@
 import os
 import sys
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+    QApplication,
+    QMainWindow,
+    QLabel,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
 )
 from PyQt6.QtGui import QIcon, QPixmap, QFont, QCursor
 from PyQt6.QtCore import Qt, QPoint, QPropertyAnimation, QEasingCurve
@@ -13,14 +19,17 @@ sys.path.append(backend_path)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
 import django
+
 django.setup()
 
 from controllers.main_window import MainWindow
 from dotenv import load_dotenv
+
 load_dotenv()
 COLOR_C8F5F2 = os.getenv("COLOR_C8F5F2")
 COLOR_074E52 = os.getenv("COLOR_074E52")
 MEDIA = os.getenv("MEDIA")
+
 
 class CustomMainWindow(QMainWindow):
     def __init__(self):
@@ -38,7 +47,7 @@ class CustomMainWindow(QMainWindow):
 
         main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)  
+        main_layout.setSpacing(0)
 
         # --- Header ---
         header = QWidget()
@@ -51,7 +60,12 @@ class CustomMainWindow(QMainWindow):
         # Logo
         logo_label = QLabel()
         pixmap = QPixmap(f"{MEDIA}logo.png")
-        pixmap = pixmap.scaled(24, 24, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        pixmap = pixmap.scaled(
+            24,
+            24,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
         logo_label.setPixmap(pixmap)
 
         # Título mejorado
@@ -81,7 +95,8 @@ class CustomMainWindow(QMainWindow):
         close_btn = QPushButton("✕")
         close_btn.setFixedSize(30, 30)
         close_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        close_btn.setStyleSheet(f"""
+        close_btn.setStyleSheet(
+            f"""
             QPushButton {{
                 background-color: transparent;
                 color: {COLOR_074E52};
@@ -92,7 +107,8 @@ class CustomMainWindow(QMainWindow):
                 background-color: #ff5c5c;
                 color: {COLOR_C8F5F2};
             }}
-        """)
+        """
+        )
         close_btn.clicked.connect(self.animateClose)
 
         # Añadir al layout
@@ -131,6 +147,16 @@ class CustomMainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle(
+        "Fusion"
+    )  # Al inicio de tu aplicación, antes de crear cualquier widget:
+    app.setStyleSheet(
+        "QToolTip { color: #000000; background-color: #ffffff; border: 1px solid black; }"
+    )
+    window = MainWindow()
+    window.setWindowIcon(QIcon("media/logotipo_w.png"))
+    window.setWindowTitle("Aquanova - Monitor")
+    window.show()
     app.setStyle("Fusion")
     window = CustomMainWindow()
     window.setWindowIcon(QIcon(f"{MEDIA}logo.png"))

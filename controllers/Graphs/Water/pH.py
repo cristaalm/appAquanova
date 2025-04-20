@@ -5,8 +5,8 @@ class GraphHp(BaseGraph):
     def __init__(self):
         super().__init__(
             title="",
-            x_label="Tiempo",
-            y_label="pH",
+            x_label="",
+            y_label="Valor (pH)",
             line_color="#e63757",  # Rojo
             data_range=(6.0, 8.0),  # Rango típico de pH
         )

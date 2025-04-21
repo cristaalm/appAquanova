@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QDateEdit, QTableWidgetItem, 
     QHeaderView, QSpacerItem, QSizePolicy, QFrame, QComboBox, QGraphicsDropShadowEffect,
-    QProgressBar
+    QProgressBar, QStyle
 )
 from PyQt6.QtCore import Qt, QSize, QDateTime, QDate
 from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap, QBrush
@@ -41,6 +41,8 @@ class phComponent(QWidget):
         top_layout.addWidget(self.create_summary_panel(), 1)
         top_layout.addWidget(self.create_graph_panel(), 3)
         top_layout.addWidget(self.create_emotion_panel(), 1)
+        # En setup_ui() o donde inicialices la gráfica:
+        self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         main_layout.addLayout(top_layout, 1)
         main_layout.addWidget(self.create_history_panel(), 10)
@@ -143,8 +145,12 @@ class phComponent(QWidget):
         graph_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52; margin-bottom: 2px;")
         graph_layout.addWidget(graph_title)
         
+        # Configurar la gráfica para expandirse
+        self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.graph_widget.setMinimumHeight(180)
-        graph_layout.addWidget(self.graph_widget)
+        
+        # Añadir la gráfica con stretch factor para que ocupe todo el espacio disponible
+        graph_layout.addWidget(self.graph_widget, 1)
         
         return graph_panel
 
@@ -316,6 +322,11 @@ class phComponent(QWidget):
             ("01/04/2024 14:35", "6.9", self.get_ph_state(6.9))
         ]
         
+        # Definir los iconos para cada estado
+        icono_acido = QIcon("./resources/icons/acido.png")
+        icono_neutro = QIcon("./resources/icons/neutro.png")
+        icono_alcalino = QIcon("./resources/icons/alcalino.png")
+        
         self.history_table.setRowCount(len(data))
         for row, (fecha, valor, estado) in enumerate(data):
             # Celda de fecha
@@ -328,23 +339,22 @@ class phComponent(QWidget):
             
             # Celda de estado con color de fondo según pH
             estado_item = QTableWidgetItem(estado)
-            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            # Cambiar a alineación izquierda
+            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             
-            # Colorear según el estado
-            if estado == "ÁCIDO":
+            # Establecer icono según el estado
+            if estado == "Ácido":
                 estado_item.setBackground(QBrush(QColor("#fee2e2")))
                 estado_item.setForeground(QBrush(QColor("#b91c1c")))
-            elif estado == "ALCALINO":
+                estado_item.setIcon(icono_acido)
+            elif estado == "Alcalino":
                 estado_item.setBackground(QBrush(QColor("#fef3c7")))
                 estado_item.setForeground(QBrush(QColor("#92400e")))
+                estado_item.setIcon(icono_alcalino)
             else:  # NEUTRO
                 estado_item.setBackground(QBrush(QColor("#dcfce7")))
                 estado_item.setForeground(QBrush(QColor("#166534")))
-            
-            # Ícono opcional
-            icon_path = "resources/icons/ph_icon.png"
-            if os.path.exists(icon_path):
-                valor_item.setIcon(QIcon(icon_path))
+                estado_item.setIcon(icono_neutro)
             
             self.history_table.setItem(row, 0, fecha_item)
             self.history_table.setItem(row, 1, valor_item)
@@ -440,8 +450,8 @@ class phComponent(QWidget):
         # Determina el estado para la tabla de historial
         ph_value = float(ph_value)
         if ph_value < self.PH_MIN_NEUTRAL:
-            return "ÁCIDO"
+            return "Ácido"
         elif ph_value > self.PH_MAX_NEUTRAL:
-            return "ALCALINO"
+            return "Alcalino"
         else:
-            return "NEUTRO"
+            return "Neutro"

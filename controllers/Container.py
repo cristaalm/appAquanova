@@ -13,6 +13,7 @@ from components.pHComponent import phComponent
 from components.WaterComponent import WaterComponent
 from components.devices.DevicesView import DevicesView
 from components.TempWaterComponent import tempWaterComponent
+from components.EConductivityComponent import EConductivityComponent  # Nuevo componente
 from views.ambient import Ambient
 
 # controladores Django
@@ -134,6 +135,7 @@ class ContentContainer(QWidget):
         self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
         self.temp_water_component = tempWaterComponent(self.graph_temp_water)
+        self.ce_component = EConductivityComponent(self.graph_ce_water)  # Nuevo componente
         self.ambient = Ambient(
             self.graph_temp_ambient,
             self.temp_value,
@@ -162,15 +164,18 @@ class ContentContainer(QWidget):
             if "ph" in data:
                 self.graph_ph_water.updateHp(float(data["ph"]))
                 self.ph_controller.set_history(float(data["ph"]))
+                self.ph_component.set_ph_value(data["ph"])  # Actualizar componente pH
             if "temp" in data:
                 self.graph_temp_water.updateTemp(float(data["temp"]))
                 self.temp_water_controller.set_history(float(data["temp"]))
+                self.temp_water_component.set_temp_value(data["temp"])  # Actualizar componente temp agua
             if "dist" in data:
                 self.graph_lvl_water.updateLvlWater(float(data["dist"]))
                 self.distance_controller.set_history(float(data["dist"]))
             if "ec" in data:
                 self.graph_ce_water.updateCE(float(data["ec"]))
                 self.ce_controller.set_history(float(data["ec"]))
+                self.ce_component.set_conductivity_value(data["ec"])  # Actualizar componente conductividad
             if "humidity" in data and data["humidity"] is not None:
                 self.graph_humidity_ambient.updateHU(float(data["humidity"]))
                 self.humidity_controller.set_history(float(data["humidity"]))
@@ -231,8 +236,8 @@ class ContentContainer(QWidget):
             self.title_label.setText("Temperatura del Agua")
             self.content_layout.addWidget(self.temp_water_component)
         elif self.content_state == 4:
-            self.title_label.setText("Gráfica de Conductividad")
-            self.content_layout.addWidget(self.graph_ce_water)
+            self.title_label.setText("Conductividad Eléctrica")
+            self.content_layout.addWidget(self.ce_component)  # Usar el nuevo componente
         elif self.content_state == 5:
             self.title_label.setText("Supervisión medioambiental")
             self.content_layout.addWidget(self.ambient)

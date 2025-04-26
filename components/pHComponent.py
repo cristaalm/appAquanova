@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QDateEdit, QTableWidgetItem, 
     QHeaderView, QSpacerItem, QSizePolicy, QFrame, QComboBox, QGraphicsDropShadowEffect,
-    QProgressBar
+    QProgressBar, QStyle, QPushButton, QLineEdit
 )
 from PyQt6.QtCore import Qt, QSize, QDateTime, QDate
 from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap, QBrush
@@ -41,6 +41,8 @@ class phComponent(QWidget):
         top_layout.addWidget(self.create_summary_panel(), 1)
         top_layout.addWidget(self.create_graph_panel(), 3)
         top_layout.addWidget(self.create_emotion_panel(), 1)
+        # En setup_ui() o donde inicialices la gráfica:
+        self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
         main_layout.addLayout(top_layout, 1)
         main_layout.addWidget(self.create_history_panel(), 10)
@@ -143,8 +145,12 @@ class phComponent(QWidget):
         graph_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52; margin-bottom: 2px;")
         graph_layout.addWidget(graph_title)
         
+        # Configurar la gráfica para expandirse
+        self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.graph_widget.setMinimumHeight(180)
-        graph_layout.addWidget(self.graph_widget)
+        
+        # Añadir la gráfica con stretch factor para que ocupe todo el espacio disponible
+        graph_layout.addWidget(self.graph_widget, 1)
         
         return graph_panel
 
@@ -217,7 +223,7 @@ class phComponent(QWidget):
         history_layout = QVBoxLayout(history_panel)
         history_layout.setSpacing(10)
 
-        # Encabezado con título
+        # Encabezado con título y campo de búsqueda
         history_header = QHBoxLayout()
         
         history_label = QLabel("Historial de registros")
@@ -225,6 +231,52 @@ class phComponent(QWidget):
         history_header.addWidget(history_label)
         
         history_header.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        
+        # Añadir campo de búsqueda
+        filter_label = QLabel("Buscar:")
+        filter_label.setStyleSheet("font-size: 14px; color: #64748b;")
+        history_header.addWidget(filter_label)
+        
+        # Crear un campo de texto para el filtro
+        self.search_filter = QLineEdit()
+        self.search_filter.setPlaceholderText("Filtrar por fecha, valor o estado...")
+        self.search_filter.setStyleSheet("""
+            QLineEdit {
+                background-color: white;
+                border: 1px solid #4CA4A5;
+                color: #333;
+                padding: 5px 10px;
+                border-radius: 6px;
+                font-size: 14px;
+                min-width: 200px;
+            }
+            QLineEdit:focus {
+                border: 2px solid #4CA4A5;
+            }
+        """)
+        
+        # Conectar la señal de cambio de texto para filtrar datos
+        self.search_filter.textChanged.connect(self.filter_data)
+        
+        history_header.addWidget(self.search_filter)
+        
+        # Botón para limpiar el filtro
+        reset_filter_button = QPushButton("Limpiar")
+        reset_filter_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CA4A5;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #4CA4A5;
+            }
+        """)
+        reset_filter_button.clicked.connect(self.reset_filter)
+        history_header.addWidget(reset_filter_button)
+        
         history_layout.addLayout(history_header)
 
         # Tabla de registros históricos
@@ -292,11 +344,14 @@ class phComponent(QWidget):
         self.history_table.setMaximumHeight(600)
         history_layout.addWidget(self.history_table)
 
+        # Almacenar todos los datos originales para poder filtrar
+        self.all_data = []
+
         return history_panel
 
     def populate_table(self):
         # Datos históricos para la tabla
-        data = [
+        self.all_data = [
             ("15/04/2024 08:30", "6.8", self.get_ph_state(6.8)),
             ("15/04/2024 10:15", "7.1", self.get_ph_state(7.1)),
             ("14/04/2024 09:00", "6.9", self.get_ph_state(6.9)),
@@ -316,8 +371,13 @@ class phComponent(QWidget):
             ("01/04/2024 14:35", "6.9", self.get_ph_state(6.9))
         ]
         
-        self.history_table.setRowCount(len(data))
-        for row, (fecha, valor, estado) in enumerate(data):
+        # Definir los iconos para cada estado
+        icono_acido = QIcon("./resources/icons/acido.png")
+        icono_neutro = QIcon("./resources/icons/neutro.png")
+        icono_alcalino = QIcon("./resources/icons/alcalino.png")
+        
+        self.history_table.setRowCount(len(self.all_data))
+        for row, (fecha, valor, estado) in enumerate(self.all_data):
             # Celda de fecha
             fecha_item = QTableWidgetItem(fecha)
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -328,28 +388,58 @@ class phComponent(QWidget):
             
             # Celda de estado con color de fondo según pH
             estado_item = QTableWidgetItem(estado)
-            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            # Cambiar a alineación izquierda
+            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             
-            # Colorear según el estado
-            if estado == "ÁCIDO":
+            # Establecer icono según el estado
+            if estado == "Ácido":
                 estado_item.setBackground(QBrush(QColor("#fee2e2")))
                 estado_item.setForeground(QBrush(QColor("#b91c1c")))
-            elif estado == "ALCALINO":
+                estado_item.setIcon(icono_acido)
+            elif estado == "Alcalino":
                 estado_item.setBackground(QBrush(QColor("#fef3c7")))
                 estado_item.setForeground(QBrush(QColor("#92400e")))
+                estado_item.setIcon(icono_alcalino)
             else:  # NEUTRO
                 estado_item.setBackground(QBrush(QColor("#dcfce7")))
                 estado_item.setForeground(QBrush(QColor("#166534")))
-            
-            # Ícono opcional
-            icon_path = "resources/icons/ph_icon.png"
-            if os.path.exists(icon_path):
-                valor_item.setIcon(QIcon(icon_path))
+                estado_item.setIcon(icono_neutro)
             
             self.history_table.setItem(row, 0, fecha_item)
             self.history_table.setItem(row, 1, valor_item)
             self.history_table.setItem(row, 2, estado_item)
             self.history_table.setRowHeight(row, 35)
+
+    def filter_data(self, text):
+        """Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda"""
+        search_text = text.lower()
+        
+        # Ocultar todas las filas
+        for row in range(self.history_table.rowCount()):
+            self.history_table.hideRow(row)
+        
+        # Mostrar solo las filas que contienen el texto de búsqueda en cualquier columna
+        for row in range(self.history_table.rowCount()):
+            show_row = False
+            
+            # Buscar en todas las columnas
+            for col in range(self.history_table.columnCount()):
+                item = self.history_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    show_row = True
+                    break
+            
+            if show_row or search_text == "":
+                self.history_table.showRow(row)
+    
+    def reset_filter(self):
+        """Restablece el filtro para mostrar todos los datos"""
+        # Limpiar el campo de búsqueda
+        self.search_filter.clear()
+        
+        # Mostrar todas las filas
+        for row in range(self.history_table.rowCount()):
+            self.history_table.showRow(row)
 
     def set_ph_value(self, new_value):
         # Actualiza el valor y todos los componentes relacionados
@@ -440,8 +530,8 @@ class phComponent(QWidget):
         # Determina el estado para la tabla de historial
         ph_value = float(ph_value)
         if ph_value < self.PH_MIN_NEUTRAL:
-            return "ÁCIDO"
+            return "Ácido"
         elif ph_value > self.PH_MAX_NEUTRAL:
-            return "ALCALINO"
+            return "Alcalino"
         else:
-            return "NEUTRO"
+            return "Neutro"

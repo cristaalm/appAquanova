@@ -61,21 +61,15 @@ class BaseGraph(pg.PlotWidget):
         pass
 
     def sizeHint(self):
-        """Devuelve el tamaño preferido (80% del contenedor padre)"""
+        """Devuelve el tamaño preferido (100% del contenedor padre)"""
         if self.parent() is not None:
             parent_size = self.parent().size()
-            return QSizeF(
-                parent_size.width() * 0.8, parent_size.height() * 0.8
-            ).toSize()
+            return QSizeF(parent_size.width(), parent_size.height()).toSize()
         return super().sizeHint()
 
     def resizeEvent(self, event):
-        """Ajusta el tamaño de la gráfica"""
+        """No fijar tamaño - permitir que el layout controle el tamaño"""
         super().resizeEvent(event)
-        if self.parent() is not None:
-            new_width = int(self.parent().width() * 0.8)
-            new_height = int(self.parent().height() * 0.8)
-            self.setFixedSize(new_width, new_height)
 
     def update_data(self, new_value: float):
         """

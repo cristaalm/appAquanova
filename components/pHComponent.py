@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QDateEdit, QTableWidgetItem, 
     QHeaderView, QSpacerItem, QSizePolicy, QFrame, QComboBox, QGraphicsDropShadowEffect,
-    QProgressBar, QStyle
+    QProgressBar, QStyle, QPushButton, QLineEdit
 )
 from PyQt6.QtCore import Qt, QSize, QDateTime, QDate
 from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap, QBrush
@@ -223,7 +223,7 @@ class phComponent(QWidget):
         history_layout = QVBoxLayout(history_panel)
         history_layout.setSpacing(10)
 
-        # Encabezado con título
+        # Encabezado con título y campo de búsqueda
         history_header = QHBoxLayout()
         
         history_label = QLabel("Historial de registros")
@@ -231,6 +231,52 @@ class phComponent(QWidget):
         history_header.addWidget(history_label)
         
         history_header.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        
+        # Añadir campo de búsqueda
+        filter_label = QLabel("Buscar:")
+        filter_label.setStyleSheet("font-size: 14px; color: #64748b;")
+        history_header.addWidget(filter_label)
+        
+        # Crear un campo de texto para el filtro
+        self.search_filter = QLineEdit()
+        self.search_filter.setPlaceholderText("Filtrar por fecha, valor o estado...")
+        self.search_filter.setStyleSheet("""
+            QLineEdit {
+                background-color: white;
+                border: 1px solid #4CA4A5;
+                color: #333;
+                padding: 5px 10px;
+                border-radius: 6px;
+                font-size: 14px;
+                min-width: 200px;
+            }
+            QLineEdit:focus {
+                border: 2px solid #4CA4A5;
+            }
+        """)
+        
+        # Conectar la señal de cambio de texto para filtrar datos
+        self.search_filter.textChanged.connect(self.filter_data)
+        
+        history_header.addWidget(self.search_filter)
+        
+        # Botón para limpiar el filtro
+        reset_filter_button = QPushButton("Limpiar")
+        reset_filter_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CA4A5;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #4CA4A5;
+            }
+        """)
+        reset_filter_button.clicked.connect(self.reset_filter)
+        history_header.addWidget(reset_filter_button)
+        
         history_layout.addLayout(history_header)
 
         # Tabla de registros históricos
@@ -298,11 +344,14 @@ class phComponent(QWidget):
         self.history_table.setMaximumHeight(600)
         history_layout.addWidget(self.history_table)
 
+        # Almacenar todos los datos originales para poder filtrar
+        self.all_data = []
+
         return history_panel
 
     def populate_table(self):
         # Datos históricos para la tabla
-        data = [
+        self.all_data = [
             ("15/04/2024 08:30", "6.8", self.get_ph_state(6.8)),
             ("15/04/2024 10:15", "7.1", self.get_ph_state(7.1)),
             ("14/04/2024 09:00", "6.9", self.get_ph_state(6.9)),
@@ -327,8 +376,8 @@ class phComponent(QWidget):
         icono_neutro = QIcon("./resources/icons/neutro.png")
         icono_alcalino = QIcon("./resources/icons/alcalino.png")
         
-        self.history_table.setRowCount(len(data))
-        for row, (fecha, valor, estado) in enumerate(data):
+        self.history_table.setRowCount(len(self.all_data))
+        for row, (fecha, valor, estado) in enumerate(self.all_data):
             # Celda de fecha
             fecha_item = QTableWidgetItem(fecha)
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -360,6 +409,37 @@ class phComponent(QWidget):
             self.history_table.setItem(row, 1, valor_item)
             self.history_table.setItem(row, 2, estado_item)
             self.history_table.setRowHeight(row, 35)
+
+    def filter_data(self, text):
+        """Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda"""
+        search_text = text.lower()
+        
+        # Ocultar todas las filas
+        for row in range(self.history_table.rowCount()):
+            self.history_table.hideRow(row)
+        
+        # Mostrar solo las filas que contienen el texto de búsqueda en cualquier columna
+        for row in range(self.history_table.rowCount()):
+            show_row = False
+            
+            # Buscar en todas las columnas
+            for col in range(self.history_table.columnCount()):
+                item = self.history_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    show_row = True
+                    break
+            
+            if show_row or search_text == "":
+                self.history_table.showRow(row)
+    
+    def reset_filter(self):
+        """Restablece el filtro para mostrar todos los datos"""
+        # Limpiar el campo de búsqueda
+        self.search_filter.clear()
+        
+        # Mostrar todas las filas
+        for row in range(self.history_table.rowCount()):
+            self.history_table.showRow(row)
 
     def set_ph_value(self, new_value):
         # Actualiza el valor y todos los componentes relacionados

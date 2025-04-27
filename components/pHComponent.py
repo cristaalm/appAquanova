@@ -11,7 +11,7 @@ class phComponent(QWidget):
     def __init__(self, graph_widget, parent=None):
         super().__init__(parent)
         self.graph_widget = graph_widget
-        self.ph_value = 6.8
+        self.ph_value = 6.5
         self.table_height = 400
         
         # Definir rangos de pH como constantes
@@ -35,14 +35,11 @@ class phComponent(QWidget):
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(15)
         
-        # Tres paneles superiores en fila
+        # Dos paneles superiores en fila con alturas iguales
         top_layout = QHBoxLayout()
         top_layout.setSpacing(15)
         top_layout.addWidget(self.create_summary_panel(), 1)
-        top_layout.addWidget(self.create_graph_panel(), 3)
-        top_layout.addWidget(self.create_emotion_panel(), 1)
-        # En setup_ui() o donde inicialices la gráfica:
-        self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        top_layout.addWidget(self.create_graph_panel(), 4)
         
         main_layout.addLayout(top_layout, 1)
         main_layout.addWidget(self.create_history_panel(), 10)
@@ -51,84 +48,193 @@ class phComponent(QWidget):
         self.setLayout(main_layout)
 
     def create_summary_panel(self):
-        # Panel de resumen del pH actual
+        """Crea el panel de resumen del pH - rediseñado para ajustarse a la imagen de referencia."""
         summary_panel = QFrame()
         summary_panel.setFrameShape(QFrame.Shape.StyledPanel)
-        summary_panel.setMinimumWidth(180)
+        summary_panel.setMinimumWidth(200)
         summary_panel.setMaximumWidth(280)
-        summary_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
+        summary_panel.setMinimumHeight(280)
+        summary_panel.setFixedHeight(280)
+        summary_panel.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 12px;
+                border: none;
+            }
+        """)
         
-        # Efecto de sombra para darle profundidad
+        # Aplicar efecto de sombra para la card
         shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(15)
-        shadow.setColor(QColor(0, 0, 0, 40))
-        shadow.setOffset(0, 3)
+        shadow.setBlurRadius(10)
+        shadow.setColor(QColor(0, 0, 0, 30))
+        shadow.setOffset(0, 2)
         summary_panel.setGraphicsEffect(shadow)
         
         summary_layout = QVBoxLayout(summary_panel)
         summary_layout.setContentsMargins(15, 15, 15, 15)
-        summary_layout.setSpacing(8)
+        summary_layout.setSpacing(10)
         
-        # Encabezado con ícono
-        title_layout = QHBoxLayout()
-        title_layout.setSpacing(8)
+        # Título con círculo e icono (según la imagen de referencia)
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(8)
         
-        ph_title = QLabel("Nivel actual")
-        ph_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52;")
-        title_layout.addWidget(ph_title)
+        # Texto del título
+        title_label = QLabel("Ph actual")
+        title_label.setStyleSheet("""
+            font-size: 22px;
+            font-weight: bold;
+            color: #045859;
+        """)
+        header_layout.addWidget(title_label)
         
-        title_icon = QLabel()
-        icon_pixmap = QPixmap("./resources/icons/gota.png")
-        icon_pixmap = icon_pixmap.scaled(22, 22, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        title_icon.setPixmap(icon_pixmap)
-        title_layout.addWidget(title_icon)
+        # Icono al lado del título
+        icon_label = QLabel()
+        # Ajusta la ruta si es necesario
+        icon_pixmap = QPixmap("./resources/icons/ph_icon.png")
+        if not icon_pixmap.isNull():
+            icon_label.setPixmap(icon_pixmap.scaled(QSize(24, 24), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        else:
+            # Si el icono no se encuentra, usar un espacio reservado
+            icon_label.setText("○")
+            icon_label.setStyleSheet("font-size: 20px; color: #045859;")
         
-        title_layout.addStretch()
-        summary_layout.addLayout(title_layout)
+        header_layout.addWidget(icon_label)
+        summary_layout.addLayout(header_layout)
         
-        # Descripción del pH
-        ph_subtitle = QLabel("Grado de alcalinidad o acidez")
-        ph_subtitle.setStyleSheet("font-size: 12px; font-style: italic; color: #6b7280;")
-        summary_layout.addWidget(ph_subtitle)
+        # MODIFICACIÓN: Añadir texto descriptivo debajo del título
+        description_label = QLabel("Monitoreo del nivel de acidez del agua")
+        description_label.setStyleSheet("""
+            font-size: 12px;
+            font-style: italic;
+            color: #6b7280;
+        """)
+        summary_layout.addWidget(description_label)
         
-        # Valor con formato grande
-        ph_value_layout = QHBoxLayout()
-        ph_value_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # Añadir espacio adicional según la imagen de referencia
+        summary_layout.addSpacing(2)  # Reducido un poco para dar espacio al nuevo texto
         
-        value_icon = QLabel()
-        value_icon_pixmap = QPixmap("./resources/icons/gota.png")
-        value_icon_pixmap = value_icon_pixmap.scaled(28, 28, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        value_icon.setPixmap(value_icon_pixmap)
-        ph_value_layout.addWidget(value_icon)
+        # El resto del método continúa igual...
+        # Contenedor para el valor pH con icono y unidad
+        value_container = QHBoxLayout()
+        value_container.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
+        # Icono antes del valor
+        ph_icon_label = QLabel()
+        # Ajusta la ruta si es necesario
+        ph_icon_pixmap = QPixmap("./resources/icons/drop_icon.png")
+        if not ph_icon_pixmap.isNull():
+            ph_icon_label.setPixmap(ph_icon_pixmap.scaled(QSize(28, 28), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        else:
+            # Si el icono no se encuentra, usar un espacio reservado
+            ph_icon_label.setText("○")
+            ph_icon_label.setStyleSheet("font-size: 24px; color: #045859;")
+        
+        value_container.addWidget(ph_icon_label)
+        
+        # Valor de pH grande
         self.ph_value_label = QLabel(str(self.ph_value))
-        self.ph_value_label.setStyleSheet("font-size: 60px; font-weight: bold; color: #074e52; line-height: 1;")
-        ph_value_layout.addWidget(self.ph_value_label)
+        self.ph_value_label.setStyleSheet("""
+            font-size: 56px;
+            font-weight: bold;
+            color: #045859;
+            text-align: center;
+        """)
+        value_container.addWidget(self.ph_value_label)
         
-        ph_unit_label = QLabel("pH")
-        ph_unit_label.setStyleSheet("font-size: 36px; font-weight: bold; color: #074e52; padding-top: 12px; margin-left: -10px;")
-        ph_value_layout.addWidget(ph_unit_label)
+        # Añadir texto "ph" después del valor
+        ph_unit_label = QLabel("ph")
+        ph_unit_label.setStyleSheet("""
+            font-size: 24px;
+            color: #045859;
+            margin-left: 2px;
+            margin-top: 20px;
+            font-weight: bold;
+        """)
+        value_container.addWidget(ph_unit_label)
         
-        summary_layout.addLayout(ph_value_layout)
+        summary_layout.addLayout(value_container)
+        summary_layout.addSpacing(5)
         
-        # Información de rango
-        ph_status_label = QLabel("Rango entre 6.5 y 7.5")
-        ph_status_label.setStyleSheet("font-style: italic; color: #64748b; font-size: 14px; text-align: center;")
-        ph_status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        summary_layout.addWidget(ph_status_label)
+        # Etiquetas MIN y MAX arriba de la barra
+        labels_layout = QHBoxLayout()
+        labels_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Indicador visual de estado
-        self.status_indicator = QLabel()
-        self.update_ph_status(self.ph_value)
-        self.status_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        summary_layout.addWidget(self.status_indicator)
+        # Etiqueta MIN
+        min_label = QLabel("MIN")
+        min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        labels_layout.addWidget(min_label)
+        
+        # Espaciador
+        labels_layout.addStretch()
+        
+        # Etiqueta MAX
+        max_label = QLabel("MÁX")
+        max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        labels_layout.addWidget(max_label)
+        
+        summary_layout.addLayout(labels_layout)
+        
+        # Barra de progreso unificada con QProgressBar
+        progress_bar = QProgressBar()
+        progress_bar.setFixedHeight(12)
+        progress_bar.setTextVisible(False)
+        
+        # Calcular el valor en porcentaje (0-100) basado en el rango pH (0-14)
+        ph_percent = min(max(self.ph_value / 14.0, 0), 1) * 100
+        progress_bar.setValue(int(ph_percent))
+        
+        # Estilo para una barra única con color #045859
+        progress_bar.setStyleSheet("""
+            QProgressBar {
+                background-color: #e2e8f0;
+                border-radius: 6px;
+                border: none;
+            }
+            QProgressBar::chunk {
+                background-color: #4CA4A5;
+                border-radius: 6px;
+            }
+        """)
+        
+        summary_layout.addWidget(progress_bar)
+        summary_layout.addSpacing(20)
+        
+        # Panel de estado 
+        self.status_chip = QLabel(self.get_ph_status_text())
+        self.status_chip.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status_chip.setStyleSheet("""
+            background-color: #c5efeb; 
+            color: #2b6363;
+            border-radius: 15px;
+            padding: 6px;
+            font-size: 18px;
+            font-weight: bold;
+        """)
+        
+        summary_layout.addWidget(self.status_chip)
+        summary_layout.addStretch()
         
         return summary_panel
 
+    def get_ph_status_text(self):
+        """Determina el texto de estado según el valor de pH"""
+        ph_value = float(self.ph_value)
+        if ph_value < self.PH_MIN_OPTIMAL_INDICATOR:
+            return "BAJO"
+        elif ph_value > self.PH_MAX_OPTIMAL_INDICATOR:
+            return "ALTO"
+        else:
+            return "ÓPTIMO"
+
     def create_graph_panel(self):
-        # Panel para gráfica de tendencia
+        # Panel para gráfica de tendencia con altura fija igual a la del panel de resumen
         graph_panel = QFrame()
         graph_panel.setFrameShape(QFrame.Shape.StyledPanel)
+        # Ajustar altura igual a la del panel de pH
+        graph_panel.setMinimumHeight(280)
+        graph_panel.setFixedHeight(280)
         graph_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
         
         graph_shadow = QGraphicsDropShadowEffect()
@@ -141,71 +247,25 @@ class phComponent(QWidget):
         graph_layout.setContentsMargins(15, 15, 15, 15)
         graph_layout.setSpacing(10)
         
+        # Encabezado de la gráfica
+        header_layout = QHBoxLayout()
+        
         graph_title = QLabel("Tendencia del pH")
         graph_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52; margin-bottom: 2px;")
-        graph_layout.addWidget(graph_title)
+        header_layout.addWidget(graph_title)
+        
+        # Añadir un espaciador
+        header_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        
+        graph_layout.addLayout(header_layout)
         
         # Configurar la gráfica para expandirse
         self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.graph_widget.setMinimumHeight(180)
         
         # Añadir la gráfica con stretch factor para que ocupe todo el espacio disponible
         graph_layout.addWidget(self.graph_widget, 1)
         
         return graph_panel
-
-    def create_emotion_panel(self):
-        # Panel de caritas que indican estado
-        emotion_panel = QFrame()
-        emotion_panel.setFrameShape(QFrame.Shape.StyledPanel)
-        emotion_panel.setMinimumWidth(150)
-        emotion_panel.setMaximumWidth(200)
-        emotion_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
-        
-        emotion_shadow = QGraphicsDropShadowEffect()
-        emotion_shadow.setBlurRadius(15)
-        emotion_shadow.setColor(QColor(0, 0, 0, 40))
-        emotion_shadow.setOffset(0, 3)
-        emotion_panel.setGraphicsEffect(emotion_shadow)
-        
-        emotion_layout = QVBoxLayout(emotion_panel)
-        emotion_layout.setContentsMargins(5, 15, 5, 15)
-        emotion_layout.setSpacing(10)
-        
-        emotion_title = QLabel("Estado")
-        emotion_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52; text-align: center;")
-        emotion_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(emotion_title)
-        
-        # Caritas con versión normal y desactivada
-        self.happy_face = QLabel()
-        self.happy_face_normal = QPixmap("./resources/media/feliz.png")
-        self.happy_face_disabled = QPixmap("./resources/media/des_feliz.png")
-        self.happy_face_normal = self.happy_face_normal.scaled(90, 90, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.happy_face_disabled = self.happy_face_disabled.scaled(90, 90, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.happy_face.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(self.happy_face)
-        
-        self.neutral_face = QLabel()
-        self.neutral_face_normal = QPixmap("./resources/media/serio.png")
-        self.neutral_face_disabled = QPixmap("./resources/media/des_serio.png") 
-        self.neutral_face_normal = self.neutral_face_normal.scaled(90, 90, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.neutral_face_disabled = self.neutral_face_disabled.scaled(90, 90, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.neutral_face.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(self.neutral_face)
-        
-        self.sad_face = QLabel()
-        self.sad_face_normal = QPixmap("./resources/media/triste.png")
-        self.sad_face_disabled = QPixmap("./resources/media/des_triste.png")
-        self.sad_face_normal = self.sad_face_normal.scaled(90, 90, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.sad_face_disabled = self.sad_face_disabled.scaled(90, 90, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.sad_face.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(self.sad_face)
-        
-        # Inicializar estados de caritas
-        self.update_emotion_faces(self.ph_value)
-        
-        return emotion_panel
 
     def create_history_panel(self):
         # Panel de historial con tabla de registros
@@ -226,18 +286,18 @@ class phComponent(QWidget):
         # Encabezado con título y campo de búsqueda
         history_header = QHBoxLayout()
         
-        history_label = QLabel("Historial de registros")
+        history_label = QLabel("Lecturas")
         history_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52;")
         history_header.addWidget(history_label)
         
         history_header.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         
         # Añadir campo de búsqueda
-        filter_label = QLabel("Buscar:")
+        filter_label = QLabel("Filtrar por:")
         filter_label.setStyleSheet("font-size: 14px; color: #64748b;")
         history_header.addWidget(filter_label)
         
-        # Crear un campo de texto para el filtro
+        # MODIFICACIÓN: Crear un campo de texto para el filtro con ancho menor
         self.search_filter = QLineEdit()
         self.search_filter.setPlaceholderText("Filtrar por fecha, valor o estado...")
         self.search_filter.setStyleSheet("""
@@ -248,7 +308,7 @@ class phComponent(QWidget):
                 padding: 5px 10px;
                 border-radius: 6px;
                 font-size: 14px;
-                min-width: 200px;
+                max-width: 200px;  /* MODIFICADO: reducida a la mitad */
             }
             QLineEdit:focus {
                 border: 2px solid #4CA4A5;
@@ -260,22 +320,7 @@ class phComponent(QWidget):
         
         history_header.addWidget(self.search_filter)
         
-        # Botón para limpiar el filtro
-        reset_filter_button = QPushButton("Limpiar")
-        reset_filter_button.setStyleSheet("""
-            QPushButton {
-                background-color: #4CA4A5;
-                color: white;
-                padding: 5px 10px;
-                border-radius: 6px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #4CA4A5;
-            }
-        """)
-        reset_filter_button.clicked.connect(self.reset_filter)
-        history_header.addWidget(reset_filter_button)
+        # MODIFICACIÓN: Se eliminó el botón "Limpiar" y su funcionalidad
         
         history_layout.addLayout(history_header)
 
@@ -445,9 +490,12 @@ class phComponent(QWidget):
         # Actualiza el valor y todos los componentes relacionados
         self.ph_value = float(new_value)
         self.ph_value_label.setText(str(self.ph_value))
-        self.update_ph_status(self.ph_value)
-        self.update_emotion_faces(self.ph_value)
-         
+        
+        # Actualiza el estado de pH
+        self.update_status_chip(self.ph_value)
+        
+        # También actualizar la barra de progreso personalizada si es necesario
+        
     def set_table_height(self, height):
         # Ajusta la altura de la tabla
         self.table_height = height
@@ -461,70 +509,44 @@ class phComponent(QWidget):
         
         if card_width < 800:
             # Modo compacto
-            self.ph_value_label.setStyleSheet("font-size: 48px; font-weight: bold; color: #074e52;")
+            self.ph_value_label.setStyleSheet("font-size: 48px; font-weight: bold; color: #045859;")
         else:
             # Modo normal
-            self.ph_value_label.setStyleSheet("font-size: 60px; font-weight: bold; color: #074e52;")
+            self.ph_value_label.setStyleSheet("font-size: 56px; font-weight: bold; color: #045859;")
 
-    def update_ph_status(self, ph_value):
-        # Actualiza el indicador de texto usando los rangos definidos
+    def update_status_chip(self, ph_value):
+        # Actualiza el chip de estado según los rangos definidos
         ph_value = float(ph_value)
         if ph_value < self.PH_MIN_OPTIMAL_INDICATOR:  # Bajo
-            status_text = "BAJO"
-            status_style = """
+            self.status_chip.setText("Bajo")
+            self.status_chip.setStyleSheet("""
                 background-color: #fef3c7;
                 color: #92400e;
                 font-weight: bold;
-                font-size: 16px;
-                border-radius: 4px;
-                padding: 5px;
-                margin-top: 5px;
-                text-align: center;
-            """
+                font-size: 12px;
+                border-radius: 8px;
+                padding: 2px 8px;
+            """)
         elif ph_value > self.PH_MAX_OPTIMAL_INDICATOR:  # Alto
-            status_text = "ALTO"
-            status_style = """
+            self.status_chip.setText("Alto")
+            self.status_chip.setStyleSheet("""
                 background-color: #fee2e2;
                 color: #b91c1c;
                 font-weight: bold;
-                font-size: 16px;
-                border-radius: 4px;
-                padding: 5px;
-                margin-top: 5px;
-                text-align: center;
-            """
+                font-size: 12px;
+                border-radius: 8px;
+                padding: 2px 8px;
+            """)
         else:  # Óptimo
-            status_text = "ÓPTIMO"
-            status_style = """
+            self.status_chip.setText("Óptimo")
+            self.status_chip.setStyleSheet("""
                 background-color: #dcfce7;
                 color: #166534;
                 font-weight: bold;
-                font-size: 16px;
-                border-radius: 4px;
-                padding: 5px;
-                margin-top: 5px;
-                text-align: center;
-            """
-        self.status_indicator.setText(status_text)
-        self.status_indicator.setStyleSheet(status_style)
-
-    def update_emotion_faces(self, ph_value):
-        # Actualiza qué carita está activa según el valor de pH
-        ph_value = float(ph_value)
-        
-        # Determinar qué cara activar según el rango definido
-        if ph_value >= self.PH_MIN_OPTIMAL_INDICATOR and ph_value <= self.PH_MAX_OPTIMAL_INDICATOR:  # Óptimo
-            self.happy_face.setPixmap(self.happy_face_normal)
-            self.neutral_face.setPixmap(self.neutral_face_disabled)
-            self.sad_face.setPixmap(self.sad_face_disabled)
-        elif ph_value < self.PH_MIN_OPTIMAL_INDICATOR:  # Bajo
-            self.happy_face.setPixmap(self.happy_face_disabled)
-            self.neutral_face.setPixmap(self.neutral_face_normal)
-            self.sad_face.setPixmap(self.sad_face_disabled)
-        else:  # Alto
-            self.happy_face.setPixmap(self.happy_face_disabled)
-            self.neutral_face.setPixmap(self.neutral_face_disabled)
-            self.sad_face.setPixmap(self.sad_face_normal)
+                font-size: 12px;
+                border-radius: 8px;
+                padding: 2px 8px;
+            """)
 
     def get_ph_state(self, ph_value):
         # Determina el estado para la tabla de historial

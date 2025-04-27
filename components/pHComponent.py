@@ -92,7 +92,7 @@ class phComponent(QWidget):
         # Ajusta la ruta si es necesario
         icon_pixmap = QPixmap("./resources/icons/ph_icon.png")
         if not icon_pixmap.isNull():
-            icon_label.setPixmap(icon_pixmap.scaled(QSize(24, 24), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            icon_label.setPixmap(icon_pixmap.scaled(QSize(30, 30), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         else:
             # Si el icono no se encuentra, usar un espacio reservado
             icon_label.setText("○")
@@ -121,9 +121,9 @@ class phComponent(QWidget):
         # Icono antes del valor
         ph_icon_label = QLabel()
         # Ajusta la ruta si es necesario
-        ph_icon_pixmap = QPixmap("./resources/icons/drop_icon.png")
+        ph_icon_pixmap = QPixmap("./resources/icons/ph_icon.png")
         if not ph_icon_pixmap.isNull():
-            ph_icon_label.setPixmap(ph_icon_pixmap.scaled(QSize(28, 28), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            ph_icon_label.setPixmap(ph_icon_pixmap.scaled(QSize(55, 55), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         else:
             # Si el icono no se encuentra, usar un espacio reservado
             ph_icon_label.setText("○")
@@ -222,11 +222,11 @@ class phComponent(QWidget):
         """Determina el texto de estado según el valor de pH"""
         ph_value = float(self.ph_value)
         if ph_value < self.PH_MIN_OPTIMAL_INDICATOR:
-            return "BAJO"
+            return "Bajo"
         elif ph_value > self.PH_MAX_OPTIMAL_INDICATOR:
-            return "ALTO"
+            return "Alto"
         else:
-            return "ÓPTIMO"
+            return "Óptimo"
 
     def create_graph_panel(self):
         # Panel para gráfica de tendencia con altura fija igual a la del panel de resumen
@@ -247,17 +247,6 @@ class phComponent(QWidget):
         graph_layout.setContentsMargins(15, 15, 15, 15)
         graph_layout.setSpacing(10)
         
-        # Encabezado de la gráfica
-        header_layout = QHBoxLayout()
-        
-        graph_title = QLabel("Tendencia del pH")
-        graph_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52; margin-bottom: 2px;")
-        header_layout.addWidget(graph_title)
-        
-        # Añadir un espaciador
-        header_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
-        
-        graph_layout.addLayout(header_layout)
         
         # Configurar la gráfica para expandirse
         self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)

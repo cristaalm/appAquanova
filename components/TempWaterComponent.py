@@ -1,11 +1,11 @@
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QApplication, 
-    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QComboBox, QGraphicsDropShadowEffect, QGraphicsOpacityEffect
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QApplication, 
+    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QComboBox, QGraphicsDropShadowEffect,
+    QProgressBar, QLineEdit, QTableWidgetItem
 )
 from random import randint
-from PyQt6.QtCore import Qt, QSize, QTimer
-from PyQt6.QtGui import QFont, QColor, QPixmap
-from components.TempWaterGraph import TempGraph
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QColor, QPixmap, QBrush
 import os 
 
 class tempWaterComponent(QWidget):
@@ -13,9 +13,19 @@ class tempWaterComponent(QWidget):
     def __init__(self, graph_widget, parent=None):
         super().__init__(parent)
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.graph_widget = TempGraph()  
-        self.value = randint(25, 35)  #Valor inicial simmulado
-        self.table_height = 320  
+        self.graph_widget = graph_widget 
+        self.value = randint(25, 35)  # Valor inicial simulado
+        self.table_height = 400
+        self.table_data = []  # Lista para almacenar datos de la tabla
+        self.all_data = []  # Lista para datos originales completos
+
+        # Rangos de temperatura
+        self.temp_max = 32
+        self.temp_min = 28
+
+        # Estado del filtro
+        self.current_filter = "Todo"  # Valor por defecto
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -24,16 +34,16 @@ class tempWaterComponent(QWidget):
         
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(20)
+        main_layout.setSpacing(15)
         
         top_layout = QHBoxLayout()
-        top_layout.addWidget(self.create_summary_panel())
-        top_layout.addWidget(self.create_emotion_panel(), 1)
-        top_layout.addWidget(self.create_graph_panel(), 2)
-        main_layout.addLayout(top_layout)
-        
-        # Sección de historial
-        main_layout.addWidget(self.create_history_panel())
+        top_layout.setSpacing(15)
+        top_layout.addWidget(self.create_summary_panel(), 1)
+        top_layout.addWidget(self.create_graph_panel(), 4)
+
+        main_layout.addLayout(top_layout, 1)
+        main_layout.addWidget(self.create_history_panel(), 10)
+        main_layout.setContentsMargins(20, 20, 20, 10)
         
         self.setLayout(main_layout)
 
@@ -65,9 +75,10 @@ class tempWaterComponent(QWidget):
     def create_summary_panel(self):
         summary_panel = QFrame()
         summary_panel.setFrameShape(QFrame.Shape.StyledPanel)
-        summary_panel.setMinimumWidth(220)
+        summary_panel.setMinimumWidth(200)
         summary_panel.setMaximumWidth(280)
-        summary_panel.setMaximumHeight(240)
+        summary_panel.setMinimumHeight(280)
+        summary_panel.setFixedHeight(280)
         summary_panel.setStyleSheet("""
             QFrame {
                 background-color: white;
@@ -76,24 +87,25 @@ class tempWaterComponent(QWidget):
             }
         """)
         shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(15)
-        shadow.setColor(QColor(0, 0, 0, 40))
-        shadow.setOffset(0, 3)
+        shadow.setBlurRadius(10)
+        shadow.setColor(QColor(0, 0, 0, 30))
+        shadow.setOffset(0, 2)
         summary_panel.setGraphicsEffect(shadow)
         
         summary_layout = QVBoxLayout(summary_panel)
-        summary_layout.setContentsMargins(15, 10, 15, 10)
-        summary_layout.setSpacing(5)
+        summary_layout.setContentsMargins(15, 15, 15, 15)
+        summary_layout.setSpacing(10)
         
         title_layout = QHBoxLayout()
+        title_layout.setSpacing(8)
         
         # Título
-        self.title_text = "Condición actual     "
+        self.title_text = "Temperatura actual     "
         self.title_index = 0
         title_label = QLabel(self.title_text)
         title_label.setStyleSheet("""
             font-size: 22px;
-            color: #074e52;
+            color: #045859;
             font-weight: bold;                                
         """)
         title_label.setMinimumWidth(150)
@@ -125,6 +137,7 @@ class tempWaterComponent(QWidget):
             color: #6b7280;
         """)
         summary_layout.addWidget(subtitle)
+        summary_layout.addSpacing(2)
 
         # Sección del termómetro y temperatura
         value_layout = QHBoxLayout()
@@ -137,125 +150,97 @@ class tempWaterComponent(QWidget):
         value_layout.addWidget(thermometer_icon_label)
         
         # Valor de la temperatura
-        self.value_label = QLabel(f"{self.value}°C")
+        self.value_label = QLabel(f"{self.value}")
         self.value_label.setStyleSheet("""
-            font-size: 65px;
+            font-size: 56px;
             font-weight: bold;
-            margin: 15px 0;
-            color: #074e52;
+            color: #045859;
+            text-align: center;
         """)
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         value_layout.addWidget(self.value_label)
-        
-        summary_layout.addLayout(value_layout)
-        
-        # Fecha y hora de la última lectura (sin icono)
-        placeholder = "11/02/2025 09:00am"
-        status_label = QLabel(f"{placeholder}")
-        status_label.setStyleSheet("""
-            font-style: italic;
-            color: #64748b;
-            font-size: 15px;
-            text-align: center;
-        """)
-        status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        summary_layout.addWidget(status_label)
-        
-        # Añadir rango recomendado
-        range_label = QLabel("Rango óptimo: 28°C - 32°C")
-        range_label.setStyleSheet("""
-            font-size: 13px;
-            color: #475569;
-            margin-top: 5px;
-        """)
-        range_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        summary_layout.addWidget(range_label)
-        
-        summary_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
-        
-        return summary_panel
 
-    def create_emotion_panel(self):
-        emotion_panel = QFrame()
-        emotion_panel.setFrameShape(QFrame.Shape.StyledPanel)
-        emotion_panel.setMinimumWidth(60)
-        emotion_panel.setMaximumWidth(120)
-        emotion_panel.setMaximumHeight(240)
-        emotion_panel.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 12px;
-                border: none;
+        self.value_unit_lable = QLabel("°C")
+        self.value_unit_lable.setStyleSheet("""
+            font-size: 40px;
+            color: #045859;
+            margin-left: 2px;
+            margin-top: 20px;
+            font-weight: bold;
+        """)
+        value_layout.addWidget(self.value_unit_lable)
+        summary_layout.addLayout(value_layout)
+
+        summary_layout.addSpacing(5)
+
+        labels_layout = QHBoxLayout()
+        labels_layout.setContentsMargins(0, 0, 0, 0)  
+
+        min_label = QLabel("Min.")
+        min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        labels_layout.addWidget(min_label)
+
+        labels_layout.addStretch()
+
+        max_label = QLabel("Max.")
+        max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        labels_layout.addWidget(max_label)
+
+        summary_layout.addLayout(labels_layout)
+
+        progress_bar = QProgressBar()
+        progress_bar.setFixedHeight(12)
+        progress_bar.setTextVisible(False)
+
+        # Calcular el porcentaje de temperatura
+        temp_porcentage = (self.value - self.temp_min) * 100 / (self.temp_max - self.temp_min)
+        # Limitar el valor entre 0 y 100
+        temp_porcentage = max(0, min(100, temp_porcentage))  
+        progress_bar.setValue(int(temp_porcentage))
+        progress_bar.setStyleSheet("""
+            QProgressBar {
+                background-color: #e2e8f0;
+                border-radius: 6px;
+            }
+            QProgressBar::chunk {
+                background-color: #4CA4A5;
+                border-radius: 6px;
             }
         """)
-        emotion_shadow = QGraphicsDropShadowEffect()
-        emotion_shadow.setBlurRadius(15)
-        emotion_shadow.setColor(QColor(0, 0, 0, 40))
-        emotion_shadow.setOffset(0, 3)
-        emotion_panel.setGraphicsEffect(emotion_shadow)
 
-        emotion_layout = QVBoxLayout(emotion_panel)
-        emotion_layout.setContentsMargins(5, 5, 5, 5)
-        emotion_layout.setSpacing(5)
+        summary_layout.addWidget(progress_bar)
+        summary_layout.addSpacing(20)
 
-        emotion_title = QLabel("Estado")
-        emotion_title.setStyleSheet("""
+        self.status = QLabel(self.get_status())
+        self.status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status.setStyleSheet("""
+            background-color: #c5efeb; 
+            color: #2b6363;
+            border-radius: 15px;
+            padding: 6px;
             font-size: 18px;
             font-weight: bold;
-            color: #074e52;
-            text-align: center;
         """)
 
-        self.status_indicator = QLabel()
-        self.update_status(self.value)  
-        self.status_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        emotion_layout.addWidget(self.status_indicator)
+        summary_layout.addWidget(self.status)
+        summary_layout.addStretch()
 
-        if self.value < 28:
-            estado = "frio"
-        elif self.value > 33:
-            estado = "caluroso"
-        else:
-            estado = "ambiente"
-
-        # Diccionario con íconos activos y desactivados
-        estados = {
-            "caluroso": {
-                "activo": "caluroso.png",
-                "inactivo": "des_caluroso.png"
-            },
-            "ambiente": {
-                "activo": "ambiente.png",
-                "inactivo": "des_ambiente.png"
-            },
-            "frio": {
-                "activo": "frio.png",
-                "inactivo": "des_frío.png"
-            }
-        }
-
-        # Mostrar caritas correspondientes
-        for key in ["caluroso", "ambiente", "frio"]:
-            label = QLabel()
-            media_path = estados[key]["activo"] if key == estado else estados[key]["inactivo"]
-            pixmap = self.load("media",media_path, 50)
-            
-            if pixmap:
-                label.setPixmap(pixmap)
-            
-            if key != estado:
-                opacity_effect = QGraphicsOpacityEffect()
-                opacity_effect.setOpacity(0.3)
-                label.setGraphicsEffect(opacity_effect)
-
-            label.setAlignment(Qt.AlignmentFlag.AlignCenter)  
-            emotion_layout.addWidget(label)
-
-        return emotion_panel
+        return summary_panel
+    
+    def get_status(self):
+        if self.value < self.temp_min:  
+            return "Frío"
+        elif self.value > self.temp_max:  
+            return "Caliente"
+        else: 
+            return "Ambiente"
     
     def create_graph_panel(self):
         graph_panel = QFrame()
-        graph_panel.setMaximumHeight(240)
+        graph_panel.setMaximumHeight(280)
+        graph_panel.setFixedHeight(280)
         graph_panel.setFrameShape(QFrame.Shape.StyledPanel)
         graph_panel.setStyleSheet("""
             QFrame {
@@ -271,18 +256,16 @@ class tempWaterComponent(QWidget):
         graph_panel.setGraphicsEffect(graph_shadow)
         
         graph_layout = QVBoxLayout(graph_panel)
-        graph_layout.setContentsMargins(10, 10, 15, 5)
-        """        graph_title = QLabel("Tendencia de la tempertarua del agua")
-        graph_title.setStyleSheet(
-            font-size: 18px;
-            color: #074e52;
-            margin-bottom: 5px;
-        )
-        graph_layout.addWidget(graph_title)"""
+        graph_layout.setContentsMargins(15, 0, 15, 15)
+        graph_layout.setSpacing(10)
         
-        self.graph_widget.setMinimumHeight(200)
-        self.graph_widget.setMinimumWidth(400)
-        graph_layout.addWidget(self.graph_widget)
+        # Encabezado de la gráfica
+        header_layout = QHBoxLayout()
+        
+        header_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        graph_layout.addLayout(header_layout)
+        self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        graph_layout.addWidget(self.graph_widget, 1)
         
         return graph_panel
 
@@ -310,10 +293,11 @@ class tempWaterComponent(QWidget):
         
         # Encabezado de historial
         history_header = QHBoxLayout()
-        history_label = QLabel("Historial de registro")
+        history_label = QLabel("Lecturas")
         history_label.setStyleSheet("""
             font-size: 18px;
             color: #074e52;
+            font-weight: bold;
         """)
         history_header.addWidget(history_label)
         history_header.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
@@ -325,141 +309,98 @@ class tempWaterComponent(QWidget):
         """)
         history_header.addWidget(filter_label)
         
-        filter_combo = QComboBox()
-        filter_combo.addItems(["Todo", "Ambiente", "Caliente", "Frío"])
-        filter_combo.setStyleSheet("""
-            QComboBox {
-                background-color: #074e52;  
-                color: white;
+        self.search_filter = QLineEdit()
+        self.search_filter.setPlaceholderText("Filtrar por fecha, valor o estado...")
+        self.search_filter.setStyleSheet("""
+            QLineEdit {
+                background-color: white;
+                border: 1px solid #4CA4A5;
+                color: #333;
                 padding: 5px 10px;
                 border-radius: 6px;
-                min-width: 100px;
                 font-size: 14px;
+                max-width: 200px;  
             }
-            QComboBox::drop-down {
-                border: none;
-            }
-            QComboBox QAbstractItemView {
-                background-color: white;
-                border: 1px solid #ddd;
-                selection-background-color: #074e52;
-                selection-color: white;
+            QLineEdit:focus {
+                border: 2px solid #4CA4A5;
             }
         """)
-        history_header.addWidget(filter_combo)
+        
+        self.search_filter.textChanged.connect(self.filter_data)
+
+        history_header.addWidget(self.search_filter)
         history_layout.addLayout(history_header)
         
         # Tabla de historial
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(3)
         self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Temperatura", "Condición"])
-        self.history_table.verticalHeader().setVisible(False)
+        
+        self.history_table.setVerticalScrollMode(QTableWidget.ScrollMode.ScrollPerPixel)
         self.history_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.history_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.history_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.history_table.setAlternatingRowColors(True)
+        self.history_table.verticalHeader().setVisible(False)
+
         self.history_table.setStyleSheet("""
-            QTableView {
+            QTableWidget {
                 background-color: white;
-                gridline-color: #e2e8f0;
+                gridline-color: #c5efec;
                 border: none;
                 border-radius: 6px;
-                selection-background-color: #e2e8f0;
+                selection-background-color: #d4f1f0;
                 selection-color: black;
                 alternate-background-color: #f8fafc;
-                color: #1e293b;
+                color: #4CA4A5;
                 font-size: 14px;
+                padding-bottom: 20px;
+                margin-right: 5px;
             }
             QHeaderView::section {
-                background-color: #074e52;
+                background-color: #4CA4A5;
                 padding: 8px;
                 border: none;
+                font-weight: bold;
                 color: white;
                 font-size: 15px;
             }
+            QTableWidget::item {
+                padding: 6px;
+                border-bottom: 1px solid #c5efec;
+            }
             QScrollBar:vertical {
                 background: #f1f5f9;
-                width: 6px;
-                border-radius: 3px;
-                margin: 0;
-                border: none;
+                width: 10px;
+                border-radius: 5px;
+                margin-left: 5px;
             }
             QScrollBar::handle:vertical {
-                background: #21797a;
-                border-radius: 3px;
+                background: #4CA4A5;
                 min-height: 30px;
+                border-radius: 5px;
             }
-            QScrollBar::add-line:vertical,
+            QScrollBar::add-line:vertical, 
             QScrollBar::sub-line:vertical {
-                height: 0px;
-                background: none;
-            }
-            QScrollBar::up-arrow:vertical,
-            QScrollBar::down-arrow:vertical {
-                width: 0px;
-                height: 0px;
-                background: none;
-            }
-            QScrollBar::add-page:vertical,
-            QScrollBar::sub-page:vertical {
+                height: 0;
                 background: none;
             }
         """)
 
-        scrollbar = self.history_table.verticalScrollBar()
-        scrollbar.setStyleSheet("""
-            QTableView {
-                background-color: white;
-                gridline-color: #e2e8f0;
-                border: none;
-                border-radius: 6px;
-                selection-background-color: #e2e8f0;
-                selection-color: black;
-                alternate-background-color: #f8fafc;
-                color: #1e293b;
-                font-size: 14px;
-            }
-            QHeaderView::section {
-                background-color: #074e52;
-                padding: 8px;
-                border: none;
-                color: white;
-                font-size: 15px;
-            }
-            QScrollBar:vertical {
-                background: #f1f5f9;
-                width: 6px;
-                border-radius: 3px;
-                margin: 0;
-                border: none;
-            }
-            QScrollBar::handle:vertical {
-                background: #21797a;
-                border-radius: 3px;
-                min-height: 30px;
-            }
-            QScrollBar::add-line:vertical,
-            QScrollBar::sub-line:vertical {
-                height: 0px;
-                background: none;
-            }
-        """)
-
-        # Después de establecer el estilo
-        self.history_table.setStyleSheet(...)
-        self.history_table.repaint()  # Fuerza un repintado completo
-        QApplication.processEvents()  # Procesa todos los eventos pendientes
-
+        self.history_table.verticalHeader().setDefaultSectionSize(40)  
+        self.history_table.verticalHeader().setMinimumSectionSize(40)
         self.history_table.setMinimumHeight(self.table_height)
-        self.history_table.setMaximumHeight(self.table_height)
-        self.populate_table()
+        self.history_table.setMaximumHeight(600)
         history_layout.addWidget(self.history_table)
+        
+        # Población de datos de ejemplo
+        self.populate_table()
         
         return history_panel
     
     def populate_table(self):
-        data = [
+        self.all_data = [
             {"fecha": "10/04/2025 09:00am", "valor": randint(25, 35)},
             {"fecha": "10/04/2025 12:00pm", "valor": randint(25, 35)},
             {"fecha": "10/04/2025 03:00pm", "valor": randint(25, 35)},
@@ -473,262 +414,118 @@ class tempWaterComponent(QWidget):
             {"fecha": "12/04/2025 03:00pm", "valor": randint(25, 35)},
             {"fecha": "12/04/2025 06:00pm", "valor": randint(25, 35)},
         ]
-        self.history_table.setRowCount(len(data))
-    
-        # Configurar el color de fondo base para toda la tabla
-        background_color = "#ffffff"  # Fondo blanco
-        alternate_color = "#f8fafc"   # Color alternativo para filas pares/impares
-        
-        for row, item in enumerate(data):
-            # Determinar el color de fondo para esta fila
-            row_bg_color = alternate_color if row % 2 else background_color
-            cell_style = f"background-color: {row_bg_color}; border: none;"
+        self.history_table.setRowCount(len(self.all_data))
+
+        for row, item in enumerate(self.all_data):
+            # Columna de fecha
+            fecha_item = QTableWidgetItem(item["fecha"])
+            fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.history_table.setItem(row, 0, fecha_item)
             
-            # Columna de fecha con ícono
-            fecha_cell = QWidget()
-            fecha_cell.setStyleSheet(cell_style)
-            fecha_layout = QHBoxLayout(fecha_cell)
-            fecha_layout.setContentsMargins(10, 0, 0, 0)
-            fecha_layout.setSpacing(8)
+            # Columna de valor
+            valor_item = QTableWidgetItem(f"{item['valor']} °C")
+            valor_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.history_table.setItem(row, 1, valor_item)
             
+            # Determinar estado basado en el valor de temperatura
+            estado = self.get_temp_state(item["valor"])
             
-            fecha_text = QLabel(item["fecha"])
-            fecha_text.setStyleSheet(f"background-color: {row_bg_color};")
+            # Columna de estado con color de fondo según temperatura
+            estado_item = QTableWidgetItem(estado)
+            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             
-            fecha_layout.addWidget(fecha_text)
-            fecha_layout.addStretch()
-            
-            self.history_table.setCellWidget(row, 0, fecha_cell)
-            
-            # Columna de valor con ícono de temperatura
-            valor_cell = QWidget()
-            valor_cell.setStyleSheet(cell_style)
-            valor_layout = QHBoxLayout(valor_cell)
-            valor_layout.setContentsMargins(0, 0, 0, 0)
-            valor_layout.setSpacing(8)
-            valor_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            
-            # Ícono de temperatura de agua
-            temp_icon = QLabel()
-            temp_pixmap = self.load("icons","temperature.png", 16)
-            if temp_pixmap:
-                temp_icon.setPixmap(temp_pixmap)
-            temp_icon.setStyleSheet(f"background-color: {row_bg_color};")
-            
-            valor_text = QLabel(f"{item['valor']} °C")
-            valor_text.setStyleSheet(f"background-color: {row_bg_color};")
-            valor_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            
-            valor_layout.addWidget(temp_icon)
-            valor_layout.addWidget(valor_text)
-            
-            self.history_table.setCellWidget(row, 1, valor_cell)
-            
-            # Columna de estado con ícono
-            valor = float(item["valor"])
-            if valor < 28:
-                estado = "Frío"
+            if estado == "Frío":
+                estado_item.setBackground(QBrush(QColor("#e0f2fe")))
+                estado_item.setForeground(QBrush(QColor("#0369a1")))
                 icon_name = "cold.png"
-                estado_color = "#1e40af"
-            elif valor > 32:
-                estado = "Caliente"
+            elif estado == "Caliente":
+                estado_item.setBackground(QBrush(QColor("#fee2e2")))
+                estado_item.setForeground(QBrush(QColor("#b91c1c")))
                 icon_name = "hot.png"
-                estado_color = "#b91c1c"
-            else:
-                estado = "Ambiente"
+            else:  # Ambiente
+                estado_item.setBackground(QBrush(QColor("#dcfce7")))
+                estado_item.setForeground(QBrush(QColor("#166534")))
                 icon_name = "good.png"
-                estado_color = "#15803d"
             
-            estado_cell = QWidget()
-            estado_cell.setStyleSheet(cell_style)
-            estado_layout = QHBoxLayout(estado_cell)
-            estado_layout.setContentsMargins(10, 0, 0, 0)
-            estado_layout.setSpacing(8)
-            
-            estado_icon = QLabel()
-            estado_pixmap = self.load("icons",icon_name, 16)
+            # Agregar el ícono correspondiente
+            estado_pixmap = self.load("icons", icon_name, 16)
             if estado_pixmap:
-                estado_icon.setPixmap(estado_pixmap)
-            estado_icon.setStyleSheet(f"background-color: {row_bg_color};")
+                # Convertir QPixmap a QIcon antes de asignarlo
+                from PyQt6.QtGui import QIcon
+                estado_icon = QIcon(estado_pixmap)
+                estado_item.setIcon(estado_icon)
             
-            estado_text = QLabel(estado)
-            estado_text.setStyleSheet(f"color: {estado_color}; background-color: {row_bg_color};")
-            
-            estado_layout.addWidget(estado_icon)
-            estado_layout.addWidget(estado_text)
-            estado_layout.addStretch()
-            
-            self.history_table.setCellWidget(row, 2, estado_cell)
+            self.history_table.setItem(row, 2, estado_item)
             
             # Altura de fila uniforme
             self.history_table.setRowHeight(row, 35)
 
-    def update_status(self, value):
-        self.value = float(value)
-        if self.value < 28:  
-            status_text = "Frío"
-            status_style = """
-                background-color: #c7f3fd;
-                color: #1e40af;
-                font-weight: bold;
-                font-size: 16px;
-                border-radius: 4px;
-                padding: 5px;
-                margin-top: 10px;
-                text-align: center;
-            """
-        elif self.value > 32:  
-            status_text = "Caliente"
-            status_style = """
-                background-color: #fee2e2;
-                color: #b91c1c;
-                font-weight: bold;
-                font-size: 16px;
-                border-radius: 4px;
-                padding: 5px;
-                margin-top: 10px;
-                text-align: center;
-            """
-        else: 
-            status_text = "Ambiente"
-            status_style = """
-                background-color: #dcfce7;
-                color: #166534;
-                font-weight: bold;
-                font-size: 16px;
-                border-radius: 4px;
-                padding: 5px;
-                margin-top: 10px;
-                text-align: center;
-            """
-        self.status_indicator.setText(status_text)
-        self.status_indicator.setStyleSheet(status_style)
+    def get_temp_state(self, temp_value):
+        """Determina el estado de temperatura para la tabla de historial"""
+        temp_value = float(temp_value)
+        if temp_value < self.temp_min:
+            return "Frío"
+        elif temp_value > self.temp_max:
+            return "Caliente"
+        else:
+            return "Ambiente"
 
+    def filter_data(self, text):
+        """Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda"""
+        search_text = text.lower()
+        
+        # Ocultar todas las filas
+        for row in range(self.history_table.rowCount()):
+            self.history_table.hideRow(row)
+        
+        # Mostrar solo las filas que contienen el texto de búsqueda en cualquier columna
+        for row in range(self.history_table.rowCount()):
+            show_row = False
+            
+            # Buscar en todas las columnas
+            for col in range(self.history_table.columnCount()):
+                item = self.history_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    show_row = True
+                    break
+            
+            if show_row or search_text == "":
+                self.history_table.showRow(row)
+    
+    def reset_filter(self):
+        """Restablece el filtro para mostrar todos los datos"""
+        # Limpiar el campo de búsqueda
+        self.search_filter.clear()
+        
+        # Mostrar todas las filas
+        for row in range(self.history_table.rowCount()):
+            self.history_table.showRow(row)
+    
     def set_value(self, new_value):
         self.value = float(new_value)
         self.value_label.setText(str(self.value))
-        self.update_status(self.value)
+        
+        # Actualizar la barra de progreso
+        temp_porcentage = (self.value - self.temp_min) * 100 / (self.temp_max - self.temp_min)
+        temp_porcentage = max(0, min(100, temp_porcentage))  # Asegurar que esté entre 0 y 100
+        
+        # Actualizar el estado
+        self.status.setText(self.get_status())
         
     def set_table_height(self, height):
         self.table_height = height
         self.history_table.setMinimumHeight(height)
         self.history_table.setMaximumHeight(height)
 
-    def create_history_panel(self):
-        history_panel = QFrame()
-        history_panel.setFrameShape(QFrame.Shape.StyledPanel)
-        history_panel.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 12px;
-                border: none;
-            }
-        """)
-        history_shadow = QGraphicsDropShadowEffect()
-        history_shadow.setBlurRadius(15)
-        history_shadow.setColor(QColor(0, 0, 0, 40))
-        history_shadow.setOffset(0, 3)
-        history_panel.setGraphicsEffect(history_shadow)
-
-        history_layout = QVBoxLayout(history_panel)
-        history_layout.setContentsMargins(15, 15, 15, 15)
-        history_layout.setSpacing(10)
-
-        history_header = QHBoxLayout()
-        history_label = QLabel("Historial térmico")
-        history_label.setStyleSheet("""
-            font-size: 18px;
-            color: #074E52;
-            font-weight: bold;
-        """)
-        history_header.addWidget(history_label)
-        history_header.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
-
-        filter_label = QLabel("Filtrar por:")
-        filter_label.setStyleSheet("""
-            font-size: 14px;
-            color: black;
-        """)
-        history_header.addWidget(filter_label)
-
-        filter_combo = QComboBox()
-        filter_combo.addItems(["Todo", "Frío", "Ambiente", "Caliente"])
-        filter_combo.setStyleSheet("""
-            QComboBox {
-                background-color: #21797a;  
-                color: white;  /* Change text color to white */
-                padding: 5px 10px;
-                border-radius: 6px;
-                min-width: 100px;
-                font-size: 14px;
-            }
-            QComboBox QAbstractItemView {
-                background-color: white;
-                border: 1px solid #ddd;
-                selection-background-color: #21797a;
-                selection-color: white;
-            }
-            QComboBox::item {
-                color: black;
-            }
-            QComboBox::item:selected {
-                color: white;
-            }
-            QComboBox::item:hover {
-                color: white;
-            }
-        """)
-        filter_combo.currentIndexChanged.connect(self.filter_table)  # Connect filter change to filtering function
-        history_header.addWidget(filter_combo)
-        history_layout.addLayout(history_header)
-
-        self.history_table = QTableWidget()
-        self.history_table.setColumnCount(3)
-        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Temperatura", "Condición"])
-        self.history_table.verticalHeader().setVisible(False)
-        self.history_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.history_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.history_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.history_table.setAlternatingRowColors(True)
-        self.history_table.setStyleSheet("""
-            QTableView {
-                background-color: white;
-                gridline-color: #e2e8f0;
-                border: none;
-                border-radius: 6px;
-                selection-background-color: #97DFDB;
-                selection-color: black;
-                alternate-background-color: #f8fafc;
-                color: #1e293b;
-                font-size: 14px;
-            }
-            QHeaderView::section {
-                background-color: #21797a;
-                padding: 8px;
-                border: none;
-                color: white;
-                font-size: 15px;
-            }
-        """)
-        self.history_table.setMinimumHeight(self.table_height)
-        self.history_table.setMaximumHeight(self.table_height)
-        self.populate_table()
-        history_layout.addWidget(self.history_table)
-
-        self.filter_combo = filter_combo  # Store the filter combo for later use
-        return history_panel
-
-    def filter_table(self):
-        filter_text = self.filter_combo.currentText()
-        for row in range(self.history_table.rowCount()):
-            state_item = self.history_table.item(row, 2)
-            if filter_text == "Todo" or state_item.text() == filter_text:
-                self.history_table.setRowHidden(row, False)
-            else:
-                self.history_table.setRowHidden(row, True)
-    
-    def set_value(self, new_value):
-        self.value = float(new_value)
-        self.value_label.setText(f"{self.value}°C")
-        self.update_status(self.value)
+    def resizeEvent(self, event):
+        """Manejar cambios de tamaño de la ventana"""
+        super().resizeEvent(event)
+        
+        card_width = self.width()
+        
+        if card_width < 800:
+            # Modo compacto
+            self.value_label.setStyleSheet("font-size: 48px; font-weight: bold; color: #045859;")
+        else:
+            # Modo normal
+            self.value_label.setStyleSheet("font-size: 56px; font-weight: bold; color: #045859;")

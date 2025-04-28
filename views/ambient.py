@@ -53,7 +53,8 @@ class Ambient(QWidget):
         # Agregar gráfica que ocupará las filas 0 y 1 de la segunda columna
         graph_panel = GraphicsAmbient(self.temperature_graphic, self.humidity_graphic)
         graph_panel.setStyleSheet("margin:0;padding:0;border-radius: 12px;")
-        
+        graph_panel.setContentsMargins(0, 0, 0, 0)
+
         # Efecto de sombra para la gráfica
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(15)
@@ -63,10 +64,15 @@ class Ambient(QWidget):
         graph_panel.setGraphicsEffect(shadow)
         
         # Limitar la altura máxima del panel de gráficos
-        graph_panel.setMaximumHeight(300)
+        graph_panel.setMaximumHeight(500)
 
         # Agregar el panel de gráficos al layout
         grid_layout.addWidget(graph_panel, 0, 1, 2, 1)  # fila 0, col 1, rowspan 2, colspan 1
+
+        # Agregar spacer a la derecha de la gráfica
+        from PyQt6.QtWidgets import QSpacerItem, QSizePolicy
+        spacer = QSpacerItem(20, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        grid_layout.addItem(spacer, 0, 2, 2, 1)  # Fila 0, col 2, rowspan 2, colspan 1
 
         main_layout.addLayout(grid_layout)
         

@@ -16,10 +16,12 @@ class GraphicsAmbient(QtWidgets.QMainWindow):
         # 1. Gráfica de temperatura
         self.plot_temp = pg.PlotWidget()
         self.plot_temp.setBackground("white")
+        self.plot_temp.setMinimumHeight(200)  # <-- Ajusta aquí la altura
+        self.plot_temp.setMaximumHeight(200)  # <-- Ajusta aquí la altura
         pen_temp = pg.mkPen(color=(230, 126, 34))
         style = {"color": "#333", "font-size": "11px"}
         self.plot_temp.setLabel("left", "°C Temperatura", **style)
-        self.plot_temp.setLabel("bottom", "Tiempo (min)", **style)
+        self.plot_temp.setLabel("bottom", "Tiempo (minutos)", **style)
         self.plot_temp.addLegend()
         self.plot_temp.showGrid(x=True, y=True)
         self.plot_temp.setYRange(20, 40)
@@ -28,9 +30,11 @@ class GraphicsAmbient(QtWidgets.QMainWindow):
         # 2. Gráfica de humedad
         self.plot_hum = pg.PlotWidget()
         self.plot_hum.setBackground("white")
+        self.plot_hum.setMinimumHeight(200)  # <-- Ajusta aquí la altura
+        self.plot_hum.setMaximumHeight(200)  # <-- Ajusta aquí la altura
         pen_hum = pg.mkPen(color=(30, 137, 207))
         self.plot_hum.setLabel("left", "% Humedad", **style)
-        self.plot_hum.setLabel("bottom", "Tiempo (min)", **style)
+        self.plot_hum.setLabel("bottom", "Tiempo (minutos)", **style)
         self.plot_hum.addLegend()
         self.plot_hum.showGrid(x=True, y=True)
         self.plot_hum.setYRange(30, 90)

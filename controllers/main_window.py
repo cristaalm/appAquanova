@@ -7,8 +7,8 @@ from PyQt6.QtCore import QSize, Qt
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PyQt6 Basic Window")
-        self.resize(1280, 720)  # Tamaño inicial
+        self.setWindowTitle("AquaNova - Hidroponía")
+        # self.resize(1280, 720)  # Tamaño inicial
 
         # Establecer tamaño mínimo de la ventana
         self.setMinimumSize(QSize(600, 400))  # Tamaño mínimo más pequeño para mejor adaptabilidad
@@ -41,7 +41,10 @@ class MainWindow(QMainWindow):
         # Configuración inicial de tamaños
         self.sidebar_min_width = 200
         self.sidebar_max_width = 300
-        self.sidebar_width = 250  # Ancho inicial
+       
+        # Abrir la ventana en pantalla com        # Bloquear el ancho del sidebar
+        self.sidebar_width = 250  # Ancho fijo en píxeles
+        self.splitter.setSizes([self.sidebar_width, self.width() - self.sidebar_width])
         
         # Establecer estilos
         self.splitter.setStyleSheet("""
@@ -54,38 +57,5 @@ class MainWindow(QMainWindow):
             }
         """)
 
-        # Conectar señal de movimiento del splitter
-        self.splitter.splitterMoved.connect(self.handle_splitter_move)
-
-    def handle_splitter_move(self, pos, index):
-        """Manejar el movimiento del splitter para mantener límites"""
-        # Asegurarse de que el sidebar no sea más pequeño que el mínimo ni más grande que el máximo
-        current_sizes = self.splitter.sizes()
-        if current_sizes[0] < self.sidebar_min_width:
-            self.splitter.blockSignals(True)
-            self.splitter.setSizes([self.sidebar_min_width, current_sizes[1] - (self.sidebar_min_width - current_sizes[0])])
-            self.splitter.blockSignals(False)
-        elif current_sizes[0] > self.sidebar_max_width:
-            self.splitter.blockSignals(True)
-            self.splitter.setSizes([self.sidebar_max_width, current_sizes[1] + (current_sizes[0] - self.sidebar_max_width)])
-            self.splitter.blockSignals(False)
-
-    def resizeEvent(self, event):
-        """Manejar el redimensionamiento de la ventana"""
-        super().resizeEvent(event)
-        
-        # Obtener el tamaño actual del splitter
-        current_sizes = self.splitter.sizes()
-        
-        # Si la ventana es muy pequeña, priorizar el contenido
-        if event.size().width() < 800:
-            new_sidebar_width = max(self.sidebar_min_width, min(self.sidebar_width, event.size().width() - 400))
-            self.splitter.setSizes([new_sidebar_width, event.size().width() - new_sidebar_width])
-        else:
-            # Mantener proporción relativa del sidebar
-            total = sum(current_sizes)
-            if total > 0:  # Evitar división por cero
-                ratio = current_sizes[0] / total
-                new_sidebar_width = int(event.size().width() * ratio)
-                new_sidebar_width = max(self.sidebar_min_width, min(new_sidebar_width, self.sidebar_max_width))
-                self.splitter.setSizes([new_sidebar_width, event.size().width() - new_sidebar_width])
+        # Abrir la ventana en pantalla completa al iniciar
+        self.showMaximized()

@@ -7,13 +7,18 @@ from random import randint
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QBrush
 import os 
+from components.TempWaterGraph import TempGraph
+from dotenv import load_dotenv
+
+load_dotenv()
+SHADOW = os.getenv("SHADOW")
 
 class tempWaterComponent(QWidget):
     QApplication.setStyle("Fusion")
     def __init__(self, graph_widget, parent=None):
         super().__init__(parent)
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.graph_widget = graph_widget 
+        self.graph_widget = TempGraph() 
         self.value = randint(25, 35)  # Valor inicial simulado
         self.table_height = 400
         self.table_data = []  # Lista para almacenar datos de la tabla
@@ -87,9 +92,11 @@ class tempWaterComponent(QWidget):
             }
         """)
         shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(10)
-        shadow.setColor(QColor(0, 0, 0, 30))
-        shadow.setOffset(0, 2)
+        shadow.setBlurRadius(15)
+        r, g, b = map(int, SHADOW.split(","))
+        shadow_color = QColor(r, g, b)
+        shadow.setColor(shadow_color)
+        shadow.setOffset(0, 3)
         summary_panel.setGraphicsEffect(shadow)
         
         summary_layout = QVBoxLayout(summary_panel)
@@ -122,7 +129,7 @@ class tempWaterComponent(QWidget):
         title_layout.addStretch()
         
         temp_icon_label = QLabel()
-        temp_pixmap = self.load("icons","water_temp.png", 24)
+        temp_pixmap = self.load("icons","water_temp.png", 30)
         if temp_pixmap:
             temp_icon_label.setPixmap(temp_pixmap)
         
@@ -144,7 +151,7 @@ class tempWaterComponent(QWidget):
         
         # Ícono del termómetro
         thermometer_icon_label = QLabel()
-        thermometer_pixmap = self.load("icons","temperature.png", 60)
+        thermometer_pixmap = self.load("icons","temperature.png", 55)
         if thermometer_pixmap:
             thermometer_icon_label.setPixmap(thermometer_pixmap)
         value_layout.addWidget(thermometer_icon_label)
@@ -162,7 +169,7 @@ class tempWaterComponent(QWidget):
 
         self.value_unit_lable = QLabel("°C")
         self.value_unit_lable.setStyleSheet("""
-            font-size: 40px;
+            font-size: 24px;
             color: #045859;
             margin-left: 2px;
             margin-top: 20px;
@@ -196,8 +203,6 @@ class tempWaterComponent(QWidget):
 
         # Calcular el porcentaje de temperatura
         temp_porcentage = (self.value - self.temp_min) * 100 / (self.temp_max - self.temp_min)
-        # Limitar el valor entre 0 y 100
-        temp_porcentage = max(0, min(100, temp_porcentage))  
         progress_bar.setValue(int(temp_porcentage))
         progress_bar.setStyleSheet("""
             QProgressBar {
@@ -249,22 +254,20 @@ class tempWaterComponent(QWidget):
                 border: none;
             }
         """)
-        graph_shadow = QGraphicsDropShadowEffect()
-        graph_shadow.setBlurRadius(15)
-        graph_shadow.setColor(QColor(0, 0, 0, 40))
-        graph_shadow.setOffset(0, 3)
-        graph_panel.setGraphicsEffect(graph_shadow)
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(15)
+        r, g, b = map(int, SHADOW.split(","))
+        shadow_color = QColor(r, g, b)
+        shadow.setColor(shadow_color)
+        shadow.setOffset(0, 3)
+        graph_panel.setGraphicsEffect(shadow)
         
         graph_layout = QVBoxLayout(graph_panel)
-        graph_layout.setContentsMargins(15, 0, 15, 15)
+        graph_layout.setContentsMargins(15, 15, 15, 15)
         graph_layout.setSpacing(10)
         
-        # Encabezado de la gráfica
-        header_layout = QHBoxLayout()
-        
-        header_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
-        graph_layout.addLayout(header_layout)
         self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        
         graph_layout.addWidget(self.graph_widget, 1)
         
         return graph_panel
@@ -281,14 +284,15 @@ class tempWaterComponent(QWidget):
             }
         """)
         # Aplicar efecto de sombra para el panel de historial
-        history_shadow = QGraphicsDropShadowEffect()
-        history_shadow.setBlurRadius(15)
-        history_shadow.setColor(QColor(0, 0, 0, 40))
-        history_shadow.setOffset(0, 3)
-        history_panel.setGraphicsEffect(history_shadow)
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(15)
+        r, g, b = map(int, SHADOW.split(","))
+        shadow_color = QColor(r, g, b)
+        shadow.setColor(shadow_color)
+        shadow.setOffset(0, 3)
+        history_panel.setGraphicsEffect(shadow)
         
         history_layout = QVBoxLayout(history_panel)
-        history_layout.setContentsMargins(15, 15, 15, 15)
         history_layout.setSpacing(10)
         
         # Encabezado de historial

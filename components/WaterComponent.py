@@ -9,7 +9,7 @@ class WaterComponent(QWidget):
     def __init__(self, graph_widget, parent=None):
         super().__init__(parent)
         self.graph_widget = graph_widget
-        self.level_value = 14.5 # Nivel de agua simulado en litros
+        self.level_value = 5.5 # Nivel de agua simulado en litros
         self.table_height = 250
         self.setup_ui()
 
@@ -24,7 +24,6 @@ class WaterComponent(QWidget):
         top_layout = QHBoxLayout()
         top_layout.addWidget(self.create_summary_panel())
         top_layout.addWidget(self.create_graph_panel(), 3)
-        top_layout.addWidget(self.create_emotion_panel(), 1)
         main_layout.addLayout(top_layout)
 
         main_layout.addWidget(self.create_history_panel())
@@ -52,7 +51,7 @@ class WaterComponent(QWidget):
         summary_layout.setContentsMargins(15, 15, 15, 15)
         summary_layout.setSpacing(10)
 
-        water_title = QLabel("Nivel de Agua")
+        water_title = QLabel("Nivel de agua 💧")
         water_title.setStyleSheet("""
             font-size: 22px;
             font-weight: bold;
@@ -60,11 +59,11 @@ class WaterComponent(QWidget):
         """)
         summary_layout.addWidget(water_title)
 
-        water_subtitle = QLabel("Control de la capacidad de agua")
+        water_subtitle = QLabel("Monitoreo de la capacidad del tanque")
         water_subtitle.setStyleSheet("""
-            font-size: 16px;
+            font-size: 12px;
+            font-style: italic;
             color: #6b7280;
-            margin-top: -5px;
         """)
         summary_layout.addWidget(water_subtitle)
 
@@ -77,13 +76,12 @@ class WaterComponent(QWidget):
         """)
         self.level_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         summary_layout.addWidget(self.level_value_label)
-
-        water_status_label = QLabel("Rango entre\n10L y 18L")
+ 
+        water_status_label = QLabel("Rango recomendado entre 10 a 18 litros")
         water_status_label.setStyleSheet("""
+            font-size: 12px;
             font-style: italic;
-            color: #64748b;
-            font-size: 15px;
-            text-align: center;
+            color: #6b7280;
         """)
         water_status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         summary_layout.addWidget(water_status_label)
@@ -116,44 +114,13 @@ class WaterComponent(QWidget):
         graph_layout = QVBoxLayout(graph_panel)
         graph_layout.setContentsMargins(15, 15, 15, 15)
 
-        graph_title = QLabel("Tendencia del Nivel")
-        graph_title.setStyleSheet("""
-            font-size: 18px;
-            font-weight: bold;
-            color: #074e52;
-            margin-bottom: 5px;
-        """)
-        graph_layout.addWidget(graph_title)
-
         self.graph_widget.setMinimumHeight(200)
         self.graph_widget.setMinimumWidth(700)  # O más, ajusta a lo que necesites
 
         graph_layout.addWidget(self.graph_widget)
 
         return graph_panel
-
-    def create_emotion_panel(self):
-        emotion_panel = QFrame()
-        emotion_panel.setFrameShape(QFrame.Shape.StyledPanel)
-        emotion_panel.setMinimumWidth(120)
-        emotion_panel.setMaximumWidth(180)
-        emotion_panel.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 12px;
-                border: none;
-            }
-        """)
-        emotion_shadow = QGraphicsDropShadowEffect()
-        emotion_shadow.setBlurRadius(15)
-        emotion_shadow.setColor(QColor(0, 0, 0, 40))
-        emotion_shadow.setOffset(0, 3)
-        emotion_panel.setGraphicsEffect(emotion_shadow)
-
-        emotion_layout = QVBoxLayout(emotion_panel)
-        emotion_layout.setContentsMargins(10, 15, 10, 15)
-        emotion_layout.setSpacing(15)
-
+    
     def update_level_status(self, level_value):
         level_value = float(level_value)
         if level_value < 10:
@@ -240,7 +207,7 @@ class WaterComponent(QWidget):
         history_layout.setSpacing(10)
 
         history_header = QHBoxLayout()
-        history_label = QLabel("Historial de registro")
+        history_label = QLabel("Lecturas")
         history_label.setStyleSheet("""
             font-size: 18px;
             font-weight: bold;
@@ -310,6 +277,12 @@ class WaterComponent(QWidget):
 
     def populate_table(self):
         data = [
+            {"fecha": "10/04/2025 09:00am", "valor": "14.2", "estado": "Óptimo"},
+            {"fecha": "10/04/2025 12:00pm", "valor": "9.8", "estado": "Bajo"},
+            {"fecha": "10/04/2025 03:00pm", "valor": "10.2", "estado": "Regular"},
+            {"fecha": "10/04/2025 09:00am", "valor": "14.2", "estado": "Óptimo"},
+            {"fecha": "10/04/2025 12:00pm", "valor": "9.8", "estado": "Bajo"},
+            {"fecha": "10/04/2025 03:00pm", "valor": "10.2", "estado": "Regular"},
             {"fecha": "10/04/2025 09:00am", "valor": "14.2", "estado": "Óptimo"},
             {"fecha": "10/04/2025 12:00pm", "valor": "9.8", "estado": "Bajo"},
             {"fecha": "10/04/2025 03:00pm", "valor": "10.2", "estado": "Regular"},

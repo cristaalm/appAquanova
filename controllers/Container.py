@@ -227,7 +227,7 @@ class ContentContainer(QWidget):
             welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.content_layout.addWidget(welcome_label)
         elif self.content_state == 1:
-            self.title_label.setText("Nivel de Agua")
+            self.title_label.setText("Gestión de niveles de agua")
             self.content_layout.addWidget(self.water_component)
         elif self.content_state == 2:
             self.title_label.setText("Nivel de pH")

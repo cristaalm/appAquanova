@@ -23,7 +23,7 @@ from historiales.controllers.TempAmbientController import TempAmbientController
 from historiales.controllers.CEController import CEController
 from historiales.controllers.DistanceController import DistanceController
 from historiales.controllers.HUAmbientController import HUAmbientController
-from views.systems import Systems
+from components.cardDashboard import CardDashboard
 
 
 class ContentContainer(QWidget):
@@ -142,9 +142,9 @@ class ContentContainer(QWidget):
             self.hum_value,
             self.graph_humidity_ambient,
         )
-        self.systems = Systems(company_list)
 
         self.devices_view = DevicesView(self.notification)
+        self.card_dashboard = CardDashboard()
         # Estado inicial
         self.content_state = 0
 
@@ -216,16 +216,17 @@ class ContentContainer(QWidget):
         # Mostrar contenido según estado
         if self.content_state == 0:
             self.title_label.setText("Bienvenido a el monitor de AquaNova")
-            welcome_label = QLabel(
-                "¡Explora los datos de tus sensores en tiempo real!<br><br>"
-                "Este sistema te permite monitorear parámetros vitales del agua y del entorno, como el nivel, pH, temperatura, conductividad y condiciones ambientales. "
-                "Utiliza el menú lateral para comenzar.<br><br>"
-                "<i>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus luctus urna sed urna ultricies ac tempor dui sagittis.</i>"
-            )
-            welcome_label.setStyleSheet("color: #4CA4A5; font-size: 14px;")
-            welcome_label.setWordWrap(True)
-            welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.content_layout.addWidget(welcome_label)
+            self.content_layout.addWidget(self.card_dashboard)
+            # welcome_label = QLabel(
+            #     "¡Explora los datos de tus sensores en tiempo real!<br><br>"
+            #     "Este sistema te permite monitorear parámetros vitales del agua y del entorno, como el nivel, pH, temperatura, conductividad y condiciones ambientales. "
+            #     "Utiliza el menú lateral para comenzar.<br><br>"
+            #     "<i>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus luctus urna sed urna ultricies ac tempor dui sagittis.</i>"
+            # )
+            # welcome_label.setStyleSheet("color: #4CA4A5; font-size: 14px;")
+            # welcome_label.setWordWrap(True)
+            # welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            # self.content_layout.addWidget(welcome_label)
         elif self.content_state == 1:
             self.title_label.setText("Gestión de niveles de agua")
             self.content_layout.addWidget(self.water_component)
@@ -244,9 +245,6 @@ class ContentContainer(QWidget):
         elif self.content_state == 6:
             self.title_label.setText("Dispositivos")
             self.content_layout.addWidget(self.devices_view)
-        elif self.content_state == 7:
-            self.title_label.setText("Sistemas")
-            self.content_layout.addWidget(self.systems)
         else:
             self.title_label.setText("Estado Desconocido")
             error_msg = QLabel("Estado no válido")

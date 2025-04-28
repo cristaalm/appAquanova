@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QFrame,
     QGraphicsDropShadowEffect,
+    QProgressBar,
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QPixmap
@@ -31,7 +32,7 @@ class MarqueeLabel(QLabel):
         self.timer.start(150)  # Menor valor = más rápido
 
     def scroll_text(self):
-        scrolled = self.full_text[self.index :] + self.full_text[: self.index]
+        scrolled = self.full_text[self.index:] + self.full_text[:self.index]
         self.setText(scrolled)
         self.index = (self.index + 1) % len(self.full_text)
 
@@ -51,7 +52,7 @@ class CurrentAmbient(QWidget):
         # Tarjeta de temperatura
         self.temperature_card = self.create_card(
             title="Temperatura actual",
-            subtitle="Control de la temperatura en tiempo real",
+            subtitle="Nivel de calor ambiental.",
             value=f"{self.temperature_value} °C",
             is_temperature=True,
         )
@@ -60,7 +61,7 @@ class CurrentAmbient(QWidget):
         # Tarjeta de humedad
         self.humidity_card = self.create_card(
             title="Humedad actual",
-            subtitle="Control de la humedad en tiempo real",
+            subtitle="Cantidad de vapor en el aire.",
             value=f"{self.humidity_value} %",
             is_temperature=False,
         )
@@ -103,18 +104,14 @@ class CurrentAmbient(QWidget):
             color: #074e52;
         """
         )
-        title_label.setAlignment(
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-        )
+        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
         corner_icon = QLabel()
         corner_icon.setFixedSize(22, 22)
         if is_temperature:
             timezone = pytz.timezone("America/Mexico_City")
             current_hour = datetime.now(timezone).hour
-            icon_path = (
-                f"{ICONS}sol.png" if 6 <= current_hour < 19 else f"{ICONS}luna.png"
-            )
+            icon_path = f"{ICONS}sol.png" if 6 <= current_hour < 19 else f"{ICONS}luna.png"
         else:
             icon_path = f"{ICONS}gota.png"
         corner_pixmap = QPixmap(icon_path).scaled(
@@ -133,7 +130,6 @@ class CurrentAmbient(QWidget):
         # Subtítulo y valor
         bottom_layout = QHBoxLayout()
 
-        # Subtítulo
         subtitle_label = QLabel(subtitle)
         subtitle_label.setStyleSheet(
             """
@@ -143,19 +139,16 @@ class CurrentAmbient(QWidget):
         """
         )
         subtitle_label.setWordWrap(True)
-        subtitle_label.setAlignment(
-            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft
-        )
+        subtitle_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         bottom_layout.addWidget(subtitle_label, 1)
 
-        # Valor con ícono
         value_container = QHBoxLayout()
         image_label = QLabel()
-        image_label.setFixedSize(32, 32)
+        image_label.setFixedSize(30, 30)
         image_path = f"{ICONS}thermometer.png" if is_temperature else f"{ICONS}nube.png"
         pixmap = QPixmap(image_path).scaled(
-            32,
-            32,
+            30,
+            30,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )
@@ -178,4 +171,84 @@ class CurrentAmbient(QWidget):
 
         layout.addLayout(bottom_layout)
 
+        # Etiquetas MIN y MAX dinámicas según el tipo de card
+        if is_temperature:
+            min_label_text = "MIN 0°C"
+            max_label_text = "MÁX 50°C"
+        else:
+            min_label_text = "MIN 0%"
+            max_label_text = "MÁX 100%"
+
+        labels_layout = QHBoxLayout()
+        labels_layout.setContentsMargins(0, 0, 0, 0)
+        min_label = QLabel(min_label_text)
+        min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        labels_layout.addWidget(min_label)
+        labels_layout.addStretch()
+        max_label = QLabel(max_label_text)
+        max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        labels_layout.addWidget(max_label)
+        layout.addLayout(labels_layout)
+
+        # Barra de progreso
+        progress_bar = QProgressBar()
+        progress_bar.setFixedHeight(12)
+        progress_bar.setTextVisible(False)
+
+        num_value = float(value.split()[0])
+        if is_temperature:
+            percentage = min(max(num_value / 50.0, 0), 1) * 100  # supongamos máximo 50°C
+        else:
+            percentage = min(max(num_value / 100.0, 0), 1) * 100  # humedad sobre 100%
+
+        progress_bar.setValue(int(percentage))
+
+        progress_bar.setStyleSheet("""
+            QProgressBar {
+                background-color: #e2e8f0;
+                border-radius: 6px;
+                border: none;
+            }
+            QProgressBar::chunk {
+                background-color: #4CA4A5;
+                border-radius: 6px;
+            }
+        """)
+        
+        layout.addWidget(progress_bar)
+
+        # Panel de estado dinámico
+        status = self.get_status(num_value, is_temperature)
+
+        self.status_chip = QLabel(status)
+        self.status_chip.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status_chip.setStyleSheet("""
+            background-color: #c5efeb;
+            color: #2b6363;
+            border-radius: 15px;
+            padding: 6px;
+            font-size: 18px;
+            font-weight: bold;
+        """)
+        
+        layout.addWidget(self.status_chip)
+        layout.addStretch()
         return frame
+
+    def get_status(self, value, is_temperature):
+        if is_temperature:
+            if value > 30:
+                return "ALERTA: Temperatura Alta"
+            elif value < 10:
+                return "ALERTA: Temperatura Baja"
+            else:
+                return "Óptima Temperatura"
+        else:
+            if value > 80:
+                return "ALERTA: Humedad Alta"
+            elif value < 30:
+                return "ALERTA: Humedad Baja"
+            else:
+                return "Óptima Humedad"

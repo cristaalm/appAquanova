@@ -79,7 +79,6 @@ class Sidebar(QWidget):
         # Categoría: Configuración
         self.add_category_separator("CONFIGURACIÓN")
         self.add_button("Dispositivos", "engranajes", "engranajes_w", 6)
-        self.add_button("Sistemas", "empresa", "empresa_w", 7)
 
         # Espaciador final
         self.sidebar_layout.addItem(

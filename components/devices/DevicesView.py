@@ -27,18 +27,18 @@ class DevicesView(QWidget):
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(20)
 
-        # Título
-        title = QLabel("Dispositivos Conectados")
-        title.setStyleSheet(
-            """
-            font-size: 22px;
-            font-weight: bold;
-            color: #1e293b;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0fffe;
-            """
-        )
-        main_layout.addWidget(title)
+        # # Título
+        # title = QLabel("Dispositivos Conectados")
+        # title.setStyleSheet(
+        #     """
+        #     font-size: 22px;
+        #     font-weight: bold;
+        #     color: #1e293b;
+        #     padding-bottom: 10px;
+        #     border-bottom: 2px solid #f0fffe;
+        #     """
+        # )
+        # main_layout.addWidget(title)
 
         # Contenedor del layout dinámico (sin scroll)
         content_widget = QWidget()

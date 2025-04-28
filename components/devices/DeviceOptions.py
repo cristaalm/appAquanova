@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
 )
 from PyQt6.QtCore import Qt
+import utils.LabelMove as MarqueeLabel
 
 from dispositivos.controllers.deviceController import DispositivoController
 
@@ -119,9 +120,8 @@ class DeviceOptions(QWidget):
 
     def add_tds_options(self, layout):
         config = self.get_loaded_config(1)
-        print(config)
 
-        layout.addWidget(QLabel("Opciones del Sensor TDS"))
+        layout.addWidget(MarqueeLabel.MarqueeLabel("Opciones del Sensor TDS"))
         spin = QSpinBox()
         spin.setRange(1, 120)
         spin.setValue(config.get("tiempo_batido", 30))
@@ -145,7 +145,7 @@ class DeviceOptions(QWidget):
     def add_ph_options(self, layout):
         config = self.get_loaded_config(2)
 
-        layout.addWidget(QLabel("Opciones del Sensor de pH"))
+        layout.addWidget(MarqueeLabel.MarqueeLabel("Opciones del Sensor de pH"))
         spin = QSpinBox()
         spin.setRange(1, 120)
         spin.setValue(config.get("tiempo_batido", 30))
@@ -170,7 +170,7 @@ class DeviceOptions(QWidget):
         temp_config = self.get_loaded_config(3)
         hum_config = self.get_loaded_config(6)
 
-        layout.addWidget(QLabel("Opciones del Sensor DHT11"))
+        layout.addWidget(MarqueeLabel.MarqueeLabel("Opciones del Sensor DHT11"))
 
         tmin = QDoubleSpinBox()
         tmax = QDoubleSpinBox()
@@ -201,7 +201,7 @@ class DeviceOptions(QWidget):
     def add_temp_sumergible_options(self, layout):
         config = self.get_loaded_config(4)
 
-        layout.addWidget(QLabel("Opciones del Sensor DS18B20"))
+        layout.addWidget(MarqueeLabel.MarqueeLabel("Opciones del Sensor DS18B20"))
 
         tmin = QDoubleSpinBox()
         tmax = QDoubleSpinBox()
@@ -219,7 +219,7 @@ class DeviceOptions(QWidget):
     def add_ultrasonico_options(self, layout):
         config = self.get_loaded_config(5)
 
-        layout.addWidget(QLabel("Opciones del Sensor Ultrasónico"))
+        layout.addWidget(MarqueeLabel.MarqueeLabel("Opciones del Sensor Ultrasónico"))
 
         dmin = QDoubleSpinBox()
         dmax = QDoubleSpinBox()

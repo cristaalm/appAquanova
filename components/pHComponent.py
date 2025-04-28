@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QHeaderView, QSpacerItem, QSizePolicy, QFrame, QComboBox, QGraphicsDropShadowEffect,
     QProgressBar, QStyle, QPushButton, QLineEdit
 )
-from PyQt6.QtCore import Qt, QSize, QDateTime, QDate
+from PyQt6.QtCore import Qt, QSize, QDateTime, QDate, QTimer
 from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap, QBrush
 import os
 
@@ -22,6 +22,10 @@ class phComponent(QWidget):
         # Para rangos en la tabla "ÁCIDO"/"NEUTRO"/"ALCALINO"
         self.PH_MIN_NEUTRAL = 6.5
         self.PH_MAX_NEUTRAL = 7.5
+        
+        # Texto e índice para el efecto de carrusel del título
+        self.title_text = "Potencial de hidrógeno (pH)   "
+        self.title_index = 0
         
         self.setup_ui()
         self.populate_table()
@@ -47,6 +51,12 @@ class phComponent(QWidget):
 
         self.setLayout(main_layout)
 
+    def scroll_title_text(self, label):
+        """Función para hacer que el texto del título se desplace como un carrusel"""
+        scrolled = self.title_text[self.title_index:] + self.title_text[:self.title_index]
+        label.setText(scrolled)
+        self.title_index = (self.title_index + 1) % len(self.title_text)
+
     def create_summary_panel(self):
         """Crea el panel de resumen del pH - rediseñado para ajustarse a la imagen de referencia."""
         summary_panel = QFrame()
@@ -63,29 +73,42 @@ class phComponent(QWidget):
             }
         """)
         
-        # Aplicar efecto de sombra para la card
+        # Aplicar efecto de sombra con el nuevo color RGB(197,239,236)
         shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(10)
-        shadow.setColor(QColor(0, 0, 0, 30))
-        shadow.setOffset(0, 2)
+        shadow.setBlurRadius(15)
+        shadow.setColor(QColor(197, 239, 236))
+        shadow.setOffset(0, 3)
         summary_panel.setGraphicsEffect(shadow)
         
         summary_layout = QVBoxLayout(summary_panel)
         summary_layout.setContentsMargins(15, 15, 15, 15)
         summary_layout.setSpacing(10)
         
-        # Título con círculo e icono (según la imagen de referencia)
+        # Título con carrusel e icono a la derecha
         header_layout = QHBoxLayout()
         header_layout.setSpacing(8)
         
-        # Texto del título
-        title_label = QLabel("Ph actual")
+        # Texto del título con carrusel
+        title_label = QLabel(self.title_text)
         title_label.setStyleSheet("""
             font-size: 22px;
             font-weight: bold;
             color: #045859;
         """)
+        title_label.setMinimumWidth(150)
+        title_label.setMaximumWidth(200)
+        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        title_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        
+        # Iniciar el temporizador para el efecto de carrusel
+        self.title_timer = QTimer()
+        self.title_timer.timeout.connect(lambda: self.scroll_title_text(title_label))
+        self.title_timer.start(150)  # Actualizar cada 150ms
+        
         header_layout.addWidget(title_label)
+        
+        # Añadir espacio para empujar el icono a la derecha
+        header_layout.addStretch()
         
         # Icono al lado del título
         icon_label = QLabel()
@@ -101,7 +124,7 @@ class phComponent(QWidget):
         header_layout.addWidget(icon_label)
         summary_layout.addLayout(header_layout)
         
-        # MODIFICACIÓN: Añadir texto descriptivo debajo del título
+        # Añadir texto descriptivo debajo del título
         description_label = QLabel("Monitoreo del nivel de acidez del agua")
         description_label.setStyleSheet("""
             font-size: 12px;
@@ -110,10 +133,9 @@ class phComponent(QWidget):
         """)
         summary_layout.addWidget(description_label)
         
-        # Añadir espacio adicional según la imagen de referencia
-        summary_layout.addSpacing(2)  # Reducido un poco para dar espacio al nuevo texto
+        # Añadir espacio adicional
+        summary_layout.addSpacing(2)
         
-        # El resto del método continúa igual...
         # Contenedor para el valor pH con icono y unidad
         value_container = QHBoxLayout()
         value_container.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -237,16 +259,16 @@ class phComponent(QWidget):
         graph_panel.setFixedHeight(280)
         graph_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
         
+        # Cambiar el color de la sombra a RGB(197,239,236)
         graph_shadow = QGraphicsDropShadowEffect()
         graph_shadow.setBlurRadius(15)
-        graph_shadow.setColor(QColor(0, 0, 0, 40))
+        graph_shadow.setColor(QColor(197, 239, 236))
         graph_shadow.setOffset(0, 3)
         graph_panel.setGraphicsEffect(graph_shadow)
         
         graph_layout = QVBoxLayout(graph_panel)
         graph_layout.setContentsMargins(15, 15, 15, 15)
         graph_layout.setSpacing(10)
-        
         
         # Configurar la gráfica para expandirse
         self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -262,10 +284,10 @@ class phComponent(QWidget):
         history_panel.setFrameShape(QFrame.Shape.StyledPanel)
         history_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
 
-        # Sombra para profundidad visual
+        # Sombra con el nuevo color RGB(197,239,236)
         history_shadow = QGraphicsDropShadowEffect()
         history_shadow.setBlurRadius(15)
-        history_shadow.setColor(QColor(0, 0, 0, 40))
+        history_shadow.setColor(QColor(197, 239, 236))
         history_shadow.setOffset(0, 3)
         history_panel.setGraphicsEffect(history_shadow)
 
@@ -286,7 +308,7 @@ class phComponent(QWidget):
         filter_label.setStyleSheet("font-size: 14px; color: #64748b;")
         history_header.addWidget(filter_label)
         
-        # MODIFICACIÓN: Crear un campo de texto para el filtro con ancho menor
+        # Crear un campo de texto para el filtro con ancho menor
         self.search_filter = QLineEdit()
         self.search_filter.setPlaceholderText("Filtrar por fecha, valor o estado...")
         self.search_filter.setStyleSheet("""
@@ -297,7 +319,7 @@ class phComponent(QWidget):
                 padding: 5px 10px;
                 border-radius: 6px;
                 font-size: 14px;
-                max-width: 200px;  /* MODIFICADO: reducida a la mitad */
+                max-width: 200px;
             }
             QLineEdit:focus {
                 border: 2px solid #4CA4A5;
@@ -308,8 +330,6 @@ class phComponent(QWidget):
         self.search_filter.textChanged.connect(self.filter_data)
         
         history_header.addWidget(self.search_filter)
-        
-        # MODIFICACIÓN: Se eliminó el botón "Limpiar" y su funcionalidad
         
         history_layout.addLayout(history_header)
 

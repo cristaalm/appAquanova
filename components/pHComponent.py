@@ -5,12 +5,13 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QSize, QDateTime, QDate, QTimer
 from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap, QBrush
+from components.phGraph import phGraph
 import os
 
 class phComponent(QWidget):
     def __init__(self, graph_widget, parent=None):
         super().__init__(parent)
-        self.graph_widget = graph_widget
+        self.graph_widget = phGraph()
         self.ph_value = 6.5
         self.table_height = 400
         

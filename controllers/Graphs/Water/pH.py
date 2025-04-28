@@ -6,7 +6,7 @@ class GraphHp(BaseGraph):
         super().__init__(
             title="",
             x_label="Tiempo (minutos)",
-            y_label="Valor de potencial de hidrógeno (pH)",
+            y_label="Valor (pH)",
             line_color="#e63757",  # Rojo
             data_range=(6.0, 8.0),  # Rango típico de pH
         )

@@ -52,13 +52,13 @@ class phComponent(QWidget):
         self.setLayout(main_layout)
 
     def scroll_title_text(self, label):
-        """Función para hacer que el texto del título se desplace como un carrusel"""
+        #Función para hacer que el texto del título se desplace como un carrusel
         scrolled = self.title_text[self.title_index:] + self.title_text[:self.title_index]
         label.setText(scrolled)
         self.title_index = (self.title_index + 1) % len(self.title_text)
 
     def create_summary_panel(self):
-        """Crea el panel de resumen del pH - rediseñado para ajustarse a la imagen de referencia."""
+        #Crea el panel de resumen del pH
         summary_panel = QFrame()
         summary_panel.setFrameShape(QFrame.Shape.StyledPanel)
         summary_panel.setMinimumWidth(200)
@@ -73,7 +73,7 @@ class phComponent(QWidget):
             }
         """)
         
-        # Aplicar efecto de sombra con el nuevo color RGB(197,239,236)
+        # Aplicar efecto de sombra
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(15)
         shadow.setColor(QColor(197, 239, 236))
@@ -84,7 +84,7 @@ class phComponent(QWidget):
         summary_layout.setContentsMargins(15, 15, 15, 15)
         summary_layout.setSpacing(10)
         
-        # Título con carrusel e icono a la derecha
+        # Título con carrusel
         header_layout = QHBoxLayout()
         header_layout.setSpacing(8)
         
@@ -112,7 +112,6 @@ class phComponent(QWidget):
         
         # Icono al lado del título
         icon_label = QLabel()
-        # Ajusta la ruta si es necesario
         icon_pixmap = QPixmap("./resources/icons/ph_icon.png")
         if not icon_pixmap.isNull():
             icon_label.setPixmap(icon_pixmap.scaled(QSize(30, 30), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
@@ -142,7 +141,6 @@ class phComponent(QWidget):
         
         # Icono antes del valor
         ph_icon_label = QLabel()
-        # Ajusta la ruta si es necesario
         ph_icon_pixmap = QPixmap("./resources/icons/ph_icon.png")
         if not ph_icon_pixmap.isNull():
             ph_icon_label.setPixmap(ph_icon_pixmap.scaled(QSize(55, 55), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
@@ -162,8 +160,7 @@ class phComponent(QWidget):
             text-align: center;
         """)
         value_container.addWidget(self.ph_value_label)
-        
-        # Añadir texto "ph" después del valor
+
         ph_unit_label = QLabel("ph")
         ph_unit_label.setStyleSheet("""
             font-size: 24px;
@@ -241,7 +238,7 @@ class phComponent(QWidget):
         return summary_panel
 
     def get_ph_status_text(self):
-        """Determina el texto de estado según el valor de pH"""
+        #Determina el texto de estado según el valor de pH     
         ph_value = float(self.ph_value)
         if ph_value < self.PH_MIN_OPTIMAL_INDICATOR:
             return "Bajo"
@@ -259,7 +256,7 @@ class phComponent(QWidget):
         graph_panel.setFixedHeight(280)
         graph_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
         
-        # Cambiar el color de la sombra a RGB(197,239,236)
+        # Color de la sombra
         graph_shadow = QGraphicsDropShadowEffect()
         graph_shadow.setBlurRadius(15)
         graph_shadow.setColor(QColor(197, 239, 236))
@@ -284,7 +281,7 @@ class phComponent(QWidget):
         history_panel.setFrameShape(QFrame.Shape.StyledPanel)
         history_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
 
-        # Sombra con el nuevo color RGB(197,239,236)
+        # Sombra
         history_shadow = QGraphicsDropShadowEffect()
         history_shadow.setBlurRadius(15)
         history_shadow.setColor(QColor(197, 239, 236))
@@ -465,7 +462,7 @@ class phComponent(QWidget):
             self.history_table.setRowHeight(row, 35)
 
     def filter_data(self, text):
-        """Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda"""
+        #Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda
         search_text = text.lower()
         
         # Ocultar todas las filas
@@ -487,7 +484,8 @@ class phComponent(QWidget):
                 self.history_table.showRow(row)
     
     def reset_filter(self):
-        """Restablece el filtro para mostrar todos los datos"""
+        #Restablece el filtro para mostrar todos los datos
+
         # Limpiar el campo de búsqueda
         self.search_filter.clear()
         

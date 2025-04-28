@@ -4,7 +4,6 @@ import time
 class GraphLvlWater(BaseGraph):
     def __init__(self):
         super().__init__(
-            title="Fluctuaciones de niveles de agua",
             x_label="Tiempo (Minutos)",
             y_label="Nivel (Litros)",
             line_color="#39C3EF",  # Azúl

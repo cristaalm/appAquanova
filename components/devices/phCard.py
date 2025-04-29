@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (
     QFrame, QLabel, QHBoxLayout, QVBoxLayout, QSlider, QLineEdit, QTextEdit, QSizePolicy, QPushButton, QGraphicsDropShadowEffect
 )
+from components.ImageViewer import ImageViewer
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QPixmap, QIntValidator, QColor
 from components.devices.phConfigModel import PhConfigModel
@@ -75,14 +76,6 @@ class PhCard(QFrame):
         main_layout.setSpacing(12)
         main_layout.setContentsMargins(16, 16, 16, 16)
 
-        # Título con icono y botón
-        title_layout = QHBoxLayout()
-        icon_label = QLabel()
-        icon_label.setPixmap(QPixmap("resources/icons/humedad.png").scaled(24, 24, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-        title = QLabel("<b>Sensor de pH</b>")
-        title.setFont(QFont("Arial", 14))
-        title.setStyleSheet("color: #045859;")
-
         self.toggle_button = QPushButton("▼")
         self.toggle_button.setFixedSize(28, 28)
         self.toggle_button.setStyleSheet('''
@@ -101,10 +94,33 @@ class PhCard(QFrame):
         self.toggle_button.setChecked(True)
         self.toggle_button.clicked.connect(self.toggle_arrow)
 
+        # Título con imagen clickable y botón
+        title_layout = QHBoxLayout()
+        title_layout.setContentsMargins(0, 0, 0, 0)  # Eliminar márgenes internos
+        title_layout.setSpacing(6)  # Espaciado mínimo entre elementos
+
+        img_label = QLabel()
+        img_label.setFixedSize(36, 36)
+        img_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        img_label.setStyleSheet("background: none; margin: 0 10px 0 0; padding: 0px;")
+        img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        img_path = os.path.join(os.path.dirname(__file__), '../../resources/media/sensores/ph.jpg')
+        if os.path.exists(img_path):
+            img_label.setPixmap(QPixmap(img_path).scaled(36, 36, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        else:
+            img_label.setText("PH")
+        img_label.mousePressEvent = lambda event: self._show_image_viewer(img_path)
+
+        title = QLabel("<b>Sensor de pH</b>")
+        title.setFont(QFont("Arial", 14))
+        title.setStyleSheet("color: #045859; padding: 0px; margin: 0px;")
+        title.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+
         title_layout.addWidget(self.toggle_button)
-        title_layout.addWidget(icon_label)
+        title_layout.addWidget(img_label)
         title_layout.addWidget(title)
         title_layout.addStretch()
+
         main_layout.addLayout(title_layout)
 
         # Área de configuración
@@ -170,58 +186,57 @@ class PhCard(QFrame):
         max_slider_layout.addWidget(self.max_input)
         left_col.addLayout(max_slider_layout)
 
-        # Nuevas configuraciones: tiempo de batido
-        batido_validator = QIntValidator(0, 120, self)
-
-        # Ácido cítrico
-        citrico_label = QLabel("Tiempo de batido (ácido cítrico)")
+        # Batido cítrico
+        citrico_label = QLabel("Tiempo batido cítrico (s)")
         citrico_label.setFont(QFont("Arial", 10))
         left_col.addWidget(citrico_label)
+
         citrico_slider_layout = QHBoxLayout()
+        citrico_slider_layout.setContentsMargins(0, 0, 0, 0)  # Espaciado vertical extra
+        citrico_slider_layout.setSpacing(12)
         self.citrico_slider = QSlider(Qt.Orientation.Horizontal)
         self.citrico_slider.setMinimum(0)
         self.citrico_slider.setMaximum(120)
         self.citrico_slider.setValue(0)
-        self.citrico_slider.setMinimumHeight(20)
+        self.citrico_slider.setMinimumHeight(20)  # Altura mínima para evitar corte de la bolita
         self.citrico_slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.citrico_slider.setStyleSheet(self.slider_style())
+
         self.citrico_input = QLineEdit("0")
         self.citrico_input.setFixedWidth(40)
         self.citrico_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.citrico_input.setReadOnly(True)
         self.citrico_input.setStyleSheet(self.input_style())
-        citrico_seg_label = QLabel("seg.")
-        citrico_seg_label.setFont(QFont("Arial", 10))
+
         citrico_slider_layout.addWidget(self.citrico_slider)
         citrico_slider_layout.addWidget(self.citrico_input)
-        citrico_slider_layout.addWidget(citrico_seg_label)
-        citrico_slider_layout.addStretch()
         left_col.addLayout(citrico_slider_layout)
         self.citrico_slider.valueChanged.connect(lambda val: self.citrico_input.setText(str(val)))
 
         # Bicarbonato de sodio
-        bicarb_label = QLabel("Tiempo de batido (bicarbonato de sodio)")
+        bicarb_label = QLabel("Tiempo batido bicarbonato (s)")
         bicarb_label.setFont(QFont("Arial", 10))
         left_col.addWidget(bicarb_label)
+
         bicarb_slider_layout = QHBoxLayout()
+        bicarb_slider_layout.setContentsMargins(0, 0, 0, 0)  # Espaciado vertical extra
+        bicarb_slider_layout.setSpacing(12)
         self.bicarb_slider = QSlider(Qt.Orientation.Horizontal)
         self.bicarb_slider.setMinimum(0)
         self.bicarb_slider.setMaximum(120)
         self.bicarb_slider.setValue(0)
-        self.bicarb_slider.setMinimumHeight(20)
+        self.bicarb_slider.setMinimumHeight(20)  # Altura mínima para evitar corte de la bolita
         self.bicarb_slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.bicarb_slider.setStyleSheet(self.slider_style())
+
         self.bicarb_input = QLineEdit("0")
         self.bicarb_input.setFixedWidth(40)
         self.bicarb_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.bicarb_input.setReadOnly(True)
         self.bicarb_input.setStyleSheet(self.input_style())
-        bicarb_seg_label = QLabel("seg.")
-        bicarb_seg_label.setFont(QFont("Arial", 10))
+
         bicarb_slider_layout.addWidget(self.bicarb_slider)
         bicarb_slider_layout.addWidget(self.bicarb_input)
-        bicarb_slider_layout.addWidget(bicarb_seg_label)
-        bicarb_slider_layout.addStretch()
         left_col.addLayout(bicarb_slider_layout)
         self.bicarb_slider.valueChanged.connect(lambda val: self.bicarb_input.setText(str(val)))
 
@@ -238,22 +253,11 @@ class PhCard(QFrame):
         self.desc_text = QTextEdit()
         self.desc_text.setText(
             "Mide la acidez o alcalinidad del agua. Un pH de 7 es neutro, por debajo es ácido y por encima es alcalino.\n\n"
-            "El tiempo de batido (ácido cítrico) controla cuánto tiempo se activa el agitador para disolver el ácido cítrico y bajar el pH cuando es necesario.\n\n"
-            "El tiempo de batido (bicarbonato de sodio) controla cuánto tiempo se activa el agitador para disolver el bicarbonato y subir el pH cuando es necesario."
         )
-        self.desc_text.setFixedHeight(150)
-        self.desc_text.setFont(QFont("Arial", 12))
-        self.desc_text.setStyleSheet("""
-            QTextEdit {
-                color: #000;
-                border-radius: 8px;
-                border: 1px solid #eee;
-                padding: 4px;
-            }
-            QTextEdit::teaser {
-                color: #777;
-            }
-        """)
+        self.desc_text.setFont(QFont("Arial", 10))
+        self.desc_text.setStyleSheet("background: #fff; color: #000; border-radius: 8px; border: 1px solid #eee;")
+        self.desc_text.setMaximumHeight(120)  # Limita a aprox 3 líneas
+        self.desc_text.textChanged.connect(self._limit_desc_text)
         right_col.addWidget(self.desc_text)
 
         self.save_button = QPushButton("Guardar configuración")
@@ -317,6 +321,20 @@ class PhCard(QFrame):
         self.citrico_slider.valueChanged.connect(self._validate_changes)
         self.bicarb_slider.valueChanged.connect(self._validate_changes)
         self.save_button.setEnabled(False)
+
+    def _limit_desc_text(self):
+        max_chars = 200
+        current_text = self.desc_text.toPlainText()
+        if len(current_text) > max_chars:
+            # Bloquear señales para evitar bucles al actualizar el texto
+            self.desc_text.blockSignals(True)
+            self.desc_text.setPlainText(current_text[:max_chars])
+            # Mueve el cursor al final
+            cursor = self.desc_text.textCursor()
+            cursor.setPosition(len(current_text[:max_chars]))
+            self.desc_text.setTextCursor(cursor)
+            self.desc_text.blockSignals(False)
+
 
     def set_config_values(self, min_val, max_val, citrico_val, bicarb_val):
         """
@@ -418,6 +436,11 @@ class PhCard(QFrame):
                 border-radius: 9px; 
             }
         """
+
+    def _show_image_viewer(self, img_path):
+        if os.path.exists(img_path):
+            viewer = ImageViewer(img_path, self.window())
+            viewer.show()
 
     def input_style(self):
         return """

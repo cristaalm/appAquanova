@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QSize, QDateTime, QDate, QTimer
 from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap, QBrush
-from components.phGraph import phGraph
+from components.ph.phGraph import phGraph
 import os
 
 class phComponent(QWidget):
@@ -166,7 +166,7 @@ class phComponent(QWidget):
         ph_unit_label.setStyleSheet("""
             font-size: 24px;
             color: #045859;
-            margin-left: 2px;
+            margin-left: 0px;
             margin-top: 20px;
             font-weight: bold;
         """)
@@ -180,7 +180,7 @@ class phComponent(QWidget):
         labels_layout.setContentsMargins(0, 0, 0, 0)
         
         # Etiqueta MIN
-        min_label = QLabel("MIN")
+        min_label = QLabel("MIN 0")
         min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
@@ -189,7 +189,7 @@ class phComponent(QWidget):
         labels_layout.addStretch()
         
         # Etiqueta MAX
-        max_label = QLabel("MÁX")
+        max_label = QLabel("MÁX 14")
         max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)
@@ -317,7 +317,7 @@ class phComponent(QWidget):
                 padding: 5px 10px;
                 border-radius: 6px;
                 font-size: 14px;
-                max-width: 200px;
+                max-width: 250px;
             }
             QLineEdit:focus {
                 border: 2px solid #4CA4A5;
@@ -440,9 +440,8 @@ class phComponent(QWidget):
             
             # Celda de estado con color de fondo según pH
             estado_item = QTableWidgetItem(estado)
-            # Cambiar a alineación izquierda
-            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-            
+            # Cambiar a alineación centrada
+            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignCenter)
             # Establecer icono según el estado
             if estado == "Ácido":
                 estado_item.setBackground(QBrush(QColor("#fee2e2")))

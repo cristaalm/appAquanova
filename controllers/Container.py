@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePoli
 from PyQt6.QtGui import QPalette, QColor
 from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
-from components.pHComponent import phComponent
+from components.ph.pHComponent import phComponent
 from components.WaterComponent import WaterComponent
 from components.TempWaterComponent import tempWaterComponent
 from components.EConductivityComponent import EConductivityComponent  # Nuevo componente

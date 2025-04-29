@@ -11,10 +11,12 @@ from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.ph.pHComponent import phComponent
 from components.WaterComponent import WaterComponent
+from components.devices.DevicesView import DevicesView
 from components.TempWaterComponent import tempWaterComponent
 from components.EConductivityComponent import EConductivityComponent  # Nuevo componente
 from views.DevicesView import DevicesView
 from views.ambient import Ambient
+from random import randint
 
 # controladores Django
 from historiales.controllers.PHController import PHController
@@ -131,10 +133,11 @@ class ContentContainer(QWidget):
         self.graph_temp_ambient = GraphTempAmbient()
         self.graph_humidity_ambient = GraphHumidityAmbient()
 
+        water_temp = randint(25, 35)
         # Componentes
         self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
-        self.temp_water_component = tempWaterComponent(self.graph_temp_water)
+        self.temp_water_component = tempWaterComponent(self.graph_temp_water, water_temp)
         self.ce_component = EConductivityComponent(self.graph_ce_water)  # Nuevo componente
         self.ambient = Ambient(
             self.graph_temp_ambient,
@@ -168,7 +171,6 @@ class ContentContainer(QWidget):
             if "temp" in data:
                 self.graph_temp_water.updateTemp(float(data["temp"]))
                 self.temp_water_controller.set_history(float(data["temp"]))
-                self.temp_water_component.set_temp_value(data["temp"])  # Actualizar componente temp agua
             if "dist" in data:
                 self.graph_lvl_water.updateLvlWater(float(data["dist"]))
                 self.distance_controller.set_history(float(data["dist"]))

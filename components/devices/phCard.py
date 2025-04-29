@@ -1,9 +1,13 @@
 from PyQt6.QtWidgets import (
-    QFrame, QLabel, QHBoxLayout, QVBoxLayout, QSlider, QLineEdit, QTextEdit, QSizePolicy, QPushButton
+    QFrame, QLabel, QHBoxLayout, QVBoxLayout, QSlider, QLineEdit, QTextEdit, QSizePolicy, QPushButton, QGraphicsDropShadowEffect
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QPixmap, QIntValidator
+from PyQt6.QtGui import QFont, QPixmap, QIntValidator, QColor
 from components.devices.phConfigModel import PhConfigModel
+import os
+from dotenv import load_dotenv
+load_dotenv()
+SHADOW = os.getenv("SHADOW", "0,0,0")
 
 class PhCard(QFrame):
     def __init__(self, notificationes, parent=None):
@@ -57,6 +61,14 @@ class PhCard(QFrame):
         self.setMinimumWidth(600)
         self.setMaximumWidth(900)
         self.setContentsMargins(16, 16, 16, 16)
+
+        # --- SOMBRA estilo cardDashboard.py ---
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        r, g, b = map(int, SHADOW.split(","))
+        shadow.setColor(QColor(r, g, b))
+        shadow.setOffset(0, 3)
+        self.setGraphicsEffect(shadow)
 
         # Layout principal
         main_layout = QVBoxLayout(self)

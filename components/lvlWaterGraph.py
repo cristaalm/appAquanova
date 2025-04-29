@@ -4,8 +4,8 @@ import time
 class GraphLvlWater(BaseGraph):
     def __init__(self):
         super().__init__(
-            x_label="Tiempo (Minutos)",
-            y_label="Nivel (Litros)",
+            x_label="Tiempo (minutos)",
+            y_label="Nivel (itros)",
             line_color="#39C3EF",  # Azul
             data_range=(0.0, 25.0),
         )

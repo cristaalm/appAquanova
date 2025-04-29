@@ -51,7 +51,7 @@ class WaterComponent(QWidget):
         header_layout = QHBoxLayout()
         header_layout.setSpacing(8)
 
-        title_label = QLabel("Nivel de agua actual")
+        title_label = QLabel("Estado del nivel actual")
         title_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #045859;")
         header_layout.addWidget(title_label)
 
@@ -173,7 +173,7 @@ class WaterComponent(QWidget):
         layout.setSpacing(10)
 
         header_layout = QHBoxLayout()
-        label = QLabel("Lecturas detalladas")
+        label = QLabel("Lecturas")
         label.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52;")
         header_layout.addWidget(label)
 
@@ -303,13 +303,13 @@ class WaterComponent(QWidget):
             # Colores
             if estado == "Bajo":
                 estado_item.setIcon(QIcon("./resources/icons/low-water.png"))
-                estado_item.setForeground(QColor("#b91c1c"))
+                estado_item.setForeground(QColor("#92400e"))
             elif estado == "Óptimo":
                 estado_item.setIcon(QIcon("./resources/icons/optimal-water.png"))
                 estado_item.setForeground(QColor("#166534"))
             elif estado == "Alto":
                 estado_item.setIcon(QIcon("./resources/icons/overflow-water.png"))
-                estado_item.setForeground(QColor("#f5d762"))
+                estado_item.setForeground(QColor("#b91c1c"))
 
             self.history_table.setItem(row, 2, estado_item)
 

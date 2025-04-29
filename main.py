@@ -1,5 +1,6 @@
 import os
 import sys
+import signal
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,

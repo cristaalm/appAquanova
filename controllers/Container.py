@@ -11,9 +11,9 @@ from PyQt6.QtCore import Qt
 from .Notification.NotificationWidget import NotificationWidget
 from components.pHComponent import phComponent
 from components.WaterComponent import WaterComponent
-from components.devices.DevicesView import DevicesView
 from components.TempWaterComponent import tempWaterComponent
 from components.EConductivityComponent import EConductivityComponent  # Nuevo componente
+from views.DevicesView import DevicesView
 from views.ambient import Ambient
 
 # controladores Django

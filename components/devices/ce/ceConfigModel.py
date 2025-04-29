@@ -23,7 +23,7 @@ class CeConfigModel:
             config = self.controller.get_dispositivo(1) or {}
             return {
                 "valor_minimo": int(config.get("valor_minimo", 0)),
-                "valor_maximo": int(config.get("valor_maximo", 14)),
+                "valor_maximo": int(config.get("valor_maximo", 9999)),
                 "tiempo_batido": int(config.get("tiempo_batido", config.get("tiempo_batido", 0))),
             }
         except Exception as e:

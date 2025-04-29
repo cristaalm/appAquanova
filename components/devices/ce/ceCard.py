@@ -135,7 +135,7 @@ class CeCard(QFrame):
         left_col.setSpacing(16)
 
         # Valor mínimo
-        min_label = QLabel("Valor mínimo")
+        min_label = QLabel("Valor mínimo (ppm)")
         min_label.setFont(QFont("Arial", 10))
         left_col.addWidget(min_label)
 
@@ -144,7 +144,7 @@ class CeCard(QFrame):
         min_slider_layout.setSpacing(12)
         self.min_slider = QSlider(Qt.Orientation.Horizontal)
         self.min_slider.setMinimum(0)
-        self.min_slider.setMaximum(5000)
+        self.min_slider.setMaximum(9999)
         self.min_slider.setValue(1000)
         self.min_slider.setMinimumHeight(20)  # Altura mínima para evitar corte de la bolita
         self.min_slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -161,7 +161,7 @@ class CeCard(QFrame):
         left_col.addLayout(min_slider_layout)
 
         # Valor máximo
-        max_label = QLabel("Valor máximo")
+        max_label = QLabel("Valor máximo (ppm)")
         max_label.setFont(QFont("Arial", 10))
         left_col.addWidget(max_label)
 
@@ -170,7 +170,7 @@ class CeCard(QFrame):
         max_slider_layout.setSpacing(12)
         self.max_slider = QSlider(Qt.Orientation.Horizontal)
         self.max_slider.setMinimum(0)
-        self.max_slider.setMaximum(5000)
+        self.max_slider.setMaximum(9999)
         self.max_slider.setValue(2000)
         self.max_slider.setMinimumHeight(20)  # Altura mínima para evitar corte de la bolita
         self.max_slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -273,6 +273,9 @@ class CeCard(QFrame):
         self.min_slider.setValue(min_val)
         self.max_slider.setValue(max_val)
         self.batido_slider.setValue(batido_val)
+        self.min_input.setText(str(min_val))
+        self.max_input.setText(str(max_val))
+        self.batido_input.setText(str(batido_val))
 
         # Guardar los valores originales para validación
         self._last_saved = {

@@ -135,7 +135,7 @@ class DistanceCard(QFrame):
         left_col.setSpacing(16)
 
         # Valor mínimo
-        min_label = QLabel("Valor mínimo")
+        min_label = QLabel("Nivel mínimo")
         min_label.setFont(QFont("Arial", 10))
         left_col.addWidget(min_label)
 
@@ -161,7 +161,7 @@ class DistanceCard(QFrame):
         left_col.addLayout(min_slider_layout)
 
         # Valor máximo
-        max_label = QLabel("Valor máximo")
+        max_label = QLabel("Nivel máximo")
         max_label.setFont(QFont("Arial", 10))
         left_col.addWidget(max_label)
 

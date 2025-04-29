@@ -23,7 +23,7 @@ class TempConfigModel:
             config = self.controller.get_dispositivo(4) or {}
             return {
                 "valor_minimo": int(config.get("valor_minimo", 0)),
-                "valor_maximo": int(config.get("valor_maximo", 14)),
+                "valor_maximo": int(config.get("valor_maximo", 50)),
             }
         except Exception as e:
             print(f"Error al cargar configuración de temperatura: {e}")

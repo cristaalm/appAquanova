@@ -23,7 +23,7 @@ class DistanceConfigModel:
             config = self.controller.get_dispositivo(5) or {}
             return {
                 "valor_minimo": int(config.get("valor_minimo", 0)),
-                "valor_maximo": int(config.get("valor_maximo", 14)),
+                "valor_maximo": int(config.get("valor_maximo", 120)),
             }
         except Exception as e:
             print(f"Error al cargar configuración de distancia: {e}")

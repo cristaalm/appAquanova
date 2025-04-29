@@ -48,13 +48,13 @@ class AmbientCard(QFrame):
                 border-radius: 3px;
             }
             QScrollBar::add-line:vertical {
-                background: none;
+                background: #4ca4a5;
                 height: 0px;
                 subcontrol-position: bottom;
                 subcontrol-origin: margin;
             }
             QScrollBar::sub-line:vertical {
-                background: none;
+                background: #4ca4a5;
                 height: 0px;
                 subcontrol-position: top;
                 subcontrol-origin: margin;
@@ -114,7 +114,7 @@ class AmbientCard(QFrame):
 
         title = QLabel("<b>Sensor DHT11</b>")
         title.setFont(QFont("Arial", 14))
-        title.setStyleSheet("color: #045859; padding: 0px; margin: 0px;")
+        title.setStyleSheet("color: #045859; padding: 0px; margin: 0px; background: transparent;")
         title.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
 
         title_layout.addWidget(self.toggle_button)

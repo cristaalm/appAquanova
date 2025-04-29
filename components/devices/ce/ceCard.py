@@ -113,7 +113,7 @@ class CeCard(QFrame):
 
         title = QLabel("<b>Sensor de CE</b>")
         title.setFont(QFont("Arial", 14))
-        title.setStyleSheet("color: #045859; padding: 0px; margin: 0px;")
+        title.setStyleSheet("color: #045859; padding: 0px; margin: 0px; background: transparent;")
         title.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
 
         title_layout.addWidget(self.toggle_button)

@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QVBoxLayout, QWidget, QSplitter, QHBoxLayout
+from PyQt6.QtWidgets import QVBoxLayout, QWidget, QSplitter
 from PyQt6.QtCore import Qt
-from components.devices.phCard import PhCard
+from components.devices.ph.phCard import PhCard
+from components.devices.ce.ceCard import CeCard
 
 class DevicesView(QWidget):
     def __init__(self, notification):
@@ -12,6 +13,7 @@ class DevicesView(QWidget):
         # creación de los componentes
         # self.distance_card = DistanceCard()
         self.ph_card = PhCard(self.notification)
+        self.ce_card = CeCard(self.notification)
 
         # creación del layout principal vertical
         self.layout = QVBoxLayout()
@@ -23,6 +25,7 @@ class DevicesView(QWidget):
         # agregar las tarjetas
         # self.cards_layout.addWidget(self.distance_card)
         self.cards_layout.addWidget(self.ph_card)
+        self.cards_layout.addWidget(self.ce_card)
 
         # creación del splitter
         self.splitter = QSplitter(Qt.Orientation.Vertical)

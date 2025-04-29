@@ -4,19 +4,19 @@ from PyQt6.QtWidgets import (
 from components.ImageViewer import ImageViewer
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QPixmap, QColor
-from components.devices.ce.ceConfigModel import CeConfigModel
+from components.devices.distance.distanceConfigModel import DistanceConfigModel
 import os
 from dotenv import load_dotenv
 load_dotenv()
 SHADOW = os.getenv("SHADOW", "0,0,0")
 
-class CeCard(QFrame):
+class DistanceCard(QFrame):
     def __init__(self, notificationes, parent=None):
         super().__init__(parent)
-        self.setObjectName("ceCard")
+        self.setObjectName("distanceCard")
         self.notification = notificationes
         self.setStyleSheet("""
-            QFrame#ceCard {
+            QFrame#distanceCard {
                 background: #fff;
                 border-radius: 16px;
                 border: 1px solid #eee;
@@ -104,14 +104,14 @@ class CeCard(QFrame):
         img_label.setCursor(Qt.CursorShape.PointingHandCursor)
         img_label.setStyleSheet("background: none; margin: 0 10px 0 0; padding: 0px;")
         img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        img_path = os.path.join(os.path.dirname(__file__), '../../../resources/media/sensores/conductivity.jpg')
+        img_path = os.path.join(os.path.dirname(__file__), '../../../resources/media/sensores/ultrasonic.jpg')
         if os.path.exists(img_path):
             img_label.setPixmap(QPixmap(img_path).scaled(36, 36, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         else:
-            img_label.setText("CE")
+            img_label.setText("TEMP")
         img_label.mousePressEvent = lambda event: self._show_image_viewer(img_path)
 
-        title = QLabel("<b>Sensor de CE</b>")
+        title = QLabel("<b>Sensor ultrasonico</b>")
         title.setFont(QFont("Arial", 14))
         title.setStyleSheet("color: #045859; padding: 0px; margin: 0px;")
         title.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
@@ -143,14 +143,14 @@ class CeCard(QFrame):
         min_slider_layout.setContentsMargins(0, 0, 0, 0)  # Espaciado vertical extra
         min_slider_layout.setSpacing(12)
         self.min_slider = QSlider(Qt.Orientation.Horizontal)
-        self.min_slider.setMinimum(0)
-        self.min_slider.setMaximum(5000)
-        self.min_slider.setValue(1000)
+        self.min_slider.setMinimum(20)
+        self.min_slider.setMaximum(120)
+        self.min_slider.setValue(18)
         self.min_slider.setMinimumHeight(20)  # Altura mínima para evitar corte de la bolita
         self.min_slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.min_slider.setStyleSheet(self.slider_style())
 
-        self.min_input = QLineEdit("1000")
+        self.min_input = QLineEdit("18")
         self.min_input.setFixedWidth(40)
         self.min_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.min_input.setReadOnly(True)
@@ -169,14 +169,14 @@ class CeCard(QFrame):
         max_slider_layout.setContentsMargins(0, 0, 0, 0)  # Espaciado vertical extra
         max_slider_layout.setSpacing(12)
         self.max_slider = QSlider(Qt.Orientation.Horizontal)
-        self.max_slider.setMinimum(0)
-        self.max_slider.setMaximum(5000)
-        self.max_slider.setValue(2000)
+        self.max_slider.setMinimum(20)
+        self.max_slider.setMaximum(120)
+        self.max_slider.setValue(28)
         self.max_slider.setMinimumHeight(20)  # Altura mínima para evitar corte de la bolita
         self.max_slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.max_slider.setStyleSheet(self.slider_style())
 
-        self.max_input = QLineEdit("2000")
+        self.max_input = QLineEdit("28")
         self.max_input.setFixedWidth(40)
         self.max_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.max_input.setReadOnly(True)
@@ -185,33 +185,6 @@ class CeCard(QFrame):
         max_slider_layout.addWidget(self.max_slider)
         max_slider_layout.addWidget(self.max_input)
         left_col.addLayout(max_slider_layout)
-
-        # Batido cítrico
-        citrico_label = QLabel("Tiempo de batido contenedor (s)")
-        citrico_label.setFont(QFont("Arial", 10))
-        left_col.addWidget(citrico_label)
-
-        batido_slider_layout = QHBoxLayout()
-        batido_slider_layout.setContentsMargins(0, 0, 0, 0)  # Espaciado vertical extra
-        batido_slider_layout.setSpacing(12)
-        self.batido_slider = QSlider(Qt.Orientation.Horizontal)
-        self.batido_slider.setMinimum(0)
-        self.batido_slider.setMaximum(120)
-        self.batido_slider.setValue(0)
-        self.batido_slider.setMinimumHeight(20)  # Altura mínima para evitar corte de la bolita
-        self.batido_slider.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.batido_slider.setStyleSheet(self.slider_style())
-
-        self.batido_input = QLineEdit("0")
-        self.batido_input.setFixedWidth(40)
-        self.batido_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.batido_input.setReadOnly(True)
-        self.batido_input.setStyleSheet(self.input_style())
-
-        batido_slider_layout.addWidget(self.batido_slider)
-        batido_slider_layout.addWidget(self.batido_input)
-        left_col.addLayout(batido_slider_layout)
-        self.batido_slider.valueChanged.connect(lambda val: self.batido_input.setText(str(val)))
 
         left_col.addStretch()
 
@@ -225,10 +198,8 @@ class CeCard(QFrame):
 
         self.desc_text = QTextEdit()
         self.desc_text.setText(
-            "Mide la conductividad eléctrica del agua, que es la capacidad del agua para\n"
-            "conducir corriente eléctrica. Un valor alto indica una mayor cantidad de\n"
-            "sustancias disueltas en el agua.\n\n"
-        )
+            "Mide la distancia, nos ayuda a saber el nivel del agua.\n\n"
+        )  
         self.desc_text.setFont(QFont("Arial", 10))
         self.desc_text.setStyleSheet("background: #fff; color: #000; border-radius: 8px; border: 1px solid #eee;")
         self.desc_text.setMaximumHeight(120)  # Limita a aprox 3 líneas
@@ -252,7 +223,7 @@ class CeCard(QFrame):
         ''')
         self.save_button.setCursor(Qt.CursorShape.PointingHandCursor)
         right_col.addWidget(self.save_button, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.save_button.clicked.connect(self.save_ce_config)
+        self.save_button.clicked.connect(self.save_distance_config)
 
         config_layout.addLayout(left_col)
         config_layout.addLayout(right_col)
@@ -260,35 +231,32 @@ class CeCard(QFrame):
         main_layout.addWidget(self.config_widget)
 
         # Cargar configuración inicial desde el modelo
-        self._config_model = CeConfigModel()
+        self._config_model = DistanceConfigModel()
         config = self._config_model.load() or {}
         min_val = config.get("valor_minimo", self.min_slider.value())
         max_val = config.get("valor_maximo", self.max_slider.value())
-        batido_val = config.get("tiempo_batido", self.batido_slider.value())
+        print(min_val, max_val)
 
         # Variables privadas para los valores
         self._min_val = min_val
         self._max_val = max_val
-        self._batido_val = batido_val
+        self.min_input.setText(str(min_val))
+        self.max_input.setText(str(max_val))
         self.min_slider.setValue(min_val)
         self.max_slider.setValue(max_val)
-        self.batido_slider.setValue(batido_val)
 
         # Guardar los valores originales para validación
         self._last_saved = {
             'min': self._min_val,
             'max': self._max_val,
-            'batido': self._batido_val,
         }
 
         # Sincronización de sliders con inputs y variables
         self.min_slider.valueChanged.connect(self._update_min)
         self.max_slider.valueChanged.connect(self._update_max)
-        self.batido_slider.valueChanged.connect(self._update_batido)
         # Validar cambios para el botón guardar
         self.min_slider.valueChanged.connect(self._validate_changes)
         self.max_slider.valueChanged.connect(self._validate_changes)
-        self.batido_slider.valueChanged.connect(self._validate_changes)
         self.save_button.setEnabled(False)
 
     def _limit_desc_text(self):
@@ -305,23 +273,18 @@ class CeCard(QFrame):
             self.desc_text.blockSignals(False)
 
 
-    def set_config_values(self, min_val, max_val, batido_val):
+    def set_config_values(self, min_val, max_val):
         """
         Actualiza los 3 valores de configuración de la card y sincroniza sliders y QLineEdit.        """
 
         self._min_val = min_val
         self._max_val = max_val
-        self._batido_val = batido_val
-        # self._bicarb_val = bicarb_val
         self.min_slider.setValue(min_val)
         self.max_slider.setValue(max_val)
-        self.batido_slider.setValue(batido_val)
-        # self.bicarb_slider.setValue(bicarb_val)
         # Actualizar los valores guardados para la validación
         self._last_saved = {
             'min': min_val,
             'max': max_val,
-            'batido': batido_val,
         }
         self._validate_changes()
         # Los QLineEdit se actualizan por las señales conectadas
@@ -334,25 +297,20 @@ class CeCard(QFrame):
         self._max_val = val
         self.max_input.setText(str(val))
 
-    def _update_batido(self, val):
-        self._batido_val = val
-        self.batido_input.setText(str(val))
-
-    def save_ce_config(self):
+    def save_distance_config(self):
         """
         Guarda los valores de configuración de cE en la base de datos.
         """
         if self._min_val > self._max_val:
             self.notification.show_message("El valor mínimo no puede ser mayor que el valor máximo", "error")
             return
-        ok = self._config_model.save(self._min_val, self._max_val, self._batido_val)
+        ok = self._config_model.save(self._min_val, self._max_val)
         if ok:
             self.notification.show_message("Configuración de ce guardada correctamente.", "success")
             # Actualiza los valores guardados
             self._last_saved = {
                 'min': self._min_val,
                 'max': self._max_val,
-                'batido': self._batido_val,
             }
             self._validate_changes()
         else:
@@ -362,8 +320,7 @@ class CeCard(QFrame):
         # Habilita el botón solo si hay cambios respecto a los valores guardados
         changed = (
             self._min_val != self._last_saved['min'] or
-            self._max_val != self._last_saved['max'] or
-            self._batido_val != self._last_saved['batido']
+            self._max_val != self._last_saved['max']
         )
         self.save_button.setEnabled(changed)
 

@@ -51,16 +51,18 @@ class ContentContainer(QWidget):
 
         # Parte central: Contenedor para la gráfica o componente
         self.content_container = QWidget()
+        self.content_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.content_layout = QVBoxLayout(self.content_container)
         self.content_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.content_layout.setContentsMargins(10, 10, 10, 10)
-        self.layout.addWidget(self.content_container)
+        self.layout.addWidget(self.content_container, stretch=1)
 
         # Espaciador inferior
         self.spacer = QSpacerItem(
             20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
         )
         self.layout.addItem(self.spacer)
+        self.spacer_active = True
 
         # Notificaciones
         self.notification = NotificationWidget(self)
@@ -207,11 +209,17 @@ class ContentContainer(QWidget):
             if widget is not None:
                 widget.setParent(None)
 
-        # Configurar alineación del layout según el estado
-        if self.content_state == 6:  # Dispositivos
+        # Quitar espaciador si estamos en Dispositivos
+        if self.content_state == 6:
+            if self.spacer is not None and self.spacer_active:
+                self.layout.removeItem(self.spacer)
+                self.spacer_active = False
             self.content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-            self.content_layout.setContentsMargins(10, 10, 10, 10)
+            self.content_layout.setContentsMargins(0, 0, 0, 0)
         else:
+            if self.spacer is not None and not self.spacer_active:
+                self.layout.addItem(self.spacer)
+                self.spacer_active = True
             self.content_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.content_layout.setContentsMargins(10, 10, 10, 10)
 
@@ -258,5 +266,4 @@ class ContentContainer(QWidget):
         self.content_state = state
         self.update_content()
 
-    def get_container(self):
-        return self
+    def get_container(self):        return self

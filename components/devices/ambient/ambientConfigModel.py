@@ -1,9 +1,9 @@
-# phConfigModel.py
+# distanceConfigModel.py
 """
-Modelo para cargar y guardar la configuración del sensor de pH en la base de datos.
+Modelo para cargar y guardar la configuración del sensor de cE en la base de datos.
 """
 
-class PhConfigModel:
+class AmbientConfigModel:
     def __init__(self):
         try:
             from dispositivos.controllers.deviceController import DispositivoController
@@ -14,26 +14,24 @@ class PhConfigModel:
 
     def load(self):
         """
-        Carga la configuración del sensor pH (ID 2) desde la base de datos.
+        Carga la configuración del sensor ultrasonico (ID 3) desde la base de datos.
         Devuelve un dict con los valores o None si falla.
         """
         if not self.controller:
             return None
         try:
-            config = self.controller.get_dispositivo(2) or {}
+            config = self.controller.get_dispositivo(3) or {}
             return {
                 "valor_minimo": int(config.get("valor_minimo", 0)),
-                "valor_maximo": int(config.get("valor_maximo", 14)),
-                "tiempo_batido_citrico": int(config.get("tiempo_batido_citrico", config.get("tiempo_batido", 0))),
-                "tiempo_batido_bicarbonato": int(config.get("tiempo_batido_bicarbonato", 0)),
+                "valor_maximo": int(config.get("valor_maximo", 50)),
             }
         except Exception as e:
-            print(f"Error al cargar configuración de pH: {e}")
+            print(f"Error al cargar configuración de la temperatura: {e}")
             return None
-
-    def save(self, min_val, max_val, citrico_val, bicarb_val):
+    
+    def save(self, min_val, max_val):
         """
-        Guarda los valores de configuración del sensor pH (ID 2) en la base de datos.
+        Guarda los valores de configuración del sensor ultrasonico (ID 3) en la base de datos.
         Devuelve True si fue exitoso, False si hubo error.
         """
         if not self.controller:
@@ -42,11 +40,9 @@ class PhConfigModel:
             data = {
                 "valor_minimo": min_val,
                 "valor_maximo": max_val,
-                "tiempo_batido_citrico": citrico_val,
-                "tiempo_batido_bicarbonato": bicarb_val,
             }
-            ok = self.controller.update_dispositivo(2, data)
+            ok = self.controller.update_dispositivo(3, data)
             return ok
         except Exception as e:
-            print(f"Error al guardar configuración de pH: {e}")
+            print(f"Error al guardar configuración de la temperatura: {e}")
             return False

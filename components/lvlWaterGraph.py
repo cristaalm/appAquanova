@@ -1,35 +1,71 @@
-from utils.BaseGraph import BaseGraph
-import time
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFrame, QGraphicsDropShadowEffect
+from PyQt6.QtGui import QColor
+import pyqtgraph as pg
+from random import randint
 
-class GraphLvlWater(BaseGraph):
-    def __init__(self):
-        super().__init__(
-            x_label="Tiempo (minutos)",
-            y_label="Nivel (itros)",
-            line_color="#39C3EF",  # Azul
-            data_range=(0.0, 25.0),
+class GraphLvlWater(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        # Crear el plot
+        self.plot_widget = pg.PlotWidget()
+        self.plot_widget.setBackground("white")
+
+        # Estilo de etiquetas
+        label_style = {"color": "#045859", "font-size": "11px"}
+        self.plot_widget.setLabel("left", "Nivel (litros)", **label_style)
+        self.plot_widget.setLabel("bottom", "Tiempo (minutos)", **label_style)
+        self.plot_widget.addLegend()
+        self.plot_widget.showGrid(x=True, y=True)
+        self.plot_widget.setYRange(0, 25)  # Rango de agua (puedes ajustarlo)
+        self.plot_widget.enableAutoRange(axis=pg.ViewBox.XAxis, enable=True)
+
+        # Estilo del trazo
+        pen = pg.mkPen(color=(76, 164, 165), width=2)
+
+        # Datos iniciales simulados
+        self.time_data = list(range(24))
+        self.level_data = [randint(1, 24) for _ in range(24)]
+
+        # Dibujar línea inicial
+        self.level_line = self.plot_widget.plot(
+            self.time_data,
+            self.level_data,
+            pen=pen,
+            symbol="o",
+            symbolSize=8,
+            symbolBrush="#39C3EF",
         )
-        self.start_time = time.time()
-        self.x_data = []
-        self.y_data = []
 
-    def custom_config(self):
-        """Configuración específica para nivel de agua"""
-        self.getPlotItem().setXRange(0, 10)  # ← Aquí fijo el eje X
-        self.set_data_range(0, 25)            # ← El eje Y (función ya hecha)
-        self.getPlotItem().setMouseEnabled(x=False, y=False)  # ← Esto bloquea movimiento de zoom/pan (si quieres fijo)
+        # Frame decorativo con sombra
+        frame = QFrame()
+        frame_layout = QVBoxLayout(frame)
+        frame_layout.setContentsMargins(0, 0, 0, 0)
+        frame_layout.addWidget(self.plot_widget)
 
-    def updateLvlWater(self, new_value: float):
-        """Agrega nuevo dato en tiempo real"""
-        current_time = time.time()
-        elapsed_minutes = (current_time - self.start_time) / 60.0
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(15)
+        shadow.setColor(QColor(57, 195, 239))  # Misma sombra que tu panel
+        shadow.setOffset(0, 3)
+        frame.setGraphicsEffect(shadow)
 
-        self.x_data.append(elapsed_minutes)
-        self.y_data.append(new_value)
+        layout.addWidget(frame)
 
-        # Mantener últimos 100 puntos
-        self.x_data = self.x_data[-100:]
-        self.y_data = self.y_data[-100:]
+    def update_data(self, new_value):
+        """
+        Agrega un nuevo dato de nivel de agua y actualiza la gráfica.
+        """
+        self.time_data.append(self.time_data[-1] + 1 if self.time_data else 0)
+        self.level_data.append(new_value)
 
-        self.getPlotItem().clear()
-        self.getPlotItem().plot(self.x_data, self.y_data, pen=self.curve.opts['pen'])
+        # Mantener los últimos 20 datos para no saturar la gráfica
+        self.time_data = self.time_data[-20:]
+        self.level_data = self.level_data[-20:]
+
+        self.level_line.setData(self.time_data, self.level_data)

@@ -64,7 +64,6 @@ class GraphicsAmbient(QtWidgets.QMainWindow):
         self.line_temp = self.plot_temp.plot(
             self.time,
             self.temp_data,
-            name="Sensor Temp",
             pen=pen_temp,
             symbol="+",
             symbolSize=10,
@@ -74,7 +73,6 @@ class GraphicsAmbient(QtWidgets.QMainWindow):
         self.line_hum = self.plot_hum.plot(
             self.time,
             self.hum_data,
-            name="Sensor Humedad",
             pen=pen_hum,
             symbol="o",
             symbolSize=10,

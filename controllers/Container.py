@@ -12,7 +12,7 @@ from .Notification.NotificationWidget import NotificationWidget
 from components.ph.pHComponent import phComponent
 from components.WaterComponent import WaterComponent
 from views.waterTemp import tempWaterComponent
-from components.EConductivityComponent import EConductivityComponent  # Nuevo componente
+from views.conductivityE import conductivityComponent
 from views.DevicesView import DevicesView
 from views.ambient import Ambient
 from random import randint
@@ -135,11 +135,11 @@ class ContentContainer(QWidget):
         self.graph_humidity_ambient = GraphHumidityAmbient()
 
         water_temp = randint(25, 35)
-        # Componentes
+        ce_value = randint(1000, 1500)        # Componentes
         self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
         self.temp_water_component = tempWaterComponent(self.graph_temp_water, water_temp)
-        self.ce_component = EConductivityComponent(self.graph_ce_water)  # Nuevo componente
+        self.ce_component = conductivityComponent(self.graph_ce_water,ce_value)  # Nuevo componente
         self.ambient = Ambient(
             self.graph_temp_ambient,
             self.temp_value,

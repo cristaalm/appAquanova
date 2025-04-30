@@ -118,7 +118,7 @@ class TableCard(QWidget):
         # Tabla de historial
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(3)
-        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Conductividad (S/m)", "Condición"])
+        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Conductividad µS/cm", "Condición"])
         
         # Asegurar que la tabla ocupe todo el ancho disponible
         self.history_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
@@ -232,16 +232,16 @@ class TableCard(QWidget):
             # Determinar estado basado en el valor de temperatura
             temp_value = float(item["valor"])
             if temp_value < self.rango_min:
-                estado = "Frío"
-                icon_name = "cold.png"
-                color_style = "color: #2980B9;"  # Azul para frío
+                estado = "Bajo"
+                icon_name = "rojoElecricity.png"
+                color_style = "color: #D9534F;"  # Azul para frío
             elif temp_value > self.rango_max:
-                estado = "Caliente"
-                icon_name = "hot.png"
-                color_style = "color: #D9534F;"  # Rojo para caliente
+                estado = "Alto"
+                icon_name = "amarilloElecricity.png"
+                color_style = "color:#F4B400;"  # Rojo para caliente
             else:
-                estado = "Ambiente"
-                icon_name = "good.png"
+                estado = "Optimo"
+                icon_name = "verdeElecricity.png"
                 color_style = "color: #2ECC71;"  # Verde para ambiente
 
             # Crear widget contenedor

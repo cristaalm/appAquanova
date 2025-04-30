@@ -54,7 +54,7 @@ class CustomMainWindow(QMainWindow):
         # Set initial size based on screen dimensions
         initial_width = min(1000, screen.width() * 0.8)
         initial_height = min(600, screen.height() * 0.8)
-        self.resize(initial_width, initial_height)
+        self.resize(int(initial_width), int(initial_height))
         
         central_widget = QWidget()
         self.setCentralWidget(central_widget)

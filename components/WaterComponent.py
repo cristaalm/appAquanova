@@ -98,11 +98,11 @@ class WaterComponent(QWidget):
         layout.addLayout(value_container)
 
         labels_layout = QHBoxLayout()
-        min_label = QLabel("MIN: 0 %")
+        min_label = QLabel("MIN 0%")
         min_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #045859;")
         labels_layout.addWidget(min_label)
         labels_layout.addStretch()
-        max_label = QLabel("MAX: 100 %")
+        max_label = QLabel("MÁX 100%")
         max_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #045859;")
         labels_layout.addWidget(max_label)
         layout.addLayout(labels_layout)
@@ -184,21 +184,22 @@ class WaterComponent(QWidget):
         header_layout.addWidget(filter_label)
 
         self.search_filter = QLineEdit()
-        self.search_filter.setPlaceholderText("Filtrar por fecha, nivel o estado")
+        self.search_filter.setPlaceholderText("Filtrar por fecha, nivel o estado...")
         self.search_filter.setStyleSheet("""
             QLineEdit {
                 background-color: white;
                 border: 1px solid #4CA4A5;
                 color: #333;
-                padding: 5px 20px;
+                padding: 5px 10px;
                 border-radius: 6px;
                 font-size: 14px;
-                max-width: 205px;
+                max-width: 250px;
             }
             QLineEdit:focus {
                 border: 2px solid #4CA4A5;
             }
         """)
+
         self.search_filter.textChanged.connect(self.filter_data)
 
         header_layout.addWidget(self.search_filter)
@@ -208,8 +209,6 @@ class WaterComponent(QWidget):
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(3)
         self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Valor", "Estado"])
-
-        self.history_table.setMinimumHeight(400)  # Puedes ajustar el número si quieres más grande, por ejemplo 350 o 400
 
         
         # Configuración de scroll y visualización
@@ -231,6 +230,8 @@ class WaterComponent(QWidget):
                 alternate-background-color: #f8fafc;
                 color: #4CA4A5;
                 font-size: 14px;
+                padding-bottom: 20px;
+                margin-right: 5px;
             }
             QHeaderView::section {
                 background-color: #4CA4A5;
@@ -239,6 +240,10 @@ class WaterComponent(QWidget):
                 font-weight: bold;
                 color: white;
                 font-size: 15px;
+            }
+            QTableWidget::item {
+                padding: 6px;
+                border-bottom: 1px solid #c5efec;
             }
             QScrollBar:vertical {
                 background: #f1f5f9;
@@ -257,48 +262,49 @@ class WaterComponent(QWidget):
                 background: none;
             }
         """)
-
+        self.history_table.verticalHeader().setDefaultSectionSize(40)  
+        self.history_table.verticalHeader().setMinimumSectionSize(40)
+        self.history_table.setMinimumHeight(self.table_height)
+        self.history_table.setMaximumHeight(600)
         layout.addWidget(self.history_table)
         return history_panel
 
     def populate_table(self):
-        icon_low = QIcon(QPixmap("./resources/icons/low-water.png").scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-        icon_medium = QIcon(QPixmap("./resources/icons/medium-water.png").scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-        icon_optimal = QIcon(QPixmap("./resources/icons/optimal-water.png").scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-        icon_overflow = QIcon(QPixmap("./resources/icons/overflow-water.png").scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-
         self.all_data = [
-            ("27/04/2025 08:00", "12.5", "Óptimo"),
-            ("27/04/2025 12:00", "9.0", "Bajo"),
-            ("27/04/2025 20:00", "18.5", "Óptimo"),
-            ("28/04/2025 08:00", "19.2", "Alto"),
-            ("27/04/2025 08:00", "12.5", "Óptimo"),
-            ("27/04/2025 12:00", "9.0", "Bajo"),
-            ("27/04/2025 20:00", "18.5", "Óptimo"),
-            ("28/04/2025 08:00", "19.2", "Alto"),
-            ("27/04/2025 08:00", "12.5", "Óptimo"),
-            ("27/04/2025 12:00", "9.0", "Bajo"),
-            ("27/04/2025 20:00", "18.5", "Óptimo"),
-            ("28/04/2025 08:00", "19.2", "Alto"),
-            ("27/04/2025 08:00", "12.5", "Óptimo"),
-            ("27/04/2025 12:00", "9.0", "Bajo"),
-            ("27/04/2025 20:00", "18.5", "Óptimo"),
-            ("28/04/2025 08:00", "19.2", "Alto"),
+            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 l", "Bajo"),
+            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 l", "Alto"),
+            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 l", "Bajo"),
+            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 l", "Alto"),
+            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 l", "Bajo"),
+            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 l", "Alto"),
+            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 l", "Bajo"),
+            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 l", "Alto"),
         ]
 
         self.history_table.setRowCount(len(self.all_data))
         for row, (fecha, valor, estado) in enumerate(self.all_data):
             fecha_item = QTableWidgetItem(fecha)
-            fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+
             self.history_table.setItem(row, 0, fecha_item)
 
             valor_item = QTableWidgetItem(valor)
-            valor_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            valor_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+
             self.history_table.setItem(row, 1, valor_item)
             
             # Dentro de tu loop de populate_table()
             estado_item = QTableWidgetItem(estado)
-            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+
 
             # Colores
             if estado == "Bajo":
@@ -312,6 +318,7 @@ class WaterComponent(QWidget):
                 estado_item.setForeground(QColor("#b91c1c"))
 
             self.history_table.setItem(row, 2, estado_item)
+            self.history_table.setRowHeight(row, 35)
 
 
     def set_water_value(self, new_value):

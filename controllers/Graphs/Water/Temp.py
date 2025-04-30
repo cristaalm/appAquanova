@@ -37,7 +37,7 @@ class GraphTemp(BaseGraph):
         
         # Configurar etiquetas con el estilo deseado
         self.getPlotItem().setLabel("left", "°C Temperatura", **style)
-        self.getPlotItem().setLabel("bottom", "Tiempo(min)", **style)
+        self.getPlotItem().setLabel("bottom", "Tiempo(horas)", **style)
         
         # Añadir leyenda
         self.getPlotItem().addLegend()
@@ -46,11 +46,11 @@ class GraphTemp(BaseGraph):
         self.getPlotItem().showGrid(x=True, y=True, alpha=0.3)
         
         # Modificar el estilo de la línea para añadir símbolos
-        pen = pg.mkPen(color="#1E89CF")
+        pen = pg.mkPen(color="#3C9A9B")
         self.curve.setPen(pen)
         self.curve.setSymbol('o')
         self.curve.setSymbolSize(7)
-        self.curve.setSymbolBrush("#1E89CF")
+        self.curve.setSymbolBrush("#3C9A9B")
         
         # Habilitar auto-rango
         self.enableAutoRange(axis=pg.ViewBox.XYAxes, enable=True)

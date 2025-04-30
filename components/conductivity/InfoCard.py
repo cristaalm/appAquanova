@@ -145,7 +145,7 @@ class CurrentTemp(QWidget):
         title_layout.addStretch()
         
         temp_icon_label = QLabel()
-        temp_pixmap = self.load("icons","conductivity1.png", 28)
+        temp_pixmap = self.load("icons","verdeElecricity.png", 26)
         if temp_pixmap:
             temp_icon_label.setPixmap(temp_pixmap)
         
@@ -199,14 +199,14 @@ class CurrentTemp(QWidget):
         labels_layout = QHBoxLayout()
         labels_layout.setContentsMargins(0, 0, 0, 0)  
 
-        min_label = QLabel(f"MÍN {self.CE_min} µS/cm")
+        min_label = QLabel(f"MÍN {self.CE_min}µ")
         min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
 
         labels_layout.addStretch()
 
-        max_label = QLabel(f"MÁX {self.CE_max} µS/cm")
+        max_label = QLabel(f"MÁX {self.CE_max}µ")
         max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)

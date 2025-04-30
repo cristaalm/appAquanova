@@ -30,14 +30,14 @@ class GraphCE(BaseGraph):
         self.set_data_range(10, 40)  # Rango razonable para temperatura ambiente
         
         # Aplicar estilos de TempGraph
-        style = {"color": "#333", "font-size": "11px"}
+        style = {"color": "#045859", "font-size": "11px"}
         
         # Establecer fondo blanco
         self.setBackground("white")
         
         # Configurar etiquetas con el estilo deseado
         self.getPlotItem().setLabel("left", "Conductividad (S/m)", **style)
-        self.getPlotItem().setLabel("bottom", "Tiempo(horas)", **style)
+        self.getPlotItem().setLabel("bottom", "Tiempo (horas)", **style)
         
         # Añadir leyenda
         self.getPlotItem().addLegend()

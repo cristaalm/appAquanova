@@ -217,7 +217,7 @@ class TableCard(QWidget):
             layout.setAlignment(Qt.AlignmentFlag.AlignLeft) 
 
             icon_temp = QLabel()
-            valor_pixmap = self.load("icons", "temperature.png", 16)
+            valor_pixmap = self.load("icons", "verdeElecricity.png", 16)
             if valor_pixmap:
                 icon_temp.setPixmap(valor_pixmap)
             layout.addWidget(icon_temp)
@@ -240,7 +240,7 @@ class TableCard(QWidget):
                 icon_name = "amarilloElecricity.png"
                 color_style = "color:#F4B400;"  # Rojo para caliente
             else:
-                estado = "Optimo"
+                estado = "Óptimo"
                 icon_name = "verdeElecricity.png"
                 color_style = "color: #2ECC71;"  # Verde para ambiente
 

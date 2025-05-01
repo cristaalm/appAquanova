@@ -18,7 +18,7 @@ class phGraph(QtWidgets.QMainWindow):
         self.plot_temp.setBackground("white")
         pen_temp = pg.mkPen(color=(30, 137, 207))
         self.plot_temp.setLabel("left", "Potencial de hidrógeno", **style)
-        self.plot_temp.setLabel("bottom", "Tiempo (minutos)", **style)
+        self.plot_temp.setLabel("bottom", "Tiempo (horas)", **style)
         self.plot_temp.addLegend()
         self.plot_temp.showGrid(x=True, y=True)
         self.plot_temp.setYRange(30, 90)

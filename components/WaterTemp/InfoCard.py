@@ -153,7 +153,7 @@ class CurrentTemp(QWidget):
         self.summary_layout.addLayout(title_layout)  
         
         # Subtítulo
-        subtitle = QLabel("Último registro del sensor")
+        subtitle = QLabel("Registro térmico actual")
         subtitle.setStyleSheet("""
             font-size: 12px;
             font-style: italic;
@@ -199,7 +199,7 @@ class CurrentTemp(QWidget):
         labels_layout = QHBoxLayout()
         labels_layout.setContentsMargins(0, 0, 0, 0)  
 
-        min_label = QLabel(f"MIN {self.temp_min} °C")
+        min_label = QLabel(f"MÍN {self.temp_min} °C")
         min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)

@@ -16,7 +16,7 @@ class BaseGraph(pg.PlotWidget):
         axis_color: str = "#333333",
         grid_alpha: float = 0.1,
         data_range: Tuple[float, float] = (0, 10),
-        initial_data_length: int = 100,
+        initial_data_length: int = 100
     ):
         """
         Clase base para gráficas personalizadas.
@@ -45,11 +45,14 @@ class BaseGraph(pg.PlotWidget):
         self.getPlotItem().getAxis("bottom").setPen(axis_color)
         self.getPlotItem().getAxis("left").setPen(axis_color)
 
+        # Deshabilitar zoom y panning
+        self.getPlotItem().getViewBox().setMouseEnabled(x=False, y=False)
+
         # Cuadrícula
         self.getPlotItem().showGrid(x=True, y=True, alpha=grid_alpha)
 
         # Datos iniciales
-        self.data_x = list(range(initial_data_length))
+        self.data_x = list(range(1, initial_data_length + 1))
         self.data_y = [random.uniform(*data_range) for _ in range(initial_data_length)]
         self.curve = self.plot(self.data_x, self.data_y, pen=line_color)
 

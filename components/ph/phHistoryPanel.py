@@ -43,7 +43,7 @@ class PhHistoryPanel(QFrame):
         header.addWidget(filter_label)
         
         self.search_filter = QLineEdit()
-        self.search_filter.setPlaceholderText("Filtrar por fecha, valor o estado...")
+        self.search_filter.setPlaceholderText("Fecha, valor o estado...")
         self.search_filter.setStyleSheet("""
             QLineEdit {
                 background-color: white;
@@ -87,7 +87,7 @@ class PhHistoryPanel(QFrame):
                 alternate-background-color: #f8fafc;
                 color: #4CA4A5;
                 font-size: 14px;
-                padding-bottom: 20px;
+                padding-bottom: 0px;
                 margin-right: 5px;
             }
             QHeaderView::section {
@@ -120,8 +120,8 @@ class PhHistoryPanel(QFrame):
             }
         """)
 
-        self.history_table.verticalHeader().setDefaultSectionSize(40)  
-        self.history_table.verticalHeader().setMinimumSectionSize(40)
+        self.history_table.verticalHeader().setDefaultSectionSize(0)  
+        self.history_table.verticalHeader().setMinimumSectionSize(0)
         self.history_table.setMinimumHeight(self.table_height)
         self.history_table.setMaximumHeight(600)
         layout.addWidget(self.history_table)
@@ -195,7 +195,7 @@ class PhHistoryPanel(QFrame):
             self.history_table.setItem(row, 0, fecha_item)
             self.history_table.setItem(row, 1, valor_item)
             self.history_table.setItem(row, 2, estado_item)
-            self.history_table.setRowHeight(row, 35)
+            self.history_table.setRowHeight(row, 31)
     
     def filter_data(self, text):
         search_text = text.lower()

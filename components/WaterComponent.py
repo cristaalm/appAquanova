@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
     QHeaderView, QSpacerItem, QSizePolicy, QFrame, QLineEdit, QProgressBar, QGraphicsDropShadowEffect
 )
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QIcon
 from components.lvlWaterGraph import GraphLvlWater
 
@@ -11,7 +11,9 @@ class WaterComponent(QWidget):
     def __init__(self, graph_widget, parent=None):
         super().__init__(parent)
         self.graph_widget = GraphLvlWater()
-        self.water_value = 15
+        self.water_value = 41
+        self.water_min = 0
+        self.water_max = 50
         self.table_height = 400
         self.setup_ui()
         self.populate_table()
@@ -36,7 +38,18 @@ class WaterComponent(QWidget):
 
     def create_summary_panel(self):
         summary_panel = QFrame()
-        summary_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
+        summary_panel.setFrameShape(QFrame.Shape.StyledPanel)
+        summary_panel.setMinimumWidth(200)
+        summary_panel.setMaximumWidth(280)
+        summary_panel.setMinimumHeight(280)
+        summary_panel.setFixedHeight(280)
+        summary_panel.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 12px;
+                border: none;
+            }
+        """)
         # Aplicar efecto de sombra
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(15)
@@ -51,71 +64,89 @@ class WaterComponent(QWidget):
         header_layout = QHBoxLayout()
         header_layout.setSpacing(8)
 
-        title_label = QLabel("Estado del nivel actual")
-        title_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #045859;")
-        header_layout.addWidget(title_label)
+        # Carrusel del título
+        self.title_text = "Capacidad disponible de agua                "
+        self.title_index = 0
 
+        self.title_label = QLabel(self.title_text)
+        self.title_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #045859;")
+        self.title_label.setMinimumWidth(150)
+        self.title_label.setMaximumWidth(200)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+
+        self.title_timer = QTimer()
+        self.title_timer.timeout.connect(self.scroll_title_text)
+        self.title_timer.start(150)
+
+        header_layout.addWidget(self.title_label)
+
+        # Icono
         header_icon = QLabel()
         pixmap = QPixmap("./resources/icons/botella-de-agua.png")
         if not pixmap.isNull():
-            header_icon.setPixmap(pixmap.scaled(QSize(27, 32), Qt.AspectRatioMode.KeepAspectRatio))
+            header_icon.setPixmap(pixmap.scaled(QSize(28, 28), Qt.AspectRatioMode.KeepAspectRatio))
         header_layout.addWidget(header_icon)
 
         layout.addLayout(header_layout)
 
-        description_label = QLabel("Monitoreo de la capacidad del tanque")
+        # Descripción
+        description_label = QLabel("Estado del nivel de agua")
         description_label.setStyleSheet("font-size: 12px; font-style: italic; color: #6b7280;")
         layout.addWidget(description_label)
 
+        # Valor
         value_container = QHBoxLayout()
         value_container.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Icono que cambia según estado
         self.state_icon_label = QLabel()
         self.update_state_icon(self.get_water_status())
-        self.state_icon_label.setAlignment(Qt.AlignmentFlag.AlignVCenter)  # Alinear verticalmente
-        self.state_icon_label.setContentsMargins(0, 8, 0, 0)  # Bajar ligeramente la imagen si quieres
+        self.state_icon_label.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.state_icon_label.setContentsMargins(0, 8, 0, 0)
         value_container.addWidget(self.state_icon_label)
 
-        # Número grande de litros
         self.water_value_label = QLabel(str(self.water_value))
         self.water_value_label.setStyleSheet("font-size: 56px; font-weight: bold; color: #045859;")
         self.water_value_label.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         value_container.addWidget(self.water_value_label)
 
-        # Unidad "L" como imagen
-        liter_label = QLabel()
-        pixmap = QPixmap("resources/icons/letra-l.png")  # Ruta correcta
-        pixmap = pixmap.scaled(40, 40, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        liter_label.setPixmap(pixmap)
-
-        # Ajustar márgenes manualmente
-        liter_label.setContentsMargins(-8, 20, 0, 0)  # (left, top, right, bottom)
-
-        liter_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-        value_container.addWidget(liter_label)
+        unit_label = QLabel("cm")
+        unit_label.setStyleSheet("""
+            font-size: 24px;
+            color: #045859;
+            margin-left: 0px;
+            margin-top: 20px;
+            font-weight: bold;
+        """)
+        unit_label.setContentsMargins(-2, 7, 0, 0)
+        unit_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        value_container.addWidget(unit_label)
 
         layout.addLayout(value_container)
 
+        # Etiquetas MIN y MAX
         labels_layout = QHBoxLayout()
-        min_label = QLabel("MIN 0%")
-        min_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #045859;")
+        min_label = QLabel("MÍN 0 CM")
+        min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
         labels_layout.addStretch()
-        max_label = QLabel("MÁX 100%")
-        max_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #045859;")
+        max_label = QLabel("MÁX 50 CM")
+        max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)
         layout.addLayout(labels_layout)
 
+        # Barra de progreso
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(12)
         self.progress_bar.setTextVisible(False)
-        percent = min(max(self.water_value / 20.0, 0), 1) * 100
+        percent = min(max(self.water_value / self.water_max, self.water_min), 1) * 100
         self.progress_bar.setValue(int(percent))
         self.progress_bar.setStyleSheet("""
             QProgressBar {
                 background-color: #e2e8f0;
                 border-radius: 6px;
+                border: none;
             }
             QProgressBar::chunk {
                 background-color: #4CA4A5;
@@ -123,14 +154,43 @@ class WaterComponent(QWidget):
             }
         """)
         layout.addWidget(self.progress_bar)
+        layout.addSpacing(20)
 
-        self.status_chip = QLabel(self.get_water_status())
-        self.status_chip.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_chip.setStyleSheet(self.get_status_style())
-        layout.addWidget(self.status_chip)
-        layout.addStretch()
+        # Estado con ícono y texto combinados
+        self.status_chip_container = QWidget()
+        self.status_chip_container.setStyleSheet("""
+            background-color: #c5efeb;
+            border-radius: 15px;
+        """)
+        chip_layout = QHBoxLayout(self.status_chip_container)
+        chip_layout.setContentsMargins(12, 4, 12, 4)
+        chip_layout.setSpacing(8)
+        chip_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Imagen de estado
+        self.status_icon = QLabel()
+        self.status_icon.setFixedSize(24, 24)
+        chip_layout.addWidget(self.status_icon)
+
+        # Texto del estado
+        self.status_text = QLabel(self.get_water_status())
+        self.status_text.setStyleSheet("""
+            color: #2b6363;
+            font-size: 18px;
+            font-weight: bold;
+        """)
+        chip_layout.addWidget(self.status_text)
+
+        layout.addWidget(self.status_chip_container)
+
 
         return summary_panel
+    
+    def scroll_title_text(self):
+        scrolled = self.title_text[self.title_index:] + self.title_text[:self.title_index]
+        self.title_label.setText(scrolled)
+        self.title_index = (self.title_index + 1) % len(self.title_text)
+
 
     def create_graph_panel(self):
         # Panel para gráfica de tendencia con altura fija igual a la del panel de resumen
@@ -162,12 +222,13 @@ class WaterComponent(QWidget):
 
     def create_history_panel(self):
         history_panel = QFrame()
+        history_panel.setFrameShape(QFrame.Shape.StyledPanel)
         history_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(15)
-        shadow.setColor(QColor(0, 0, 0, 40))
-        shadow.setOffset(0, 3)
-        history_panel.setGraphicsEffect(shadow)
+        history_shadow = QGraphicsDropShadowEffect()
+        history_shadow.setBlurRadius(15)
+        history_shadow.setColor(QColor(197, 239, 236))
+        history_shadow.setOffset(0, 3)
+        history_panel.setGraphicsEffect(history_shadow)
 
         layout = QVBoxLayout(history_panel)
         layout.setSpacing(10)
@@ -184,7 +245,7 @@ class WaterComponent(QWidget):
         header_layout.addWidget(filter_label)
 
         self.search_filter = QLineEdit()
-        self.search_filter.setPlaceholderText("Filtrar por fecha, nivel o estado...")
+        self.search_filter.setPlaceholderText("Fecha, nivel o estado...")
         self.search_filter.setStyleSheet("""
             QLineEdit {
                 background-color: white;
@@ -208,7 +269,7 @@ class WaterComponent(QWidget):
         # Tabla de registros históricos
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(3)
-        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Valor", "Estado"])
+        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Nivel (cm)", "Estado"])
 
         
         # Configuración de scroll y visualización
@@ -271,42 +332,41 @@ class WaterComponent(QWidget):
 
     def populate_table(self):
         self.all_data = [
-            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
-            ("27/04/2025 12:00", "9.0 l", "Bajo"),
-            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
-            ("28/04/2025 08:00", "19.2 l", "Alto"),
-            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
-            ("27/04/2025 12:00", "9.0 l", "Bajo"),
-            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
-            ("28/04/2025 08:00", "19.2 l", "Alto"),
-            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
-            ("27/04/2025 12:00", "9.0 l", "Bajo"),
-            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
-            ("28/04/2025 08:00", "19.2 l", "Alto"),
-            ("27/04/2025 08:00", "12.5 l", "Óptimo"),
-            ("27/04/2025 12:00", "9.0 l", "Bajo"),
-            ("27/04/2025 20:00", "18.5 l", "Óptimo"),
-            ("28/04/2025 08:00", "19.2 l", "Alto"),
+            ("27/04/2025 08:00", "12.5 cm", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 cm", "Bajo"),
+            ("27/04/2025 20:00", "18.5 cm", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 cm", "Alto"),
+            ("27/04/2025 08:00", "12.5 cm", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 cm", "Bajo"),
+            ("27/04/2025 20:00", "18.5 cm", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 cm", "Alto"),
+            ("27/04/2025 08:00", "12.5 cm", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 cm", "Bajo"),
+            ("27/04/2025 20:00", "18.5 cm", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 cm", "Alto"),
+            ("27/04/2025 08:00", "12.5 cm", "Óptimo"),
+            ("27/04/2025 12:00", "9.0 cm", "Bajo"),
+            ("27/04/2025 20:00", "18.5 cm", "Óptimo"),
+            ("28/04/2025 08:00", "19.2 cm", "Alto"),
         ]
 
         self.history_table.setRowCount(len(self.all_data))
         for row, (fecha, valor, estado) in enumerate(self.all_data):
+            # Columna 1: Fecha y hora
             fecha_item = QTableWidgetItem(fecha)
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-
             self.history_table.setItem(row, 0, fecha_item)
 
+            # Columna 2: Nivel (cm) con ícono de botella
             valor_item = QTableWidgetItem(valor)
+            valor_item.setIcon(QIcon("./resources/icons/botella-de-agua.png"))  # <- Aquí se agrega el ícono
             valor_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-
             self.history_table.setItem(row, 1, valor_item)
-            
-            # Dentro de tu loop de populate_table()
+
+            # Columna 3: Estado con íconos por nivel
             estado_item = QTableWidgetItem(estado)
             estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
 
-
-            # Colores
             if estado == "Bajo":
                 estado_item.setIcon(QIcon("./resources/icons/low-water.png"))
                 estado_item.setForeground(QColor("#92400e"))
@@ -321,13 +381,57 @@ class WaterComponent(QWidget):
             self.history_table.setRowHeight(row, 35)
 
 
+
     def set_water_value(self, new_value):
         self.water_value = float(new_value)
         self.water_value_label.setText(str(self.water_value))
-        self.progress_bar.setValue(min(max(self.water_value / 20.0, 0), 1) * 100)
-        self.status_chip.setText(self.get_water_status())
-        self.status_chip.setStyleSheet(self.get_status_style())
+        self.progress_bar.setValue(min(max(self.water_value / self.water_max, self.water_min), 1) * 100)
+        estado = self.get_water_status()
+        self.status_text.setText(estado)
+
+        self.status_chip_container.setStyleSheet(f"""
+            background-color: {self.get_status_bg_color(estado)};
+            border-radius: 15px;
+        """)
+
+        self.status_text.setStyleSheet(f"""
+            color: {self.get_status_fg_color(estado)};
+            font-size: 18px;
+            font-weight: bold;
+        """)
+
+        self.status_icon.setPixmap(QPixmap(self.get_status_icon_path(estado)).scaled(
+            24, 24, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+        ))
+
         self.update_state_icon(self.get_water_status())
+
+    def get_status_icon_path(self, estado):
+        if estado == "Bajo":
+            return "./resources/icons/low-water.png"
+        elif estado == "Óptimo":
+            return "./resources/icons/optimal-water.png"
+        elif estado == "Alto":
+            return "./resources/icons/overflow-water.png"
+        return ""
+
+    def get_status_bg_color(self, estado):
+        if estado == "Bajo":
+            return "#fef3c7"
+        elif estado == "Óptimo":
+            return "#dcfce7"
+        elif estado == "Alto":
+            return "#fee2e2"
+        return "#c5efeb"
+
+    def get_status_fg_color(self, estado):
+        if estado == "Bajo":
+            return "#92400e"
+        elif estado == "Óptimo":
+            return "#166534"
+        elif estado == "Alto":
+            return "#b91c1c"
+        return "#2b6363"
 
     def update_state_icon(self, estado):
         if estado == "Bajo":
@@ -364,9 +468,9 @@ class WaterComponent(QWidget):
                 self.history_table.showRow(row)
 
     def get_water_status(self):
-        if self.water_value < 10:
+        if self.water_value < 20:
             return "Bajo"
-        elif self.water_value > 18:
+        elif self.water_value > 40:
             return "Alto"
         else:
             return "Óptimo"

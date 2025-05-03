@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QIcon
 from components.lvlWaterGraph import GraphLvlWater
+import os
 
 
 class WaterComponent(QWidget):
@@ -50,7 +51,7 @@ class WaterComponent(QWidget):
                 border: none;
             }
         """)
-        # Aplicar efecto de sombra
+        # Sombra
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(15)
         shadow.setColor(QColor(197, 239, 236))
@@ -61,11 +62,11 @@ class WaterComponent(QWidget):
         layout.setContentsMargins(15, 15, 15, 15)
         layout.setSpacing(10)
 
+        # Título carrusel
         header_layout = QHBoxLayout()
         header_layout.setSpacing(8)
 
-        # Carrusel del título
-        self.title_text = "Capacidad disponible de agua                "
+        self.title_text = "Capacidad disponible de agua      "
         self.title_index = 0
 
         self.title_label = QLabel(self.title_text)
@@ -80,7 +81,6 @@ class WaterComponent(QWidget):
 
         header_layout.addWidget(self.title_label)
 
-        # Icono
         header_icon = QLabel()
         pixmap = QPixmap("./resources/icons/botella-de-agua.png")
         if not pixmap.isNull():
@@ -94,12 +94,11 @@ class WaterComponent(QWidget):
         description_label.setStyleSheet("font-size: 12px; font-style: italic; color: #6b7280;")
         layout.addWidget(description_label)
 
-        # Valor
+        # Valor de agua
         value_container = QHBoxLayout()
         value_container.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.state_icon_label = QLabel()
-        self.update_state_icon(self.get_water_status())
         self.state_icon_label.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         self.state_icon_label.setContentsMargins(0, 8, 0, 0)
         value_container.addWidget(self.state_icon_label)
@@ -125,22 +124,28 @@ class WaterComponent(QWidget):
 
         # Etiquetas MIN y MAX
         labels_layout = QHBoxLayout()
-        min_label = QLabel("MÍN 0 CM")
+        min_label = QLabel("MÍN 0")
         min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
         labels_layout.addStretch()
-        max_label = QLabel("MÁX 50 CM")
+        max_label = QLabel("MÁX 50")
         max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)
         layout.addLayout(labels_layout)
 
-        # Barra de progreso
+        # Barra con ícono dinámico encima
+        percent = min(max(self.water_value / self.water_max, self.water_min), 1) * 100
+
+        progress_container = QWidget()
+        progress_layout = QVBoxLayout(progress_container)
+        progress_layout.setContentsMargins(0, 0, 0, 0)
+        progress_layout.setSpacing(0)
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(12)
         self.progress_bar.setTextVisible(False)
-        percent = min(max(self.water_value / self.water_max, self.water_min), 1) * 100
         self.progress_bar.setValue(int(percent))
         self.progress_bar.setStyleSheet("""
             QProgressBar {
@@ -153,38 +158,97 @@ class WaterComponent(QWidget):
                 border-radius: 6px;
             }
         """)
-        layout.addWidget(self.progress_bar)
+        progress_layout.addWidget(self.progress_bar)
+
+        layout.addWidget(progress_container)
         layout.addSpacing(20)
 
-        # Estado con ícono y texto combinados
+        # Chip de estado
         self.status_chip_container = QWidget()
         self.status_chip_container.setStyleSheet("""
-            background-color: #c5efeb;
+            background-color: #c5efeb; 
             border-radius: 15px;
         """)
         chip_layout = QHBoxLayout(self.status_chip_container)
-        chip_layout.setContentsMargins(12, 4, 12, 4)
-        chip_layout.setSpacing(8)
+        chip_layout.setContentsMargins(10, 6, 10, 6)
+        chip_layout.setSpacing(5)
         chip_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Imagen de estado
         self.status_icon = QLabel()
         self.status_icon.setFixedSize(24, 24)
         chip_layout.addWidget(self.status_icon)
 
-        # Texto del estado
-        self.status_text = QLabel(self.get_water_status())
+        self.status_text = QLabel("")
         self.status_text.setStyleSheet("""
             color: #2b6363;
             font-size: 18px;
             font-weight: bold;
+            background-color: transparent;
         """)
         chip_layout.addWidget(self.status_text)
 
         layout.addWidget(self.status_chip_container)
 
+        # Actualiza íconos y estado textual al iniciar
+        self.update_status_chip()
 
         return summary_panel
+
+    def get_water_status(self):
+        if self.water_value < 15:
+            return "Bajo"
+        elif self.water_value > 40:
+            return "Alto"
+        else:
+            return "Óptimo"
+
+    def get_level_icon_name(self):
+        estado = self.get_water_status()
+        if estado == "Bajo":
+            return "low-water.png"
+        elif estado == "Alto":
+            return "overflow-water.png"
+        else:
+            return "optimal-water.png"
+
+    def update_status_chip(self):
+        status = self.get_water_status()
+        self.status_text.setText(status)
+
+        if status == "Bajo":
+            icon_name = "low-water.png"
+            text_style = """
+                color: #045859;
+                font-size: 18px;
+                font-weight: bold;
+                background-color: transparent;
+            """
+        elif status == "Alto":
+            icon_name = "overflow-water.png"
+            text_style = """
+                color: #045859;
+                font-size: 18px;
+                font-weight: bold;
+                background-color: transparent;
+            """
+        else:
+            icon_name = "optimal-water.png"
+            text_style = """
+                color: #045859;
+                font-size: 18px;
+                font-weight: bold;
+                background-color: transparent;
+            """
+
+        icon_path = f"./resources/icons/{icon_name}"
+        if os.path.exists(icon_path):
+            pixmap = QPixmap(icon_path).scaled(QSize(24, 24), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            self.status_icon.setPixmap(pixmap)
+        else:
+            self.status_icon.setText("●")
+
+        self.status_text.setStyleSheet(text_style)
+
     
     def scroll_title_text(self):
         scrolled = self.title_text[self.title_index:] + self.title_text[:self.title_index]

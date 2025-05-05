@@ -121,11 +121,11 @@ class HistorialController:
             print(f"Error enviando a API remota: {e}")
             return False
 
-    async def update_sync(self, id_historial: int):
+    def update_sync(self, id_historial: int):
         try:
-            registro = await sync_to_async(Historial.objects.get)(id_historial=id_historial)
+            registro = Historial.objects.get(id_historial=id_historial)
             registro.sync = 1
-            await sync_to_async(registro.save)()
+            registro.save()
             return True
         except Historial.DoesNotExist:
             return False

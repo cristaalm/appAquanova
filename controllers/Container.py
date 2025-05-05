@@ -6,7 +6,7 @@ from .Graphs.Water.Temp import GraphTemp as GraphTempWater
 from views.conductivityE import conductivityComponent
 from .Graphs.Water.CE import GraphCE as GraphCEWater
 from .Graphs.Water.pH import GraphHp as GraphHpWater
-from components.WaterComponent import WaterComponent
+from components.lvlWater.WaterComponent import WaterComponent
 from .Serial.AsyncSerialWorker import SerialWorker
 from components.ph.pHComponent import phComponent
 from .Graphs.Water.LvlWater import GraphLvlWater

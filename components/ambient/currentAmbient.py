@@ -46,7 +46,7 @@ class CurrentAmbient(QWidget):
 
         # Diseño principal vertical
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 20, 0, 20)
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(20)
 
         # Tarjeta de temperatura
@@ -72,6 +72,8 @@ class CurrentAmbient(QWidget):
         frame.setFrameShape(QFrame.Shape.StyledPanel)
         frame.setMinimumWidth(220)
         frame.setMaximumWidth(280)
+        frame.setMinimumHeight(155)
+        frame.setMaximumHeight(155)
         frame.setStyleSheet(
             """
             QFrame {
@@ -171,12 +173,12 @@ class CurrentAmbient(QWidget):
 
         layout.addLayout(bottom_layout)
 
-        # Etiquetas MIN y MAX dinámicas según el tipo de card
+        # Etiquetas MÍN y MAX dinámicas según el tipo de card
         if is_temperature:
-            min_label_text = "MIN 0°C"
+            min_label_text = "MÍN 0°C"
             max_label_text = "MÁX 50°C"
         else:
-            min_label_text = "MIN 0%"
+            min_label_text = "MÍN 0%"
             max_label_text = "MÁX 100%"
 
         labels_layout = QHBoxLayout()

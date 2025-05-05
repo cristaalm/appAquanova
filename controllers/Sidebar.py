@@ -176,6 +176,5 @@ class Sidebar(QWidget):
         self.change_content(0)
 
     def change_content(self, state_id):
-        print(f"Cambiar contenido a estado: {state_id}")
         if hasattr(self.content_container, "set_content_state"):
             self.content_container.set_content_state(state_id)

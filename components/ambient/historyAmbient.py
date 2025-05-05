@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
-    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QDateEdit, QLineEdit
+    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QLineEdit
 )
-from PyQt6.QtCore import Qt, QDate
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QIcon, QPixmap, QBrush
 
 import os
@@ -63,7 +63,7 @@ class HistoryAmbient(QWidget):
                 padding: 5px 10px;
                 border-radius: 6px;
                 font-size: 14px;
-                max-width: 200px;
+                max-width: 250px;
             }
             QLineEdit:focus {
                 border: 2px solid #4CA4A5;
@@ -77,15 +77,16 @@ class HistoryAmbient(QWidget):
         # Tabla
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(4)
-        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Temperatura (°C)", "Humedad", "Condición"])
-        self.history_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Temperatura (°C)", "Humedad (%)", "Condición"])
+        self.history_table.setVerticalScrollMode(QTableWidget.ScrollMode.ScrollPerPixel)
+        self.history_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.history_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)  # <- SIEMPRE visible
         self.history_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.history_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.history_table.setAlternatingRowColors(True)
         self.history_table.verticalHeader().setVisible(False)
         self.history_table.setStyleSheet("""
-            QTableView {
+            QTableWidget {
                 background-color: white;
                 gridline-color: #c5efec;
                 border: none;
@@ -95,6 +96,9 @@ class HistoryAmbient(QWidget):
                 alternate-background-color: #f8fafc;
                 color: #4CA4A5;
                 font-size: 14px;
+                margin:0;
+                padding-bottom: 30px;
+                margin-right: 3px;
             }
             QHeaderView::section {
                 background-color: #4CA4A5;
@@ -104,45 +108,49 @@ class HistoryAmbient(QWidget):
                 color: white;
                 font-size: 15px;
             }
-            QTableView::item {
+            QTableWidget::item {
                 padding: 6px;
                 border-bottom: 1px solid #c5efec;
-            }
-            QTableView::item:selected {
-                border: none;
-                background-color: #d4f1f0;
-                color: black;
             }
             QScrollBar:vertical {
                 background: #f1f5f9;
                 width: 10px;
                 border-radius: 5px;
+                margin-left: 5px;
             }
             QScrollBar::handle:vertical {
                 background: #4CA4A5;
+                min-height: 30px;
                 border-radius: 5px;
             }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            QScrollBar::add-line:vertical, 
+            QScrollBar::sub-line:vertical {
                 height: 0;
+                background: none;
             }
         """)
 
         self.history_table.setMinimumHeight(self.table_height)
         self.history_table.setMaximumHeight(600)
         history_layout.addWidget(self.history_table)
-
         return history_panel
 
     def add_example_data(self):
         datos = [
-            ("12/04/2025 08:30", "26.5", "65%", "Moderado"),
-            ("12/04/2025 14:20", "30.1", "72%", "Moderado"),
-            ("12/04/2025 19:15", "28.3", "70%", "Frío"),
-            ("12/04/2025 13:00", "32.0", "80%", "Caliente"),
-            ("12/04/2025 07:45", "25.0", "60%", "Frío"),
-            ("11/04/2025 10:15", "27.0", "64%", "Caliente"),
-            ("10/04/2025 09:00", "26.8", "67%", "Moderado"),
-            ("09/04/2025 15:00", "31.2", "75%", "Caliente"),
+            ("12/04/2025 08:30", "26.5", "65", "Moderado"),
+            ("12/04/2025 14:20", "30.1", "72", "Moderado"),
+            ("12/04/2025 19:15", "28.3", "70", "Frío"),
+            ("12/04/2025 13:00", "32.0", "80", "Caliente"),
+            ("12/04/2025 07:45", "25.0", "60", "Frío"),
+            ("11/04/2025 10:15", "27.0", "64", "Caliente"),
+            ("10/04/2025 09:00", "26.8", "67", "Moderado"),
+            ("09/04/2025 15:00", "31.2", "75", "Caliente"),
+            ("12/04/2025 19:15", "28.3", "70", "Frío"),
+            ("12/04/2025 13:00", "32.0", "80", "Caliente"),
+            ("12/04/2025 07:45", "25.0", "60", "Frío"),
+            ("11/04/2025 10:15", "27.0", "64", "Caliente"),
+            ("10/04/2025 09:00", "26.8", "67", "Moderado"),
+            ("09/04/2025 15:00", "31.2", "75", "Caliente"),
         ]
 
         thermometer_icon = QIcon(QPixmap("resources/icons/thermometer.png").scaled(16, 16, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
@@ -150,6 +158,7 @@ class HistoryAmbient(QWidget):
         sun_icon = QIcon(QPixmap("resources/icons/amarillo_sol.png").scaled(16, 16, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         snowflake_icon = QIcon(QPixmap("resources/icons/azul_viento.png").scaled(16, 16, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         cloud_icon = QIcon(QPixmap("resources/icons/verde_nube.png").scaled(16, 16, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        cloud_icon_blue = QIcon(QPixmap("resources/icons/nube.png").scaled(16, 16, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
         self.history_table.setRowCount(len(datos))
         for i, fila in enumerate(datos):
@@ -160,7 +169,7 @@ class HistoryAmbient(QWidget):
                 if j == 1:
                     item.setIcon(thermometer_icon)
                 elif j == 2:
-                    item.setIcon(drop_icon)
+                    item.setIcon(cloud_icon_blue)
                 elif j == 3:
                     if dato == "Caliente":
                         item.setForeground(QBrush(QColor("#f4b400")))
@@ -175,5 +184,12 @@ class HistoryAmbient(QWidget):
                 self.history_table.setItem(i, j, item)
 
     def filter_data(self):
-        # Aquí puedes implementar tu lógica de filtrado
-        pass
+        filtro = self.search_filter.text().lower()
+        for fila in range(self.history_table.rowCount()):
+            mostrar = False
+            for columna in range(self.history_table.columnCount()):
+                item = self.history_table.item(fila, columna)
+                if item and filtro in item.text().lower():
+                    mostrar = True
+                    break
+            self.history_table.setRowHidden(fila, not mostrar)

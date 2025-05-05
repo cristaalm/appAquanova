@@ -85,7 +85,7 @@ class WaterHistoryPanel(QFrame):
                 color: #4CA4A5;
                 font-size: 14px;
                 padding-bottom: 0px;
-                margin-right: 5px;
+                margin-right: 3px;
             }
             QHeaderView::section {
                 background-color: #4CA4A5;
@@ -103,7 +103,7 @@ class WaterHistoryPanel(QFrame):
                 background: #f1f5f9;
                 width: 10px;
                 border-radius: 5px;
-                margin-left: 5px;
+                margin: 2px 2px 2px 0px;
             }
             QScrollBar::handle:vertical {
                 background: #4CA4A5;

@@ -1,7 +1,4 @@
-from PyQt6.QtGui import QColor  # Importar QColor
-
-# Constantes reutilizables para los componentes de pH
-
+from PyQt6.QtGui import QColor 
 # Para indicador en la card "ÓPTIMO"/"BAJO"/"ALTO"
 PH_MIN_OPTIMAL_INDICATOR = 6.8
 PH_MAX_OPTIMAL_INDICATOR = 7.2

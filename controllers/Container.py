@@ -256,7 +256,7 @@ class ContentContainer(QWidget):
             self.title_label.setText("Gestión de niveles de agua")
             self.content_layout.addWidget(self.water_component)
         elif self.content_state == 2:
-            self.title_label.setText("Nivel de pH")
+            self.title_label.setText("Nivel de pH del agua")
             self.content_layout.addWidget(self.ph_component)
         elif self.content_state == 3:
             self.title_label.setText("Temperatura del Agua")

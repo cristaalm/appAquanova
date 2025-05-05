@@ -29,5 +29,6 @@ class GraphLvlWater(BaseGraph):
         self.x_data = self.x_data[-100:]
         self.y_data = self.y_data[-100:]
 
-        self.plot.clear()
-        self.plot.plot(self.x_data, self.y_data, pen=self.pen)
+        self.getPlotItem().clear()
+        # Dibuja la nueva curva y guarda el objeto para futuras actualizaciones
+        self.curve = self.plot(self.x_data, self.y_data, pen="#39C3EF")

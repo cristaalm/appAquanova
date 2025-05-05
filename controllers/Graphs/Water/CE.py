@@ -56,7 +56,7 @@ class GraphCE(BaseGraph):
         self.enableAutoRange(axis=pg.ViewBox.XYAxes, enable=True)
         self.getViewBox().autoRange()
 
-    def updateTemp(self, new_value: float):
+    def updateCE(self, new_value: float):
         """Alias para mantener compatibilidad con código existente"""
         self.update_data(new_value)
 

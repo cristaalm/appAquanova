@@ -13,6 +13,7 @@ from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QPalette, QColor, QIcon
 import os
 from dotenv import load_dotenv
+from dispositivos.controllers.deviceController import DispositivoController
 
 from PyQt6.QtCore import pyqtSignal
 
@@ -70,12 +71,26 @@ class Sidebar(QWidget):
 
         # Categoría: Supervisión
         self.add_category_separator("SUPERVISIÓN")
-        self.add_button("Nivel del agua", "subida-de-agua", "subida-de-agua_w", 1)
-        self.add_button("pH del agua", "humedad", "humedad_w", 2)
-        self.add_button("Temperatura del agua", "calor", "calor_w", 3)
-        self.add_button("Conductividad eléctrica", "tapon-de-agua-circular", "tapon-de-agua-circular_w", 4)
-        self.add_button("Ambiente", "temperatura-baja", "temperatura-baja_w", 5)
-
+        # Mapeo de id a seccion, nombre, iconos
+        secciones = {
+            5: ("Nivel del agua", "subida-de-agua", "subida-de-agua_w", 1),
+            2: ("pH del agua", "humedad", "humedad_w", 2),
+            4: ("Temperatura del agua", "calor", "calor_w", 3),
+            1: ("Conductividad eléctrica", "tapon-de-agua-circular", "tapon-de-agua-circular_w", 4),
+            3: ("Ambiente", "temperatura-baja", "temperatura-baja_w", 5),
+        }
+        # Instancia el controlador y consulta dispositivos activos
+        try:
+            from dispositivos.models import Dispositivo
+            dispositivos_activos = Dispositivo.objects.filter(estado=1)
+        except Exception as e:
+            print(f"Error al consultar dispositivos activos: {e}")
+            dispositivos_activos = []
+        # Solo agrega botones de dispositivos activos, respetando el orden de 'secciones'
+        ids_dispositivos_activos = set(d.id_dispositivo for d in dispositivos_activos)
+        for id_disp, (nombre, icono, icono_w, id_seccion) in secciones.items():
+            if id_disp in ids_dispositivos_activos:
+                self.add_button(nombre, icono, icono_w, id_seccion)
         # Categoría: Configuración
         self.add_category_separator("CONFIGURACIÓN")
         self.add_button("Dispositivos", "engranajes", "engranajes_w", 6)

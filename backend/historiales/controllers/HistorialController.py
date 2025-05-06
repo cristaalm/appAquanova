@@ -1,7 +1,6 @@
 from historiales.models import Historial
 from dispositivos.models import Dispositivo  # Asegúrate de importar el modelo correcto
 from historiales.serializers import HistorialSerializer
-from asgiref.sync import sync_to_async
 from utils.network import is_connected
 from datetime import datetime
 import requests
@@ -67,6 +66,9 @@ class HistorialController:
 
         pendientes = Historial.objects.filter(sync=False)
         total = pendientes.count()
+        if (total == 0):
+            print("No hay registros pendientes para sincronizar.")
+            return
         print(f"Sincronizando {total} registros pendientes en lotes de {batch_size}...")
 
         # Procesar en lotes
@@ -113,7 +115,7 @@ class HistorialController:
         try:
             print(url)
             print(API)
-            response = requests.post(url, json=payload, timeout=10)
+            response = requests.post(url, json=payload, timeout=30)
             print(response.json())
             response.raise_for_status()
             return True

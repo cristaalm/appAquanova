@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         self.sidebar_min_width = 200
         self.sidebar_max_width = 300
        
-        # Abrir la ventana en pantalla com        # Bloquear el ancho del sidebar
+        # Bloquear el ancho del sidebar
         self.sidebar_width = 250  # Ancho fijo en píxeles
         self.splitter.setSizes([self.sidebar_width, self.width() - self.sidebar_width])
         

@@ -103,38 +103,6 @@ class ContentContainer(QWidget):
         self.temp_value = 20.3
         self.hum_value = 58
 
-        company_list = [
-            {
-                "trade_name": "Comercial Uno",
-                "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Dos",
-                "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Uno",
-                "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Dos",
-                "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Uno",
-                "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Dos",
-                "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png",
-            },
-        ]
         # Inicialización de gráficas
         self.graph_ph_water = GraphHpWater()
         self.graph_temp_water = GraphTempWater()
@@ -242,16 +210,6 @@ class ContentContainer(QWidget):
         if self.content_state == 0:
             self.title_label.setText("Bienvenido a el monitor de AquaNova")
             self.content_layout.addWidget(self.card_dashboard)
-            # welcome_label = QLabel(
-            #     "¡Explora los datos de tus sensores en tiempo real!<br><br>"
-            #     "Este sistema te permite monitorear parámetros vitales del agua y del entorno, como el nivel, pH, temperatura, conductividad y condiciones ambientales. "
-            #     "Utiliza el menú lateral para comenzar.<br><br>"
-            #     "<i>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus luctus urna sed urna ultricies ac tempor dui sagittis.</i>"
-            # )
-            # welcome_label.setStyleSheet("color: #4CA4A5; font-size: 14px;")
-            # welcome_label.setWordWrap(True)
-            # welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            # self.content_layout.addWidget(welcome_label)
         elif self.content_state == 1:
             self.title_label.setText("Gestión de niveles de agua")
             self.content_layout.addWidget(self.water_component)

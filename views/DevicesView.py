@@ -13,12 +13,14 @@ class DevicesView(QWidget):
         # componente de notificaciones global
         self.notification = notification
 
-        # creación de los componentes
-        self.distance_card = DistanceCard(self.notification)
-        self.ph_card = PhCard(self.notification)
-        self.ce_card = CeCard(self.notification)
-        self.temp_card = TempCard(self.notification)
-        self.ambient_card = AmbientCard(self.notification)
+        # Mapeo de id a (nombre, clase_card) en el orden deseado
+        secciones = {
+            5: ("Nivel del agua", DistanceCard),
+            2: ("pH del agua", PhCard),
+            4: ("Temperatura del agua", TempCard),
+            1: ("Conductividad eléctrica", CeCard),
+            3: ("Ambiente", AmbientCard),
+        }
 
         # creación del layout principal vertical
         self.layout = QVBoxLayout()
@@ -31,12 +33,18 @@ class DevicesView(QWidget):
         self.cards_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.cards_layout.setContentsMargins(0, 0, 0, 0)
 
-        # agregar las tarjetas
-        self.cards_layout.addWidget(self.ph_card)
-        self.cards_layout.addWidget(self.ce_card)
-        self.cards_layout.addWidget(self.temp_card)
-        self.cards_layout.addWidget(self.distance_card)
-        self.cards_layout.addWidget(self.ambient_card)
+        # Agrega solo las cards de dispositivos activos y en orden
+        try:
+            from dispositivos.models import Dispositivo
+            dispositivos_activos = Dispositivo.objects.filter(estado=1)
+        except Exception as e:
+            print(f"Error al consultar dispositivos activos: {e}")
+            dispositivos_activos = []
+        ids_dispositivos_activos = set(d.id_dispositivo for d in dispositivos_activos)
+        for id_disp, (nombre, CardClass) in secciones.items():
+            if id_disp in ids_dispositivos_activos:
+                card = CardClass(self.notification)
+                self.cards_layout.addWidget(card)
 
         # Scroll Area para las cards
         self.scroll_area = QScrollArea()

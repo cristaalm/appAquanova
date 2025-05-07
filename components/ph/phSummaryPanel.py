@@ -210,9 +210,9 @@ class PhSummaryPanel(QFrame):
     def get_ph_status_text(self):
         ph_value = float(self.ph_value)
         if ph_value < PH_MIN_OPTIMAL_INDICATOR:
-            return "Bajo"
+            return "Ácido"
         elif ph_value > PH_MAX_OPTIMAL_INDICATOR:
-            return "Alto"
+            return "Alcalino"
         else:
             return "Óptimo"
     

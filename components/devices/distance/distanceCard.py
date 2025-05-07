@@ -111,7 +111,7 @@ class DistanceCard(QFrame):
             img_label.setText("TEMP")
         img_label.mousePressEvent = lambda event: self._show_image_viewer(img_path)
 
-        title = QLabel("<b>Sensor ultrasonico</b>")
+        title = QLabel("<b>Sensor ultrasónico</b>")
         title.setFont(QFont("Arial", 14))
         title.setStyleSheet("color: #045859; padding: 0px; margin: 0px; background: transparent;")
         title.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)

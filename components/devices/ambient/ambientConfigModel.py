@@ -14,7 +14,7 @@ class AmbientConfigModel:
 
     def load(self):
         """
-        Carga la configuración del sensor ultrasonico (ID 3) desde la base de datos.
+        Carga la configuración del sensor ultrasónico (ID 3) desde la base de datos.
         Devuelve un dict con los valores o None si falla.
         """
         if not self.controller:
@@ -31,7 +31,7 @@ class AmbientConfigModel:
     
     def save(self, min_val, max_val):
         """
-        Guarda los valores de configuración del sensor ultrasonico (ID 3) en la base de datos.
+        Guarda los valores de configuración del sensor ultrasónico (ID 3) en la base de datos.
         Devuelve True si fue exitoso, False si hubo error.
         """
         if not self.controller:

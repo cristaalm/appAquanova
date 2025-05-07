@@ -15,7 +15,7 @@ class configuraciones(models.Model):
         db_column="id_dispositvo",
     )
     valor = models.DecimalField(
-        max_digits=10, decimal_places=0
+        max_digits=10, decimal_places=2
     )  # Adjusted to match SQL definition
 
     class Meta:

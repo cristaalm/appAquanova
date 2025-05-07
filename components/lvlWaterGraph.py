@@ -19,19 +19,19 @@ class GraphLvlWater(QWidget):
 
         # Estilo de etiquetas
         label_style = {"color": "#045859", "font-size": "11px"}
-        self.plot_widget.setLabel("left", "Nivel (litros)", **label_style)
-        self.plot_widget.setLabel("bottom", "Tiempo (minutos)", **label_style)
+        self.plot_widget.setLabel("left", "cm Nivel", **label_style)
+        self.plot_widget.setLabel("bottom", "Tiempo (horas)", **label_style)
         self.plot_widget.addLegend()
         self.plot_widget.showGrid(x=True, y=True)
-        self.plot_widget.setYRange(0, 25)  # Rango de agua (puedes ajustarlo)
+        self.plot_widget.setYRange(0, 50)  # Rango de agua (puedes ajustarlo)
         self.plot_widget.enableAutoRange(axis=pg.ViewBox.XAxis, enable=True)
 
         # Estilo del trazo
-        pen = pg.mkPen(color=(76, 164, 165), width=2)
+        pen = pg.mkPen(color=(76, 164, 165), width=1)
 
         # Datos iniciales simulados
-        self.time_data = list(range(24))
-        self.level_data = [randint(1, 24) for _ in range(24)]
+        self.time_data = list(range(25))
+        self.level_data = [randint(1, 50) for _ in range(25)]
 
         # Dibujar línea inicial
         self.level_line = self.plot_widget.plot(

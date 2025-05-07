@@ -35,11 +35,11 @@ class GraphHp(BaseGraph):
         self.getPlotItem().showGrid(x=True, y=True, alpha=0.3)
         
         # Modificar el estilo de la línea para añadir símbolos
-        pen = pg.mkPen(color="#3C9A9B")
+        pen = pg.mkPen(color="#6cc6c1")
         self.curve.setPen(pen)
         self.curve.setSymbol('o')
         self.curve.setSymbolSize(7)
-        self.curve.setSymbolBrush("#3C9A9B")
+        self.curve.setSymbolBrush("#6cc6c1")
         
         # Habilitar auto-rango
         self.enableAutoRange(axis=pg.ViewBox.XYAxes, enable=True)

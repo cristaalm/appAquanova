@@ -1,31 +1,32 @@
-from .Graphs.Water.pH import GraphHp as GraphHpWater
-from .Graphs.Water.Temp import GraphTemp as GraphTempWater
-from .Graphs.Water.LvlWater import GraphLvlWater
-from .Graphs.Water.CE import GraphCE as GraphCEWater
-from .Graphs.Ambient.Temp import GraphTemp as GraphTempAmbient
-from .Graphs.Ambient.humidity import GraphHU as GraphHumidityAmbient
-from .Serial.AsyncSerialWorker import SerialWorker
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
-from PyQt6.QtGui import QPalette, QColor
-from PyQt6.QtCore import Qt
+from .Graphs.Ambient.humidity import GraphHU as GraphHumidityAmbient
 from .Notification.NotificationWidget import NotificationWidget
-from components.ph.pHComponent import phComponent
-from components.WaterComponent import WaterComponent
-from views.waterTemp import tempWaterComponent
+from .Graphs.Ambient.Temp import GraphTemp as GraphTempAmbient
+from .Graphs.Water.Temp import GraphTemp as GraphTempWater
 from views.conductivityE import conductivityComponent
+from .Graphs.Water.CE import GraphCE as GraphCEWater
+from .Graphs.Water.pH import GraphHp as GraphHpWater
+from components.lvlWater.WaterComponent import WaterComponent
+from .Serial.AsyncSerialWorker import SerialWorker
+from components.ph.pHComponent import phComponent
+from .Graphs.Water.LvlWater import GraphLvlWater
+from views.waterTemp import tempWaterComponent
 from views.DevicesView import DevicesView
+from PyQt6.QtGui import QPalette, QColor
 from views.ambient import Ambient
+from PyQt6.QtCore import Qt
 from random import randint
-
-# controladores Django
-from historiales.controllers.PHController import PHController
-from historiales.controllers.TempWaterController import TempWaterController
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from historiales.controllers.TempAmbientController import TempAmbientController
-from historiales.controllers.CEController import CEController
-from historiales.controllers.DistanceController import DistanceController
+from historiales.controllers.TempWaterController import TempWaterController
 from historiales.controllers.HUAmbientController import HUAmbientController
+from historiales.controllers.HistorialController import HistorialController
+from historiales.controllers.DistanceController import DistanceController
+from historiales.controllers.PHController import PHController
+from historiales.controllers.CEController import CEController
 from components.cardDashboard import CardDashboard
-
+from utils.backgroundSync import background_sync
 
 class ContentContainer(QWidget):
     def __init__(self):
@@ -89,43 +90,19 @@ class ContentContainer(QWidget):
         self.ce_controller = CEController()
         self.distance_controller = DistanceController()
         self.humidity_controller = HUAmbientController()
+        self.historial_controller = HistorialController()
+
+        # iniciar thread para sincronización del historial
+        sync_thread = threading.Thread(target=background_sync, args=(self.historial_controller,), daemon=True)
+        sync_thread.start()
+
+        # Pool de hilos para registro de datos
+        self.executor = ThreadPoolExecutor(max_workers=5)  # Puedes ajustar el número
 
         # Valores ambientales simulados
         self.temp_value = 20.3
         self.hum_value = 58
 
-        company_list = [
-            {
-                "trade_name": "Comercial Uno",
-                "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Dos",
-                "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Uno",
-                "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Dos",
-                "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Uno",
-                "legal_name": "S.A. de C.V. Uno",
-                "logo": "logo_text.png",
-            },
-            {
-                "trade_name": "Comercial Dos",
-                "legal_name": "S.A. de C.V. Dos",
-                "logo": "logo_text.png",
-            },
-        ]
         # Inicialización de gráficas
         self.graph_ph_water = GraphHpWater()
         self.graph_temp_water = GraphTempWater()
@@ -167,24 +144,29 @@ class ContentContainer(QWidget):
         try:
             if "ph" in data:
                 self.graph_ph_water.updateHp(float(data["ph"]))
-                self.ph_controller.set_history(float(data["ph"]))
+                self.executor.submit(self.ph_controller.set_history, float(data["ph"]))
+
                 self.ph_component.set_ph_value(data["ph"])  # Actualizar componente pH
             if "temp" in data:
                 self.graph_temp_water.updateTemp(float(data["temp"]))
-                self.temp_water_controller.set_history(float(data["temp"]))
+                self.executor.submit(self.temp_water_controller.set_history, float(data["temp"]))
+
             if "dist" in data:
                 self.graph_lvl_water.updateLvlWater(float(data["dist"]))
-                self.distance_controller.set_history(float(data["dist"]))
+                self.executor.submit(self.distance_controller.set_history, float(data["dist"]))
+
             if "ec" in data:
                 self.graph_ce_water.updateCE(float(data["ec"]))
-                self.ce_controller.set_history(float(data["ec"]))
-                self.ce_component.set_conductivity_value(data["ec"])  # Actualizar componente conductividad
+                self.executor.submit(self.ce_controller.set_history, float(data["ec"]))
+
             if "humidity" in data and data["humidity"] is not None:
                 self.graph_humidity_ambient.updateHU(float(data["humidity"]))
-                self.humidity_controller.set_history(float(data["humidity"]))
+                self.executor.submit(self.humidity_controller.set_history, float(data["humidity"]))
+
             if "dht_temp" in data and data["dht_temp"] is not None:
                 self.graph_temp_ambient.updateTemp(float(data["dht_temp"]))
-                self.temp_ambient_controller.set_history(float(data["dht_temp"]))
+                self.executor.submit(self.temp_ambient_controller.set_history, float(data["dht_temp"]))
+
         except (ValueError, TypeError) as e:
             print(f"Error procesando datos: {e}")
 
@@ -199,6 +181,8 @@ class ContentContainer(QWidget):
     def closeEvent(self, event):
         if self.serial_worker.isRunning():
             self.serial_worker.stop()
+        if hasattr(self, 'executor'):
+            self.executor.shutdown(wait=False)
         super().closeEvent(event)
 
     def update_content(self):
@@ -226,21 +210,11 @@ class ContentContainer(QWidget):
         if self.content_state == 0:
             self.title_label.setText("Bienvenido a el monitor de AquaNova")
             self.content_layout.addWidget(self.card_dashboard)
-            # welcome_label = QLabel(
-            #     "¡Explora los datos de tus sensores en tiempo real!<br><br>"
-            #     "Este sistema te permite monitorear parámetros vitales del agua y del entorno, como el nivel, pH, temperatura, conductividad y condiciones ambientales. "
-            #     "Utiliza el menú lateral para comenzar.<br><br>"
-            #     "<i>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus luctus urna sed urna ultricies ac tempor dui sagittis.</i>"
-            # )
-            # welcome_label.setStyleSheet("color: #4CA4A5; font-size: 14px;")
-            # welcome_label.setWordWrap(True)
-            # welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            # self.content_layout.addWidget(welcome_label)
         elif self.content_state == 1:
             self.title_label.setText("Gestión de niveles de agua")
             self.content_layout.addWidget(self.water_component)
         elif self.content_state == 2:
-            self.title_label.setText("Nivel de pH")
+            self.title_label.setText("Nivel de pH del agua")
             self.content_layout.addWidget(self.ph_component)
         elif self.content_state == 3:
             self.title_label.setText("Temperatura del Agua")

@@ -17,7 +17,7 @@ class phComponent(QWidget):
         self.setStyleSheet("background-color: #f5f7fa;")
         
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setContentsMargins(20, 0, 20, 0)
         main_layout.setSpacing(15)
         
         # Dos paneles superiores en fila con alturas iguales

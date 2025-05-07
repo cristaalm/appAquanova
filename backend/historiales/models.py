@@ -7,7 +7,7 @@ class Historial(models.Model):
     id_dispositivo = models.ForeignKey(
         Dispositivo, on_delete=models.CASCADE, db_column="id_dispositivo"
     )  # Corrected field name
-    valor = models.DecimalField(max_digits=6, decimal_places=2)  # Adjusted precision
+    valor = models.DecimalField(max_digits=10, decimal_places=2)  # Adjusted precision
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     sync = models.PositiveSmallIntegerField(default=0)
 

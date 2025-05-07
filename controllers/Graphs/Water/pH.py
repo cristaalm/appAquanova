@@ -7,25 +7,25 @@ class GraphHp(BaseGraph):
             title="",
             x_label="Tiempo (horas)",
             y_label="Valor (pH)",
-            line_color="#e63757",  # Rojo
-            data_range=(6.0, 8.0),  # Rango típico de pH
+            line_color="#e63757",
+            data_range=(0, 14),  # Rango completo de pH
         )
-        # Configuración adicional específica para pH
-        self.set_data_range(0, 14)  # Rango completo de pH
+        # Aplica configuración personalizada
+        self.custom_config()
+        
+        # Establece un rango inicial adecuado para la visualización
+        self.setYRange(0.0, 20.0)  # Establece el zoom inicial en un rango típico de pH
 
     def custom_config(self):
-        """Configuración adicional específica para temperatura"""
-        # Configuración de rango de temperatura
-        self.set_data_range(10, 40)  # Rango razonable para temperatura ambiente
-        
-        # Aplicar estilos de TempGraph
+        """Configuración adicional específica para pH"""
+        # Aplicar estilos
         style = {"color": "#333", "font-size": "11px"}
         
         # Establecer fondo blanco
         self.setBackground("white")
         
         # Configurar etiquetas con el estilo deseado
-        self.getPlotItem().setLabel("left", "Ph potencial de hidrógeno", **style)
+        self.getPlotItem().setLabel("left", "pH potencial de hidrógeno", **style)
         self.getPlotItem().setLabel("bottom", "Tiempo (horas)", **style)
         
         # Añadir leyenda
@@ -35,15 +35,14 @@ class GraphHp(BaseGraph):
         self.getPlotItem().showGrid(x=True, y=True, alpha=0.3)
         
         # Modificar el estilo de la línea para añadir símbolos
-        pen = pg.mkPen(color="#6cc6c1")
+        pen = pg.mkPen(color="#6CC6C1")
         self.curve.setPen(pen)
         self.curve.setSymbol('o')
         self.curve.setSymbolSize(7)
-        self.curve.setSymbolBrush("#6cc6c1")
+        self.curve.setSymbolBrush("#6CC6C1")
         
-        # Habilitar auto-rango
-        self.enableAutoRange(axis=pg.ViewBox.XYAxes, enable=True)
-        self.getViewBox().autoRange()
+        # Configura los límites físicos (min/max permitidos)
+        self.getViewBox().setLimits(yMin=0, yMax=14)
 
     def updateHp(self, new_value: float):
         """Alias para mantener compatibilidad con código existente"""

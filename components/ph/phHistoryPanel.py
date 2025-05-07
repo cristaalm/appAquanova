@@ -10,7 +10,7 @@ from .phConstants import *
 class PhHistoryPanel(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.table_height = 400
+        self.table_height = 300
         self.all_data = []
         self.setup_ui()
         self.populate_table()
@@ -170,26 +170,26 @@ class PhHistoryPanel(QFrame):
             # Color según el valor de pH
             ph_value = float(valor)
             if ph_value < PH_MIN_NEUTRAL:
-                valor_item.setForeground(QBrush(QColor("#b91c1c")))  # Rojo para bajo
+                valor_item.setForeground(QBrush(QColor("#4ca4a5")))  # Rojo
             elif ph_value > PH_MAX_NEUTRAL:
-                valor_item.setForeground(QBrush(QColor("#92400e")))  # Naranja para alto
+                valor_item.setForeground(QBrush(QColor("#4ca4a5")))  # Naranja
             else:
-                valor_item.setForeground(QBrush(QColor("#166534")))  # Verde para normal
+                valor_item.setForeground(QBrush(QColor("#4ca4a5")))  # Verde
             
             estado_item = QTableWidgetItem(estado)
             estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             
             if estado == "Ácido":
                 estado_item.setBackground(QBrush(QColor("#fee2e2")))
-                estado_item.setForeground(QBrush(QColor("#b91c1c")))
+                estado_item.setForeground(QBrush(QColor("#d9536f")))
                 estado_item.setIcon(icono_acido)
             elif estado == "Alcalino":
                 estado_item.setBackground(QBrush(QColor("#fef3c7")))
-                estado_item.setForeground(QBrush(QColor("#92400e")))
+                estado_item.setForeground(QBrush(QColor("#f4bc19")))
                 estado_item.setIcon(icono_alcalino)
             else:  # NEUTRO
                 estado_item.setBackground(QBrush(QColor("#dcfce7")))
-                estado_item.setForeground(QBrush(QColor("#166534")))
+                estado_item.setForeground(QBrush(QColor("#27b061")))
                 estado_item.setIcon(icono_neutro)
             
             self.history_table.setItem(row, 0, fecha_item)

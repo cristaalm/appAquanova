@@ -25,7 +25,7 @@ class GraphHp(BaseGraph):
         self.setBackground("white")
         
         # Configurar etiquetas con el estilo deseado
-        self.getPlotItem().setLabel("left", "Potencial de hidrógeno", **style)
+        self.getPlotItem().setLabel("left", "Ph potencial de hidrógeno", **style)
         self.getPlotItem().setLabel("bottom", "Tiempo (horas)", **style)
         
         # Añadir leyenda

@@ -48,14 +48,14 @@ class CurrentTemp(QWidget):
     def get_status_widget(self):
         # Determinar el estado y el icono correspondiente
         if self.value < self.rango_min:  
-            self.status = "Baja"
-            icon_name = "tuerca.png"
+            self.status = "Bajo"
+            icon_name = "rojoElecricity.png"
         elif self.value > self.rango_max:  
-            self.status = "Alta"
-            icon_name = "tuerca.png"  #CAMBIARRRRRRRRRRRRRRRRRR
+            self.status = "Alto"
+            icon_name = "verdeElecricity.png"  #CAMBIARRRRRRRRRRRRRRRRRR
         else: 
-            self.status = "Optima"
-            icon_name = "tuerca.png"
+            self.status = "Optimo"
+            icon_name = "amarilloElecricity.png"
 
         status_container = QWidget()
         status_container.setStyleSheet("""
@@ -145,7 +145,7 @@ class CurrentTemp(QWidget):
         title_layout.addStretch()
         
         temp_icon_label = QLabel()
-        temp_pixmap = self.load("icons","verdeElecricity.png", 26)
+        temp_pixmap = self.load("icons","verdeElecricity.png", 24)
         if temp_pixmap:
             temp_icon_label.setPixmap(temp_pixmap)
         
@@ -153,7 +153,7 @@ class CurrentTemp(QWidget):
         self.summary_layout.addLayout(title_layout)  
         
         # Subtítulo
-        subtitle = QLabel("Registro actual de conductividad elécrica")
+        subtitle = QLabel("Estado de conductividad elécrica")
         subtitle.setStyleSheet("""
             font-size: 12px;
             font-style: italic;
@@ -166,7 +166,7 @@ class CurrentTemp(QWidget):
         
         # Ícono del termómetro
         thermometer_icon_label = QLabel()
-        thermometer_pixmap = self.load("icons","elecricity.png", 50)
+        thermometer_pixmap = self.load("icons","elecricity.png", 45)
         if thermometer_pixmap:
             thermometer_icon_label.setPixmap(thermometer_pixmap)
         value_layout.addWidget(thermometer_icon_label)
@@ -182,7 +182,7 @@ class CurrentTemp(QWidget):
         """)
         value_layout.addWidget(self.value_label)
 
-        unit_label = QLabel("µS/cm")
+        unit_label = QLabel("S/m")
         unit_label.setStyleSheet("""
             font-size: 24px;
             color: #045859;
@@ -199,14 +199,14 @@ class CurrentTemp(QWidget):
         labels_layout = QHBoxLayout()
         labels_layout.setContentsMargins(0, 0, 0, 0)  
 
-        min_label = QLabel(f" {self.CE_min}µ")
+        min_label = QLabel(f"MÍN {self.CE_min}µS")
         min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
 
         labels_layout.addStretch()
 
-        max_label = QLabel(f" {self.CE_max}µ")
+        max_label = QLabel(f"MÁX {self.CE_max}µS")
         max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)

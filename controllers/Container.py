@@ -220,7 +220,7 @@ class ContentContainer(QWidget):
             self.title_label.setText("Temperatura del Agua")
             self.content_layout.addWidget(self.temp_water_component)
         elif self.content_state == 4:
-            self.title_label.setText("Conductividad Eléctrica")
+            self.title_label.setText("Conductividad eléctrica")
             self.content_layout.addWidget(self.ce_component)  # Usar el nuevo componente
         elif self.content_state == 5:
             self.title_label.setText("Supervisión medioambiental")

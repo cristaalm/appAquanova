@@ -22,7 +22,7 @@ class TableCard(QWidget):
         self.current_filter = "Todo" 
 
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(5, 0, 5, 5) 
+        self.layout.setContentsMargins(0, 0, 0, 0) 
         
         self.history_panel = self.create_history_panel()
         self.layout.addWidget(self.history_panel)

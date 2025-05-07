@@ -43,11 +43,11 @@ class conductivityComponent(QWidget):
         table_layout.addWidget(table_card)
         
         top_layout = QHBoxLayout()
-        top_layout.setContentsMargins(20, 20, 20, 0)  
+        top_layout.setContentsMargins(20, 0, 20, 0)  
         top_layout.setSpacing(15)
         
         top_layout.addWidget(panel, 1)
         top_layout.addWidget(graph_panel, 4)
 
         main_layout.addLayout(top_layout, 1)
-        main_layout.addWidget(table_container, 10)  
+        main_layout.addWidget(table_container, 10)

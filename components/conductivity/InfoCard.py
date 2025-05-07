@@ -49,13 +49,13 @@ class CurrentTemp(QWidget):
         # Determinar el estado y el icono correspondiente
         if self.value < self.rango_min:  
             self.status = "Baja"
-            icon_name = "cold_info.png"
+            icon_name = "tuerca.png"
         elif self.value > self.rango_max:  
             self.status = "Alta"
-            icon_name = "hot_info.png"  #CAMBIARRRRRRRRRRRRRRRRRR
+            icon_name = "tuerca.png"  #CAMBIARRRRRRRRRRRRRRRRRR
         else: 
             self.status = "Optima"
-            icon_name = "good_info.png"
+            icon_name = "tuerca.png"
 
         status_container = QWidget()
         status_container.setStyleSheet("""
@@ -153,7 +153,7 @@ class CurrentTemp(QWidget):
         self.summary_layout.addLayout(title_layout)  
         
         # Subtítulo
-        subtitle = QLabel("Monitoreo de la conductividad elécrica")
+        subtitle = QLabel("Registro actual de conductividad elécrica")
         subtitle.setStyleSheet("""
             font-size: 12px;
             font-style: italic;
@@ -199,14 +199,14 @@ class CurrentTemp(QWidget):
         labels_layout = QHBoxLayout()
         labels_layout.setContentsMargins(0, 0, 0, 0)  
 
-        min_label = QLabel(f"MÍN {self.CE_min}µ")
+        min_label = QLabel(f" {self.CE_min}µ")
         min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
 
         labels_layout.addStretch()
 
-        max_label = QLabel(f"MÁX {self.CE_max}µ")
+        max_label = QLabel(f" {self.CE_max}µ")
         max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)

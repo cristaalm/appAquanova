@@ -410,8 +410,11 @@ class WaterComponent(QWidget):
 
         self.history_table.verticalHeader().setDefaultSectionSize(0)  
         self.history_table.verticalHeader().setMinimumSectionSize(0)
-        self.history_table.setMinimumHeight(self.table_height)
-        self.history_table.setMaximumHeight(600)
+        #self.history_table.setMinimumHeight(self.table_height) 
+        #self.history_table.setMaximumHeight(600)
+        self.history_table.setMinimumHeight(0) 
+        self.history_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
         layout.addWidget(self.history_table)
         return history_panel
 
@@ -433,6 +436,11 @@ class WaterComponent(QWidget):
         ("27/04/2025 10:10", "9.0", "Bajo"),
         ("27/04/2025 10:20", "42.1", "Alto"),
         ("27/04/2025 10:30", "26.7", "Óptimo"),
+        ("27/04/2025 09:40", "10.0", "Bajo"),
+        ("27/04/2025 09:50", "35.5", "Alto"),
+        ("27/04/2025 10:00", "23.4", "Óptimo"),
+        ("27/04/2025 10:10", "9.0", "Bajo"),
+        ("27/04/2025 10:20", "42.1", "Alto"),
     ]
 
 

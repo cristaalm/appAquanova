@@ -78,7 +78,7 @@ class WaterSummaryPanel(QFrame):
         value_container.setContentsMargins(0, 0, 0, 0)
 
         # Ruta correcta a la imagen de gota rellena
-        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../resources/icons/icon_water.png")
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/icons/icon-water.png")
 
         # Icono de gota rellena
         water_icon_label = QLabel()

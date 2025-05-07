@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFrame, QGraphicsDropShadowEffect
 from PyQt6.QtGui import QColor
 import pyqtgraph as pg
+from PyQt6 import QtWidgets
 from random import randint
 
 class GraphLvlWater(QWidget):
@@ -9,8 +10,10 @@ class GraphLvlWater(QWidget):
         self.setup_ui()
 
     def setup_ui(self):
+        central_widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(central_widget)
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 30, 0, 0)
         layout.setSpacing(0)
 
         # Crear el plot
@@ -51,7 +54,7 @@ class GraphLvlWater(QWidget):
 
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(15)
-        shadow.setColor(QColor(57, 195, 239))  # Misma sombra que tu panel
+        shadow.setColor(QColor(255, 255, 255))  # Misma sombra que tu panel
         shadow.setOffset(0, 3)
         frame.setGraphicsEffect(shadow)
 

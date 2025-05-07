@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QIcon, QBrush
-from components.lvlWaterGraph import GraphLvlWater
+from components.lvlWater.lvlWaterGraph import GraphLvlWater
 import os
 
 
@@ -24,7 +24,7 @@ class WaterComponent(QWidget):
         self.setStyleSheet("background-color: #f5f7fa;")
 
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setContentsMargins(20, 0, 20, 0)
         main_layout.setSpacing(15)
 
         top_layout = QHBoxLayout()
@@ -101,7 +101,7 @@ class WaterComponent(QWidget):
         value_container.setContentsMargins(0, 0, 0, 0)
 
         # Ruta correcta a la imagen de gota rellena
-        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../resources/icons/icon_water.png")
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../resources/icons/icon_water.png")
 
         # Icono de gota rellena
         water_icon_label = QLabel()
@@ -454,17 +454,17 @@ class WaterComponent(QWidget):
             estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
 
             if estado == "Bajo":
-                estado_item.setIcon(QIcon("./resources/icons/low-water-red.png"))
-                estado_item.setBackground(QBrush(QColor("#fef3c7")))
-                estado_item.setForeground(QColor("#92400e"))
+                estado_item.setIcon(QIcon("./resources/icons/low-water-blue.png"))
+                estado_item.setBackground(QBrush(QColor("#1E89CF")))
+                estado_item.setForeground(QColor("#1E89CF"))
             elif estado == "Óptimo":
                 estado_item.setIcon(QIcon("./resources/icons/optimal-water-green.png"))
-                estado_item.setBackground(QBrush(QColor("#dcfce7")))
-                estado_item.setForeground(QColor("#166534"))
+                estado_item.setBackground(QBrush(QColor("#27b061")))
+                estado_item.setForeground(QColor("#27b061"))
             elif estado == "Alto":
-                estado_item.setIcon(QIcon("./resources/icons/overflow-water-red.png"))
-                estado_item.setBackground(QBrush(QColor("#fee2e2")))
-                estado_item.setForeground(QColor("#b91c1c"))
+                estado_item.setIcon(QIcon("./resources/icons/overflow-water-yellow.png"))
+                estado_item.setBackground(QBrush(QColor("#f4b400")))
+                estado_item.setForeground(QColor("#f4b400"))
 
             self.history_table.setItem(row, 2, estado_item)
             self.history_table.setRowHeight(row, 31)

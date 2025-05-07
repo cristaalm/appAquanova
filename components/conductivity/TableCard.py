@@ -143,7 +143,7 @@ class TableCard(QWidget):
                 alternate-background-color: #f8fafc;
                 color: #4CA4A5;
                 font-size: 14px;
-                padding-bottom: 20px;
+                padding-bottom: 50px;
                 margin: 0px; 
             }
             QHeaderView::section {
@@ -155,14 +155,16 @@ class TableCard(QWidget):
                 font-size: 15px;
             }
             QTableWidget::item {
-                padding: 6px;
+                padding: 5px;
                 border-bottom: 1px solid #c5efec;
+                border-top: 1px;
             }
             QScrollBar:vertical {
                 background: #f1f5f9;
                 width: 10px;
                 border-radius: 10px;
                 margin-left: 5px;
+                margin-bottom: 50px;
             }
             QScrollBar::handle:vertical {
                 background: #4CA4A5;
@@ -177,8 +179,8 @@ class TableCard(QWidget):
             }
         """)
 
-        self.history_table.verticalHeader().setDefaultSectionSize(40)  
-        self.history_table.verticalHeader().setMinimumSectionSize(40)
+        self.history_table.verticalHeader().setDefaultSectionSize(25)  
+        self.history_table.verticalHeader().setMinimumSectionSize(25)
         self.history_table.setMinimumHeight(self.table_height)
         self.history_table.setMaximumHeight(600)
         history_layout.addWidget(self.history_table)
@@ -217,14 +219,14 @@ class TableCard(QWidget):
             layout.setAlignment(Qt.AlignmentFlag.AlignLeft) 
 
             icon_temp = QLabel()
-            valor_pixmap = self.load("icons", "verdeElecricity.png", 16)
+            valor_pixmap = self.load("icons", "verdeElecricity.png", 12)
             if valor_pixmap:
                 icon_temp.setPixmap(valor_pixmap)
             layout.addWidget(icon_temp)
             
             # Columna de valor
             value_label = QLabel(f"{item['valor']}")
-            value_label.setStyleSheet("color: #333;")
+            value_label.setStyleSheet("color: #4CA4A5; font-size: 14px;")
             layout.addWidget(value_label)
             
             self.history_table.setCellWidget(row, 1, container)
@@ -234,15 +236,15 @@ class TableCard(QWidget):
             if temp_value < self.rango_min:
                 estado = "Bajo"
                 icon_name = "rojoElecricity.png"
-                color_style = "color: #D9534F;"  # Azul para frío
+                color_style = "color: #D9534F; font-size: 14px;"
             elif temp_value > self.rango_max:
                 estado = "Alto"
                 icon_name = "amarilloElecricity.png"
-                color_style = "color:#F4B400;"  # Rojo para caliente
+                color_style = "color:#F4B400; font-size: 14px;"
             else:
                 estado = "Óptimo"
                 icon_name = "verdeElecricity.png"
-                color_style = "color: #2ECC71;"  # Verde para ambiente
+                color_style = "color: #2ECC71; font-size: 14px;"
 
             # Crear widget contenedor
             container = QWidget()
@@ -255,7 +257,7 @@ class TableCard(QWidget):
 
             # Añadir icono
             icon_label = QLabel()
-            estado_pixmap = self.load("icons", icon_name, 16)
+            estado_pixmap = self.load("icons", icon_name, 10)
             if estado_pixmap:
                 icon_label.setPixmap(estado_pixmap)
             layout.addWidget(icon_label)
@@ -264,7 +266,7 @@ class TableCard(QWidget):
             text_label.setStyleSheet(color_style)
             layout.addWidget(text_label)
             self.history_table.setCellWidget(row, 2, container)
-            self.history_table.setRowHeight(row, 35)
+            self.history_table.setRowHeight(row, 28)
 
     def filter_data(self, text):
         """Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda"""

@@ -164,6 +164,7 @@ class TableCard(QWidget):
                 width: 10px;
                 border-radius: 10px;
                 margin-left: 5px;
+                margin-bottom: 50px;
             }
             QScrollBar::handle:vertical {
                 background: #4CA4A5;
@@ -256,7 +257,7 @@ class TableCard(QWidget):
 
             # Añadir icono
             icon_label = QLabel()
-            estado_pixmap = self.load("icons", icon_name, 12)
+            estado_pixmap = self.load("icons", icon_name, 10)
             if estado_pixmap:
                 icon_label.setPixmap(estado_pixmap)
             layout.addWidget(icon_label)
@@ -265,7 +266,7 @@ class TableCard(QWidget):
             text_label.setStyleSheet(color_style)
             layout.addWidget(text_label)
             self.history_table.setCellWidget(row, 2, container)
-            self.history_table.setRowHeight(row, 30)
+            self.history_table.setRowHeight(row, 28)
 
     def filter_data(self, text):
         """Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda"""

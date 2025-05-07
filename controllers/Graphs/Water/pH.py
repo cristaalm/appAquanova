@@ -14,7 +14,7 @@ class GraphHp(BaseGraph):
         self.custom_config()
         
         # Establece un rango inicial adecuado para la visualización
-        self.setYRange(0.0, 20.0)  # Establece el zoom inicial en un rango típico de pH
+        self.setYRange(0.0, 20.0)  # Establece el zoom inicial 
 
     def custom_config(self):
         """Configuración adicional específica para pH"""

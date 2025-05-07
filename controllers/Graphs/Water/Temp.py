@@ -13,6 +13,8 @@ import pyqtgraph as pg
 
 load_dotenv()
 SHADOW = os.getenv("SHADOW")
+WATER_TEMP_COLOR = os.getenv("WATER_TEMP_COLOR")
+GRAPH_POINT_SIZE = os.getenv("GRAPH_POINT_SIZE")
 
 
 class GraphTemp(BaseGraph):
@@ -51,15 +53,11 @@ class GraphTemp(BaseGraph):
         self.getPlotItem().showGrid(x=True, y=True, alpha=0.3)
         
         # Modificar el estilo de la línea para añadir símbolos
-        pen = pg.mkPen(color="#3C9A9B")
+        pen = pg.mkPen(color=WATER_TEMP_COLOR)
         self.curve.setPen(pen)
         self.curve.setSymbol('o')
-        self.curve.setSymbolSize(7)
-        self.curve.setSymbolBrush("#3C9A9B")
-        
-        # Habilitar auto-rango
-        self.enableAutoRange(axis=pg.ViewBox.XYAxes, enable=True)
-        self.getViewBox().autoRange()
+        self.curve.setSymbolSize(GRAPH_POINT_SIZE)
+        self.curve.setSymbolBrush(WATER_TEMP_COLOR)
 
     def updateTemp(self, new_value: float):
         """Alias para mantener compatibilidad con código existente"""

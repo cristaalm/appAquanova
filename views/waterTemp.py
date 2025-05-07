@@ -32,11 +32,14 @@ class tempWaterComponent(QWidget):
         graph = self.graph
         graph_panel = graph.create_graph_panel()
         
+        table_widget = QWidget()
         table_container = QFrame()
         table_container.setFrameShape(QFrame.Shape.NoFrame)
         table_container.setStyleSheet("background: transparent;")
         table_layout = QVBoxLayout(table_container)
         table_layout.setContentsMargins(15, 0, 15, 5) 
+        table_layout.setSpacing(0)
+        table_layout.addWidget(table_widget)
         
         # Create the table card
         table_card = TableCard(self.rango_max, self.rango_min)

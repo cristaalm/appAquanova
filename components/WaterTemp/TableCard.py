@@ -143,7 +143,7 @@ class TableCard(QWidget):
                 alternate-background-color: #f8fafc;
                 color: #4CA4A5;
                 font-size: 14px;
-                padding-bottom: 50px;
+                padding-bottom: 54px;
                 margin: 0px; 
             }
             QHeaderView::section {
@@ -164,7 +164,7 @@ class TableCard(QWidget):
                 width: 10px;
                 border-radius: 10px;
                 margin-left: 5px;
-                margin-bottom: 50px;
+                margin-bottom: 60px;
             }
             QScrollBar::handle:vertical {
                 background: #4CA4A5;
@@ -207,7 +207,7 @@ class TableCard(QWidget):
         for row, item in enumerate(self.all_data):
             # Columna de fecha
             fecha_item = QTableWidgetItem(item["fecha"])
-            fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft)
+            fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             self.history_table.setItem(row, 0, fecha_item)
 
             container = QWidget()
@@ -216,7 +216,7 @@ class TableCard(QWidget):
             layout = QHBoxLayout(container)
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(5)
-            layout.setAlignment(Qt.AlignmentFlag.AlignLeft) 
+            layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter) 
 
             icon_temp = QLabel()
             valor_pixmap = self.load("icons", "temperature.png", 12)
@@ -253,7 +253,7 @@ class TableCard(QWidget):
             layout = QHBoxLayout(container)
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(2)
-            layout.setAlignment(Qt.AlignmentFlag.AlignLeft)  
+            layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)  
 
             # Añadir icono
             icon_label = QLabel()

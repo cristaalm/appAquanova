@@ -64,9 +64,9 @@ class PhSummaryPanel(QFrame):
         
         # Icono al lado del título
         icon_label = QLabel()
-        icon_pixmap = QPixmap("./resources/icons/ph_icon.png")
+        icon_pixmap = QPixmap("./resources/icons/ph-metro.png")
         if not icon_pixmap.isNull():
-            icon_label.setPixmap(icon_pixmap.scaled(QSize(30, 30), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            icon_label.setPixmap(icon_pixmap.scaled(QSize(28, 28), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         else:
             icon_label.setText("○")
             icon_label.setStyleSheet("font-size: 20px; color: #045859;")

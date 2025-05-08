@@ -10,7 +10,7 @@ from .phConstants import *
 class PhHistoryPanel(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.table_height = 300
+        self.table_height = 170
         self.all_data = []
         self.setup_ui()
         self.populate_table()
@@ -66,7 +66,7 @@ class PhHistoryPanel(QFrame):
         # Tabla
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(3)
-        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Potencial de hidrógeno (ph)", "Estado"])
+        self.history_table.setHorizontalHeaderLabels(["Fecha y hora", "Medida del pH", "Estado"])
         
         self.history_table.setVerticalScrollMode(QTableWidget.ScrollMode.ScrollPerPixel)
         self.history_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -195,7 +195,7 @@ class PhHistoryPanel(QFrame):
             self.history_table.setItem(row, 0, fecha_item)
             self.history_table.setItem(row, 1, valor_item)
             self.history_table.setItem(row, 2, estado_item)
-            self.history_table.setRowHeight(row, 31)
+            self.history_table.setRowHeight(row, 28)
     
     def filter_data(self, text):
         search_text = text.lower()

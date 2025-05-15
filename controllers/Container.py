@@ -140,32 +140,42 @@ class ContentContainer(QWidget):
         self.update_content()
 
     def handle_serial_data(self, data):
-        print("Datos recibidos:", data)
+        """
+        Ejemplo de como se resiven los datos desde el serial:
+        {"sensor":"temp","valor":27.2}
+        {"sensor":"dist","valor":54.4}
+        {"sensor":"ec","valor":2623}
+        {"sensor":"humedad_dht","valor":50.9}
+        {"sensor":"temp_dht","valor":20}
+        {"sensor":"ph","valor":20}
+        """
         try:
-            if "ph" in data:
-                self.graph_ph_water.updateHp(float(data["ph"]))
-                self.executor.submit(self.ph_controller.set_history, float(data["ph"]))
+            sensor = data["sensor"]
+            valor = data["valor"]
+            if sensor == "ph":
+                self.graph_ph_water.updateHp(float(valor))
+                self.executor.submit(self.ph_controller.set_history, float(valor))
 
-                self.ph_component.set_ph_value(data["ph"])  # Actualizar componente pH
-            if "temp" in data:
-                self.graph_temp_water.updateTemp(float(data["temp"]))
-                self.executor.submit(self.temp_water_controller.set_history, float(data["temp"]))
+                self.ph_component.set_ph_value(valor)  # Actualizar componente pH
+            elif sensor == "temp":
+                self.graph_temp_water.updateTemp(float(valor))
+                self.executor.submit(self.temp_water_controller.set_history, float(valor))
 
-            if "dist" in data:
-                self.graph_lvl_water.updateLvlWater(float(data["dist"]))
-                self.executor.submit(self.distance_controller.set_history, float(data["dist"]))
+            elif sensor == "dist":
+                self.graph_lvl_water.updateLvlWater(float(valor))
+                self.executor.submit(self.distance_controller.set_history, float(valor))
 
-            if "ec" in data:
-                self.graph_ce_water.updateCE(float(data["ec"]))
-                self.executor.submit(self.ce_controller.set_history, float(data["ec"]))
+            elif sensor == "ec":
+                self.graph_ce_water.updateCE(float(valor))
+                self.executor.submit(self.ce_controller.set_history, float(valor))
 
-            if "humidity" in data and data["humidity"] is not None:
-                self.graph_humidity_ambient.updateHU(float(data["humidity"]))
-                self.executor.submit(self.humidity_controller.set_history, float(data["humidity"]))
+            elif sensor == "humidity":
+                self.graph_humidity_ambient.updateHU(float(valor))
+                self.executor.submit(self.humidity_controller.set_history, float(valor))
 
-            if "dht_temp" in data and data["dht_temp"] is not None:
-                self.graph_temp_ambient.updateTemp(float(data["dht_temp"]))
-                self.executor.submit(self.temp_ambient_controller.set_history, float(data["dht_temp"]))
+            elif sensor == "dht_temp":
+                self.graph_temp_ambient.updateTemp(float(valor))
+                self.executor.submit(self.temp_ambient_controller.set_history, float(valor))
 
         except (ValueError, TypeError) as e:
             print(f"Error procesando datos: {e}")

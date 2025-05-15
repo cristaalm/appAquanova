@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "dispositivos",
     "historiales",
     "plantas",
+    "actuadores",
     "sistema",
 ]
 

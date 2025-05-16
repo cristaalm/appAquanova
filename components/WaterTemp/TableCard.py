@@ -3,22 +3,20 @@ from PyQt6.QtWidgets import (
     QHeaderView, QSpacerItem, QSizePolicy, QFrame, QGraphicsDropShadowEffect,
     QLineEdit, QTableWidgetItem
 )
-from random import randint
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QPixmap
 import os 
 
 class TableCard(QWidget):
-    def __init__(self, max, min, parent=None):
+    def __init__(self, historial, max, min, parent=None):
         super().__init__(parent)
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.table_height = 400
-        self.table_data = []  # Lista para almacenar datos de la tabla
-        self.all_data = []    # Lista para datos originales completos
+        self.table_height = 400 
+        self.all_data = historial
 
         self.rango_max = max
         self.rango_min = min
-
+ 
         self.current_filter = "Todo" 
 
         self.layout = QVBoxLayout(self)
@@ -188,25 +186,11 @@ class TableCard(QWidget):
         return history_panel
     
     def populate_table(self):
-        self.all_data = [
-            {"fecha": "10/04/2025 09:00am", "valor": randint(25, 35)},
-            {"fecha": "10/04/2025 12:00pm", "valor": randint(25, 35)},
-            {"fecha": "10/04/2025 03:00pm", "valor": randint(25, 35)},
-            {"fecha": "10/04/2025 06:00pm", "valor": randint(25, 35)},
-            {"fecha": "11/04/2025 09:00am", "valor": randint(25, 35)},
-            {"fecha": "11/04/2025 12:00pm", "valor": randint(25, 35)},
-            {"fecha": "11/04/2025 03:00pm", "valor": randint(25, 35)},
-            {"fecha": "11/04/2025 06:00pm", "valor": randint(25, 35)},
-            {"fecha": "12/04/2025 09:00am", "valor": randint(25, 35)},
-            {"fecha": "12/04/2025 12:00pm", "valor": randint(25, 35)},
-            {"fecha": "12/04/2025 03:00pm", "valor": randint(25, 35)},
-            {"fecha": "12/04/2025 06:00pm", "valor": randint(25, 35)},
-        ]
         self.history_table.setRowCount(len(self.all_data))
 
         for row, item in enumerate(self.all_data):
             # Columna de fecha
-            fecha_item = QTableWidgetItem(item["fecha"])
+            fecha_item = QTableWidgetItem(item["fecha_ingreso"])
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             self.history_table.setItem(row, 0, fecha_item)
 
@@ -311,3 +295,19 @@ class TableCard(QWidget):
         size = super().sizeHint()
         size.setWidth(800) 
         return size
+    
+    def clear_and_update_table(self, new_data):
+        """Actualiza la tabla con nuevos datos, limpiando completamente el contenido anterior"""
+        self.all_data = new_data
+         
+        self.history_table.clearContents()
+        self.history_table.setRowCount(0)
+         
+        self.populate_table() 
+        current_filter = self.search_filter.text()
+        if current_filter:
+            self.filter_data(current_filter)
+            
+    def update_table(self, new_data):
+        """Método alternativo que mantiene la compatibilidad con el código existente"""
+        self.clear_and_update_table(new_data)

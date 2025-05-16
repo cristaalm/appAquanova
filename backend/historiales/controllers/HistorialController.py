@@ -30,6 +30,21 @@ class HistorialController:
             return registro.valor
         except (IndexError, Dispositivo.DoesNotExist):
             return None
+    
+    def get_historial(self):
+        """
+        Obtiene el historial de un dispositivo específico.
+        """
+        if (self.id_dispositivo is None):
+            return None
+        try:
+            dispositivo = Dispositivo.objects.get(id_dispositivo=self.id_dispositivo)
+            registros = Historial.objects.filter(id_dispositivo=dispositivo).order_by(
+                "-fecha_ingreso"
+            )
+            return registros
+        except Dispositivo.DoesNotExist:
+            return None
 
     def set_history(self, valor):
         """

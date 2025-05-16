@@ -113,11 +113,10 @@ class ContentContainer(QWidget):
         self.graph_temp_ambient = GraphTempAmbient()
         self.graph_humidity_ambient = GraphHumidityAmbient()
 
-        water_temp = randint(25, 35)
         ce_value = randint(1000, 1500)        # Componentes
         self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
-        self.temp_water_component = tempWaterComponent(self.graph_temp_water, water_temp)
+        self.temp_water_component = tempWaterComponent(self.graph_temp_water)
         self.ce_component = conductivityComponent(self.graph_ce_water,ce_value)  # Nuevo componente
         self.ambient = Ambient(
             self.graph_temp_ambient,

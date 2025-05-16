@@ -16,12 +16,12 @@ class CurrentTemp(QWidget):
     def __init__(self, value, temp_min, temp_max, rango_max, rango_min):
         super().__init__()
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.value = value
-        # Rangos de temperatura
+        self.value = value 
         self.temp_max = temp_max
         self.temp_min = temp_min
         self.rango_max = rango_max
         self.rango_min = rango_min
+        
         self.panel = self.create_summary_panel()
 
     # Función para cargar íconos
@@ -166,7 +166,7 @@ class CurrentTemp(QWidget):
         
         # Ícono del termómetro
         thermometer_icon_label = QLabel()
-        thermometer_pixmap = self.load("icons","temperature.png", 55)
+        thermometer_pixmap = self.load("icons","temperature.png", 46)
         if thermometer_pixmap:
             thermometer_icon_label.setPixmap(thermometer_pixmap)
         value_layout.addWidget(thermometer_icon_label)
@@ -174,7 +174,7 @@ class CurrentTemp(QWidget):
         # Valor de la temperatura
         self.value_label = QLabel(f"{self.value}")
         self.value_label.setStyleSheet("""
-            font-size: 56px;
+            font-size: 46px;
             font-weight: bold;
             color: #045859;
             text-align: center;

@@ -86,6 +86,23 @@ class SerialWorker(QThread):
                 finally:
                     self.serial_conn = None
 
+    def send_data(self, data):
+        """
+        Envía datos por el puerto serial de forma segura.
+        Si data es str, se codifica a bytes en UTF-8.
+        Si ocurre un error, emite la señal error_occurred.
+        """
+        with QMutexLocker(self.mutex):
+            if self.serial_conn and self.serial_conn.is_open:
+                if isinstance(data, str):
+                    data = data.encode("utf-8")
+                try:
+                    self.serial_conn.write(data)
+                except serial.SerialException as e:
+                    self.error_occurred.emit(f"❌ Error al enviar datos: {str(e)}")
+            else:
+                self.error_occurred.emit("❌ Puerto serial no disponible para enviar datos.")
+
     def stop(self):
         self._is_running = False
         self.wait(1000)

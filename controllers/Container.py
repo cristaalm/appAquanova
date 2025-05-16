@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
+from PyQt6.QtCore import QThread
 from .Graphs.Ambient.humidity import GraphHU as GraphHumidityAmbient
 from .Notification.NotificationWidget import NotificationWidget
 from .Graphs.Ambient.Temp import GraphTemp as GraphTempAmbient
@@ -8,6 +9,7 @@ from .Graphs.Water.CE import GraphCE as GraphCEWater
 from .Graphs.Water.pH import GraphHp as GraphHpWater
 from components.lvlWater.WaterComponent import WaterComponent
 from .Serial.AsyncSerialWorker import SerialWorker
+from .Signal.SignalController import SignalController
 from components.ph.pHComponent import phComponent
 from .Graphs.Water.LvlWater import GraphLvlWater
 from views.waterTemp import tempWaterComponent
@@ -135,6 +137,12 @@ class ContentContainer(QWidget):
         self.serial_worker.error_occurred.connect(self.handle_serial_error)
         self.serial_worker.status_changed.connect(self.handle_serial_status)
         self.serial_worker.start()
+
+        # Inicialización del controlador de señales
+        self.signal_thread = QThread()
+        self.signal_controller = SignalController(self.serial_worker, self.notification)
+        self.signal_controller.moveToThread(self.signal_thread)
+        self.signal_thread.start()
 
         # Mostrar contenido inicial
         self.update_content()

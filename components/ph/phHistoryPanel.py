@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QFrame, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, 
     QTableWidgetItem, QHeaderView, QSpacerItem, QSizePolicy,
-    QGraphicsDropShadowEffect, QLineEdit
+    QGraphicsDropShadowEffect, QLineEdit, QPushButton
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QIcon, QBrush
@@ -12,6 +12,10 @@ class PhHistoryPanel(QFrame):
         super().__init__(parent)
         self.table_height = 170
         self.all_data = historial if historial is not None else []
+        self.items_per_page = 20
+        self.current_page = 0
+        self.total_pages = max(1, (len(self.all_data) + self.items_per_page - 1) // self.items_per_page)
+        
         self.setup_ui()
         self.populate_table()
     
@@ -112,19 +116,110 @@ class PhHistoryPanel(QFrame):
                 background: #4CA4A5;
                 min-height: 30px;
                 border-radius: 5px;
-            }
-            QScrollBar::add-line:vertical, 
+            }            QScrollBar::add-line:vertical, 
             QScrollBar::sub-line:vertical {
                 height: 0;
                 background: none;
             }
         """)
-
         self.history_table.verticalHeader().setDefaultSectionSize(0)  
         self.history_table.verticalHeader().setMinimumSectionSize(0)
         self.history_table.setMinimumHeight(self.table_height)
         self.history_table.setMaximumHeight(600)
-        layout.addWidget(self.history_table)
+        layout.addWidget(self.history_table)  # Aqui los controles de paginación
+        pagination_layout = QHBoxLayout()
+        pagination_layout.setSpacing(15)
+        pagination_layout.setContentsMargins(0, 10, 0, 5)
+        
+        # Contenedor para la paginación con fondo
+        pagination_container = QFrame()
+        pagination_container.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 8px;
+                border: none;
+            }
+        """)
+        container_layout = QHBoxLayout(pagination_container)
+        container_layout.setContentsMargins(15, 8, 15, 8)
+        container_layout.setSpacing(15)
+        
+        # Botón Anterior con icono
+        self.prev_button = QPushButton("  Anterior")
+        self.prev_button.setStyleSheet("""
+            QPushButton {
+                background-color: white;
+                color: #4CA4A5;
+                border: 1px solid #4CA4A5;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: bold;
+                min-width: 100px;
+            }
+            QPushButton:hover {
+                background-color: #4CA4A5;
+                color: white;
+            }
+            QPushButton:disabled {
+                background-color: #f1f5f9;
+                color: #94a3b8;
+                border-color: #cbd5e1;
+            }
+        """)
+        prev_icon = QIcon("./resources/icons/previous.png")
+        self.prev_button.setIcon(prev_icon)
+        self.prev_button.clicked.connect(self.previous_page)
+        
+        # Etiqueta de página 
+        self.page_label = QLabel("Página 1 de 1")
+        self.page_label.setStyleSheet("""
+            QLabel {
+                color: #074e52;
+                font-size: 14px;
+                font-weight: bold;
+                background-color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                border: 1px solid #e2e8f0;
+            }
+        """)
+        
+        # Botón Siguiente con icono
+        self.next_button = QPushButton("Siguiente  ")
+        self.next_button.setStyleSheet("""
+            QPushButton {
+                background-color: white;
+                color: #4CA4A5;
+                border: 1px solid #4CA4A5;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: bold;
+                min-width: 100px;
+            }
+            QPushButton:hover {
+                background-color: #4CA4A5;
+                color: white;
+            }
+            QPushButton:disabled {
+                background-color: #f1f5f9;
+                color: #94a3b8;
+                border-color: #cbd5e1;
+            }
+        """)
+        next_icon = QIcon("./resources/icons/next.png")
+        self.next_button.setIcon(next_icon)
+        self.next_button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.next_button.clicked.connect(self.next_page)
+        
+        container_layout.addStretch()
+        container_layout.addWidget(self.prev_button)
+        container_layout.addWidget(self.page_label)
+        container_layout.addWidget(self.next_button)
+        container_layout.addStretch()
+        
+        pagination_layout.addWidget(pagination_container)
+        
+        layout.addLayout(pagination_layout)
     
     def populate_table(self):
         # Iconos para estados
@@ -133,8 +228,14 @@ class PhHistoryPanel(QFrame):
         icono_alcalino = QIcon("./resources/icons/alcalino.png")
         icono_valor = QIcon("./resources/icons/ph_icon.png")
 
-        self.history_table.setRowCount(len(self.all_data))
-        for row, item in enumerate(self.all_data):
+        # Calcular índices para la página actual
+        start_idx = self.current_page * self.items_per_page
+        end_idx = min(start_idx + self.items_per_page, len(self.all_data))
+        page_data = self.all_data[start_idx:end_idx]
+
+        self.history_table.setRowCount(len(page_data))
+        
+        for row, item in enumerate(page_data):
             if isinstance(item, dict):
                 fecha = item.get("fecha_ingreso", "")
                 valor = str(item.get("valor", ""))
@@ -183,9 +284,32 @@ class PhHistoryPanel(QFrame):
             self.history_table.setItem(row, 2, estado_item)
             self.history_table.setRowHeight(row, 28)
 
+        # Actualizar controles de paginación
+        self.update_pagination_controls()
+
+    def update_pagination_controls(self):
+        """Actualiza los controles de paginación"""
+        self.total_pages = max(1, (len(self.all_data) + self.items_per_page - 1) // self.items_per_page)
+        self.page_label.setText(f"Página {self.current_page + 1} de {self.total_pages}")
+        self.prev_button.setEnabled(self.current_page > 0)
+        self.next_button.setEnabled(self.current_page < self.total_pages - 1)
+
+    def next_page(self):
+        """Avanza a la siguiente página"""
+        if self.current_page < self.total_pages - 1:
+            self.current_page += 1
+            self.populate_table()
+
+    def previous_page(self):
+        """Retrocede a la página anterior"""
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.populate_table()
+
     def clear_and_update_table(self, new_data):
         """Actualiza la tabla con nuevos datos"""
         self.all_data = new_data
+        self.current_page = 0  # Resetear a la primera página
         self.history_table.clearContents()
         self.history_table.setRowCount(0)
         self.populate_table()

@@ -8,10 +8,10 @@ from PyQt6.QtGui import QColor, QIcon, QBrush
 from .phConstants import *
 
 class PhHistoryPanel(QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, historial=None, parent=None):
         super().__init__(parent)
         self.table_height = 170
-        self.all_data = []
+        self.all_data = historial if historial is not None else []
         self.setup_ui()
         self.populate_table()
     
@@ -127,55 +127,41 @@ class PhHistoryPanel(QFrame):
         layout.addWidget(self.history_table)
     
     def populate_table(self):
-        # Datos históricos para la tabla
-        self.all_data = [
-            ("15/04/2024 08:30", "6.8", self.get_ph_state(6.8)),
-            ("15/04/2024 10:15", "7.1", self.get_ph_state(7.1)),
-            ("14/04/2024 09:00", "6.9", self.get_ph_state(6.9)),
-            ("14/04/2024 14:20", "7.2", self.get_ph_state(7.2)),
-            ("13/04/2024 11:45", "6.7", self.get_ph_state(6.7)),
-            ("12/04/2024 08:30", "5.8", self.get_ph_state(5.8)),
-            ("11/04/2024 10:15", "8.1", self.get_ph_state(8.1)),
-            ("10/04/2024 09:00", "6.9", self.get_ph_state(6.9)),
-            ("09/04/2024 13:30", "7.0", self.get_ph_state(7.0)),
-            ("08/04/2024 15:45", "6.6", self.get_ph_state(6.6)),
-            ("07/04/2024 09:15", "7.3", self.get_ph_state(7.3)),
-            ("06/04/2024 10:30", "6.5", self.get_ph_state(6.5)),
-            ("05/04/2024 13:45", "7.0", self.get_ph_state(7.0)),
-            ("04/04/2024 11:20", "6.4", self.get_ph_state(6.4)),
-            ("03/04/2024 16:10", "7.8", self.get_ph_state(7.8)),
-            ("02/04/2024 08:50", "7.2", self.get_ph_state(7.2)),
-            ("01/04/2024 14:35", "6.9", self.get_ph_state(6.9))
-
-        ]
-        
         # Iconos para estados
         icono_acido = QIcon("./resources/icons/acido.png")
         icono_neutro = QIcon("./resources/icons/neutro.png")
         icono_alcalino = QIcon("./resources/icons/alcalino.png")
-        
-        # Un solo icono para valores
-        icono_valor = QIcon("./resources/icons/ph_icon.png")  # O cualquier otro icono que prefieras
-        
+        icono_valor = QIcon("./resources/icons/ph_icon.png")
+
         self.history_table.setRowCount(len(self.all_data))
-        for row, (fecha, valor, estado) in enumerate(self.all_data):
+        for row, item in enumerate(self.all_data):
+            if isinstance(item, dict):
+                fecha = item.get("fecha_ingreso", "")
+                valor = str(item.get("valor", ""))
+            else:
+                fecha, valor = item["fecha_ingreso"], str(item["valor"])
+
+            try:
+                ph_value = float(valor)
+                estado = self.get_ph_state(ph_value)
+            except:
+                ph_value = 0
+                estado = "N/A"
+
             fecha_item = QTableWidgetItem(fecha)
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft)
-            
-            # Celda de valor con un único icono
+
             valor_item = QTableWidgetItem(valor)
             valor_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft)
-            valor_item.setIcon(icono_valor)  # Siempre el mismo icono
-            
-            # Color según el valor de pH
-            ph_value = float(valor)
+            valor_item.setIcon(icono_valor)
+
             if ph_value < PH_MIN_NEUTRAL:
-                valor_item.setForeground(QBrush(QColor("#4ca4a5")))  # Rojo
+                valor_item.setForeground(QBrush(QColor("#4ca4a5")))
             elif ph_value > PH_MAX_NEUTRAL:
-                valor_item.setForeground(QBrush(QColor("#4ca4a5")))  # Naranja
+                valor_item.setForeground(QBrush(QColor("#4ca4a5")))
             else:
-                valor_item.setForeground(QBrush(QColor("#4ca4a5")))  # Verde
-            
+                valor_item.setForeground(QBrush(QColor("#4ca4a5")))
+
             estado_item = QTableWidgetItem(estado)
             estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             
@@ -191,20 +177,28 @@ class PhHistoryPanel(QFrame):
                 estado_item.setBackground(QBrush(QColor("#dcfce7")))
                 estado_item.setForeground(QBrush(QColor("#27b061")))
                 estado_item.setIcon(icono_neutro)
-            
+
             self.history_table.setItem(row, 0, fecha_item)
             self.history_table.setItem(row, 1, valor_item)
             self.history_table.setItem(row, 2, estado_item)
             self.history_table.setRowHeight(row, 28)
+
+    def clear_and_update_table(self, new_data):
+        """Actualiza la tabla con nuevos datos"""
+        self.all_data = new_data
+        self.history_table.clearContents()
+        self.history_table.setRowCount(0)
+        self.populate_table()
+        current_filter = self.search_filter.text()
+        if current_filter:
+            self.filter_data(current_filter)
     
     def filter_data(self, text):
         search_text = text.lower()
         
-        # Ocultar todas las filas
         for row in range(self.history_table.rowCount()):
             self.history_table.hideRow(row)
         
-        # Mostrar filas que coincidan
         for row in range(self.history_table.rowCount()):
             show_row = False
             

@@ -126,99 +126,89 @@ class PhHistoryPanel(QFrame):
         self.history_table.verticalHeader().setMinimumSectionSize(0)
         self.history_table.setMinimumHeight(self.table_height)
         self.history_table.setMaximumHeight(600)
-        layout.addWidget(self.history_table)  # Aqui los controles de paginación
-        pagination_layout = QHBoxLayout()
-        pagination_layout.setSpacing(15)
-        pagination_layout.setContentsMargins(0, 10, 0, 5)
+        layout.addWidget(self.history_table)
         
-        # Contenedor para la paginación con fondo
+        # Controles de paginación
+        pagination_layout = QHBoxLayout()
+        pagination_layout.setSpacing(4)
+        pagination_layout.setContentsMargins(0, 4, 0, 4)
+        
+        # Contenedor para la paginación
         pagination_container = QFrame()
         pagination_container.setStyleSheet("""
             QFrame {
                 background-color: white;
                 border-radius: 8px;
-                border: none;
             }
         """)
         container_layout = QHBoxLayout(pagination_container)
-        container_layout.setContentsMargins(15, 8, 15, 8)
-        container_layout.setSpacing(15)
+        container_layout.setContentsMargins(8, 4, 8, 4)
+        container_layout.setSpacing(4)
         
-        # Botón Anterior con icono
-        self.prev_button = QPushButton("  Anterior")
+        # Botón Anterior
+        self.prev_button = QPushButton()
+        self.prev_button.setIcon(QIcon("./resources/icons/previous.png"))
         self.prev_button.setStyleSheet("""
             QPushButton {
-                background-color: white;
-                color: #4CA4A5;
-                border: 1px solid #4CA4A5;
-                padding: 8px 16px;
-                border-radius: 6px;
-                font-weight: bold;
-                min-width: 100px;
+                background-color: #f8fafc;
+                border: none;
+                padding: 4px;
+                border-radius: 4px;
+                min-width: 28px;
+                max-width: 28px;
+                min-height: 28px;
+                max-height: 28px;
             }
             QPushButton:hover {
-                background-color: #4CA4A5;
-                color: white;
+                background-color: #e2e8f0;
             }
             QPushButton:disabled {
                 background-color: #f1f5f9;
                 color: #94a3b8;
-                border-color: #cbd5e1;
             }
         """)
-        prev_icon = QIcon("./resources/icons/previous.png")
-        self.prev_button.setIcon(prev_icon)
         self.prev_button.clicked.connect(self.previous_page)
         
-        # Etiqueta de página 
-        self.page_label = QLabel("Página 1 de 1")
-        self.page_label.setStyleSheet("""
-            QLabel {
-                color: #074e52;
-                font-size: 14px;
-                font-weight: bold;
-                background-color: white;
-                padding: 8px 16px;
-                border-radius: 6px;
-                border: 1px solid #e2e8f0;
-            }
-        """)
+        # Contenedor para los botones de página
+        self.page_buttons_container = QFrame()
+        page_buttons_layout = QHBoxLayout(self.page_buttons_container)
+        page_buttons_layout.setSpacing(2)  # Reducir el espacio entre botones
+        page_buttons_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Botón Siguiente con icono
-        self.next_button = QPushButton("Siguiente  ")
+        # Lista para mantener los botones de página
+        self.page_buttons = []
+        
+        # Botón Siguiente
+        self.next_button = QPushButton()
+        self.next_button.setIcon(QIcon("./resources/icons/next.png"))
         self.next_button.setStyleSheet("""
             QPushButton {
-                background-color: white;
-                color: #4CA4A5;
-                border: 1px solid #4CA4A5;
-                padding: 8px 16px;
-                border-radius: 6px;
-                font-weight: bold;
-                min-width: 100px;
+                background-color: #f8fafc;
+                border: none;
+                padding: 4px;
+                border-radius: 4px;
+                min-width: 28px;
+                max-width: 28px;
+                min-height: 28px;
+                max-height: 28px;
             }
             QPushButton:hover {
-                background-color: #4CA4A5;
-                color: white;
+                background-color: #e2e8f0;
             }
             QPushButton:disabled {
                 background-color: #f1f5f9;
                 color: #94a3b8;
-                border-color: #cbd5e1;
             }
         """)
-        next_icon = QIcon("./resources/icons/next.png")
-        self.next_button.setIcon(next_icon)
-        self.next_button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.next_button.clicked.connect(self.next_page)
         
         container_layout.addStretch()
         container_layout.addWidget(self.prev_button)
-        container_layout.addWidget(self.page_label)
+        container_layout.addWidget(self.page_buttons_container)
         container_layout.addWidget(self.next_button)
         container_layout.addStretch()
         
         pagination_layout.addWidget(pagination_container)
-        
         layout.addLayout(pagination_layout)
     
     def populate_table(self):
@@ -287,25 +277,96 @@ class PhHistoryPanel(QFrame):
         # Actualizar controles de paginación
         self.update_pagination_controls()
 
+    def create_page_button(self, page_num, is_current=False):
+        """Crea un botón de página con el estilo apropiado"""
+        button = QPushButton(str(page_num))
+        button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {('#4CA4A5' if is_current else '#f8fafc')};
+                color: {('white' if is_current else '#4CA4A5')};
+                border: none;
+                padding: 4px;
+                border-radius: 4px;
+                font-weight: {'bold' if is_current else 'normal'};
+                min-width: 28px;
+                max-width: 28px;
+                min-height: 28px;
+                max-height: 28px;
+                font-size: 12px;
+            }}
+            QPushButton:hover {{
+                background-color: {('#3B8A8B' if is_current else '#e2e8f0')};
+            }}
+        """)
+        button.clicked.connect(lambda: self.go_to_page(page_num - 1))
+        return button
+
     def update_pagination_controls(self):
         """Actualiza los controles de paginación"""
         self.total_pages = max(1, (len(self.all_data) + self.items_per_page - 1) // self.items_per_page)
-        self.page_label.setText(f"Página {self.current_page + 1} de {self.total_pages}")
+        
+        # Limpiar botones existentes
+        for button in self.page_buttons:
+            self.page_buttons_container.layout().removeWidget(button)
+            button.deleteLater()
+        self.page_buttons.clear()
+        
+        # Determinar qué páginas mostrar
+        visible_pages = self.get_visible_pages()
+        
+        # Crear y agregar los botones de página
+        for page_num in visible_pages:
+            if page_num == -1:  # Indicador de "..."
+                label = QLabel("...")
+                label.setStyleSheet("""
+                    QLabel {
+                        color: #4CA4A5;
+                        padding: 8px;
+                        min-width: 36px;
+                        max-width: 36px;
+                        qproperty-alignment: AlignCenter;
+                    }
+                """)
+                self.page_buttons.append(label)
+                self.page_buttons_container.layout().addWidget(label)
+            else:
+                button = self.create_page_button(page_num, page_num - 1 == self.current_page)
+                self.page_buttons.append(button)
+                self.page_buttons_container.layout().addWidget(button)
+        
+        # Actualizar estado de los botones de navegación
         self.prev_button.setEnabled(self.current_page > 0)
         self.next_button.setEnabled(self.current_page < self.total_pages - 1)
 
+    def get_visible_pages(self):
+        """Determina qué números de página mostrar"""
+        current = self.current_page + 1
+        total = self.total_pages
+        
+        if total <= 7:
+            return range(1, total + 1)
+        
+        if current <= 4:
+            return [1, 2, 3, 4, 5, -1, total]
+        if current >= total - 3:
+            return [1, -1, total-4, total-3, total-2, total-1, total]
+            
+        return [1, -1, current-1, current, current+1, -1, total]
+
+    def go_to_page(self, page):
+        """Va a una página específica"""
+        if 0 <= page < self.total_pages and page != self.current_page:
+            self.current_page = page
+            self.populate_table()
+            
     def next_page(self):
         """Avanza a la siguiente página"""
-        if self.current_page < self.total_pages - 1:
-            self.current_page += 1
-            self.populate_table()
+        self.go_to_page(self.current_page + 1)
 
     def previous_page(self):
         """Retrocede a la página anterior"""
-        if self.current_page > 0:
-            self.current_page -= 1
-            self.populate_table()
-
+        self.go_to_page(self.current_page - 1)
+        
     def clear_and_update_table(self, new_data):
         """Actualiza la tabla con nuevos datos"""
         self.all_data = new_data

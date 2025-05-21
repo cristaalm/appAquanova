@@ -156,6 +156,7 @@ class ContentContainer(QWidget):
         {"sensor":"temp_dht","valor":20}
         {"sensor":"ph","valor":20}
         """
+        print(data)
         try:
             sensor = data["sensor"]
             valor = data["valor"]
@@ -176,11 +177,11 @@ class ContentContainer(QWidget):
                 self.graph_ce_water.updateCE(float(valor))
                 self.executor.submit(self.ce_controller.set_history, float(valor))
 
-            elif sensor == "humidity":
+            elif sensor == "humedad_dht":
                 self.graph_humidity_ambient.updateHU(float(valor))
                 self.executor.submit(self.humidity_controller.set_history, float(valor))
 
-            elif sensor == "dht_temp":
+            elif sensor == "temp_dht":
                 self.graph_temp_ambient.updateTemp(float(valor))
                 self.executor.submit(self.temp_ambient_controller.set_history, float(valor))
 

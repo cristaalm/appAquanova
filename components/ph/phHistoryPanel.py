@@ -122,8 +122,8 @@ class PhHistoryPanel(QFrame):
                 background: none;
             }
         """)
-        self.history_table.verticalHeader().setDefaultSectionSize(0)  
-        self.history_table.verticalHeader().setMinimumSectionSize(0)
+        self.history_table.verticalHeader().setDefaultSectionSize(25)  
+        self.history_table.verticalHeader().setMinimumSectionSize(25)
         self.history_table.setMinimumHeight(self.table_height)
         self.history_table.setMaximumHeight(600)
         layout.addWidget(self.history_table)
@@ -370,11 +370,15 @@ class PhHistoryPanel(QFrame):
     def clear_and_update_table(self, new_data):
         """Actualiza la tabla con nuevos datos"""
         self.all_data = new_data
-        self.current_page = 0  # Resetear a la primera página
+        current_page = self.current_page
+        self.current_page = 0
         self.history_table.clearContents()
         self.history_table.setRowCount(0)
         self.populate_table()
         current_filter = self.search_filter.text()
+        if current_page != self.current_page:
+            self.current_page = current_page
+            self.populate_table()
         if current_filter:
             self.filter_data(current_filter)
     

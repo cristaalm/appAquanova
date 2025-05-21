@@ -86,7 +86,7 @@ class tempWaterComponent(QWidget):
         self.setStyleSheet("background-color: #f5f7fa;")
         
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)  
+        main_layout.setContentsMargins(20, 0, 20, 0)  
         main_layout.setSpacing(15)  
         
         infoCard = self.current_temp
@@ -99,7 +99,7 @@ class tempWaterComponent(QWidget):
         table_container.setFrameShape(QFrame.Shape.NoFrame)
         table_container.setStyleSheet("background: transparent;")
         table_layout = QVBoxLayout(table_container)
-        table_layout.setContentsMargins(15, 0, 15, 5) 
+        table_layout.setContentsMargins(0, 0, 0, 5) 
         table_layout.setSpacing(0)
         table_layout.addWidget(table_widget)
         
@@ -107,8 +107,7 @@ class tempWaterComponent(QWidget):
         table_card = self.table_card
         table_layout.addWidget(table_card)
         
-        top_layout = QHBoxLayout()
-        top_layout.setContentsMargins(20, 0, 20, 0)  
+        top_layout = QHBoxLayout() 
         top_layout.setSpacing(15)
         
         top_layout.addWidget(panel, 1)
@@ -116,6 +115,7 @@ class tempWaterComponent(QWidget):
 
         main_layout.addLayout(top_layout, 1)
         main_layout.addWidget(table_container, 10)  
+      
     
     def start_timer(self, milliseconds=5000):
         """Start or restart the timer with the given interval"""

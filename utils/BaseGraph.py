@@ -44,6 +44,7 @@ class BaseGraph(pg.PlotWidget):
         self.getPlotItem().setLabel("bottom", x_label, color=axis_color)
         self.getPlotItem().getAxis("bottom").setPen(axis_color)
         self.getPlotItem().getAxis("left").setPen(axis_color)
+        self.getPlotItem().hideButtons()
 
         # Deshabilitar zoom y panning
         self.getPlotItem().getViewBox().setMouseEnabled(x=False, y=False)

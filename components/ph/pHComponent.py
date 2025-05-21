@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor
+import time
 from controllers.Graphs.Water.pH import GraphHp
 from .phSummaryPanel import PhSummaryPanel
 from .phHistoryPanel import PhHistoryPanel
@@ -11,7 +12,7 @@ from historiales.controllers.HistorialController import HistorialController
 from dispositivos.controllers.deviceController import DispositivoController
 
 class phComponent(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, graph_widget=None, parent=None):
         super().__init__(parent)
         # Configuración inicial
         self.disp = 2  # ID del dispositivo de pH
@@ -22,7 +23,7 @@ class phComponent(QWidget):
         # Controladores
         self.historial_controller = HistorialController(self.disp)
         self.device_controller = DispositivoController()
-        self.graph_widget = GraphHp()
+        self.graph_widget = graph_widget if graph_widget else GraphHp()
         
         # Cargar datos iniciales
         self.load_config()
@@ -30,11 +31,10 @@ class phComponent(QWidget):
         
         # Configurar UI
         self.setup_ui()
-        
-        # Configurar timer para actualización automática
+          # Configurar timer para actualización automática
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh_data)
-        self.timer.start(10000)  # Actualizar cada 10 segundos
+        self.timer.start(5000)  # Actualizar cada 7 segundos
     
     def load_config(self):
         """Carga la configuración del dispositivo"""
@@ -43,12 +43,19 @@ class phComponent(QWidget):
             self.rango_min = float(config.get("valor_minimo", 0))
             self.rango_max = float(config.get("valor_maximo", 14))
         except Exception as e:
-            print(f"Error al cargar configuración de pH: {e}")
-    
+            print(f"Error al cargar configuración de pH: {e}")   
+
     def load_data(self):
         """Carga los datos del historial desde la base de datos"""
         try:
-            self.ph_value = self.historial_controller.get_last() or 0
+            last_value = self.historial_controller.get_last()
+            if last_value is not None:
+                self.ph_value = float(last_value)
+                print(f"Valor de pH cargado: {self.ph_value}")
+            else:
+                self.ph_value = 7.0  # Valor neutral por defecto
+                print("No se encontró valor de pH, usando valor por defecto")
+
             registros = self.historial_controller.get_historial()
             if registros:
                 self.historial = [
@@ -58,6 +65,10 @@ class phComponent(QWidget):
                     }
                     for registro in registros
                 ]
+                # Actualizar la gráfica con datos históricos
+                if self.graph_widget and hasattr(self.graph_widget, 'updateHp'):
+                    for registro in self.historial[-60:]:  # Últimos 60 registros
+                        self.graph_widget.updateHp(float(registro["valor"]))
             else:
                 self.historial = []
         except Exception as e:
@@ -75,10 +86,12 @@ class phComponent(QWidget):
 
     def update_ui(self):
         """Actualiza todos los componentes de la UI con nuevos datos"""
-        if self.summary_panel:
+        if hasattr(self, 'summary_panel'):
             self.summary_panel.set_ph_value(self.ph_value)
-        if self.history_panel:
+        if hasattr(self, 'history_panel'):
             self.history_panel.clear_and_update_table(self.historial)
+        if self.graph_widget and hasattr(self.graph_widget, 'updateHp'):
+            self.graph_widget.updateHp(float(self.ph_value))
     
     def setup_ui(self):
         # Layout principal
@@ -137,4 +150,13 @@ class phComponent(QWidget):
     def stop_timer(self):
         """Detiene el timer de actualización"""
         if self.timer.isActive():
-            self.timer.stop()
+            self.timer.stop()    
+
+    def set_ph_value(self, new_value):
+        """Actualiza el valor de pH y todos los componentes relacionados"""
+        try:
+            self.ph_value = float(new_value)
+            print(f"Nuevo valor de pH establecido: {self.ph_value}")
+            self.update_ui()
+        except Exception as e:
+            print(f"Error al establecer valor de pH: {e}")

@@ -9,15 +9,16 @@ class GraphHp(BaseGraph):
             x_label="Tiempo (horas)",
             y_label="Valor (pH)",
             line_color="#045859",
-            data_range=(0, 14),  # Rango completo de pH
-            initial_data_length=24  # 24 horas de datos iniciales
+            data_range=(0, 14),
+            initial_data_length=1  # Iniciar con un solo punto
         )
+        # Limpiar los datos iniciales aleatorios
         self.x_data = []
         self.y_data = []
         self.last_value = None
-        self.custom_config()
+        self.curve.setData(self.x_data, self.y_data)  # Actualizar la curva para que empiece vacía
         
-        # Establece el rango inicial adecuado para pH
+        self.custom_config()
         self.setYRange(0.0, 14.0)
 
     def custom_config(self):

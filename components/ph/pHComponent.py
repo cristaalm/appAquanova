@@ -169,10 +169,7 @@ class phComponent(QWidget):
                 if len(self.historial) > 100:
                     self.historial = self.historial[:100]
                 self.history_panel.clear_and_update_table(self.historial)
-            
-            # Actualizar la gráfica
-            if self.graph_widget and hasattr(self.graph_widget, 'updateHp'):
-                self.graph_widget.updateHp(self.ph_value)
+              # No necesitamos actualizar la gráfica aquí ya que se hace en Container.py
                 
         except Exception as e:
             print(f"Error al establecer valor de pH: {e}")

@@ -14,6 +14,7 @@ class GraphHp(BaseGraph):
         )
         self.x_data = []
         self.y_data = []
+        self.last_value = None
         self.custom_config()
         
         # Establece el rango inicial adecuado para pH
@@ -53,6 +54,12 @@ class GraphHp(BaseGraph):
 
     def updateHp(self, new_value: float):
         """Actualiza la gráfica con un nuevo valor de pH"""
+        # Verificar si el valor es realmente nuevo
+        if self.last_value == new_value:
+            return
+            
+        self.last_value = new_value
+        
         if not self.x_data:  # Si es el primer punto
             self.x_data = [0]
             self.y_data = [new_value]

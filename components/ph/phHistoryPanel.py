@@ -358,30 +358,25 @@ class PhHistoryPanel(QFrame):
         if 0 <= page < self.total_pages and page != self.current_page:
             self.current_page = page
             self.populate_table()
+            self.update_pagination_label()
             
     def next_page(self):
         """Avanza a la siguiente página"""
         self.go_to_page(self.current_page + 1)
-
+    
     def previous_page(self):
         """Retrocede a la página anterior"""
         self.go_to_page(self.current_page - 1)
         
     def clear_and_update_table(self, new_data):
-        """Actualiza la tabla con nuevos datos"""
+        """Actualiza la tabla con nuevos datos sin afectar otros componentes"""
         self.all_data = new_data
-        current_page = self.current_page
         self.current_page = 0
-        self.history_table.clearContents()
-        self.history_table.setRowCount(0)
+        self.total_pages = max(1, -(-len(self.all_data) // self.items_per_page))  # Ceiling division
         self.populate_table()
-        current_filter = self.search_filter.text()
-        if current_page != self.current_page:
-            self.current_page = current_page
-            self.populate_table()
-        if current_filter:
-            self.filter_data(current_filter)
-    
+        self.update_pagination_controls()
+        self.update_pagination_label()
+
     def filter_data(self, text):
         search_text = text.lower()
         
@@ -408,3 +403,12 @@ class PhHistoryPanel(QFrame):
             return "Alcalino"
         else:
             return "Neutro"
+    
+    def update_pagination_label(self):
+        """Actualiza la etiqueta de paginación con el conteo actual"""
+        start_idx = self.current_page * self.items_per_page + 1
+        end_idx = min((self.current_page + 1) * self.items_per_page, len(self.all_data))
+        total = len(self.all_data)
+        
+        pagination_text = f"Mostrando {start_idx}-{end_idx} de {total}"
+        self.setStatusTip(pagination_text)

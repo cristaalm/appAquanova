@@ -14,7 +14,6 @@ class GraphHp(BaseGraph):
         )
         self.x_data = []
         self.y_data = []
-        # Aplica configuración personalizada
         self.custom_config()
         
         # Establece el rango inicial adecuado para pH
@@ -55,19 +54,21 @@ class GraphHp(BaseGraph):
     def updateHp(self, new_value: float):
         """Actualiza la gráfica con un nuevo valor de pH"""
         if not self.x_data:  # Si es el primer punto
-            self.x_data = [0]  # Comenzar en 0 horas
+            self.x_data = [0]
+            self.y_data = [new_value]
         else:
-            # El siguiente punto será una hora después del último
             self.x_data.append(self.x_data[-1] + 1)
+            self.y_data.append(new_value)
             
-        self.y_data.append(new_value)
+            # Mantener solo los últimos 24 puntos
+            if len(self.x_data) > 24:
+                self.x_data = self.x_data[-24:]
+                self.y_data = self.y_data[-24:]
 
-        # Mantener solo los últimos 24 puntos (24 horas)
-        if len(self.x_data) > 24:
-            self.x_data = self.x_data[-24:]
-            self.y_data = self.y_data[-24:]
-
-        # Actualizar la gráfica y establecer el rango del eje X
+        # Actualizar la gráfica
         self.curve.setData(self.x_data, self.y_data)
+        
+        # Ajustar el rango visible
         if len(self.x_data) > 1:
-            self.getViewBox().setXRange(max(0, self.x_data[-1] - 24), self.x_data[-1])
+            latest_x = self.x_data[-1]
+            self.getViewBox().setXRange(max(0, latest_x - 23), latest_x + 1)

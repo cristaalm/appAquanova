@@ -4,7 +4,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor
-import time
 from controllers.Graphs.Water.pH import GraphHp
 from .phSummaryPanel import PhSummaryPanel
 from .phHistoryPanel import PhHistoryPanel
@@ -31,11 +30,12 @@ class phComponent(QWidget):
         
         # Configurar UI
         self.setup_ui()
-          # Configurar timer para actualización automática
+          
+        # Configurar timer para actualización automática
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh_data)
-        self.timer.start(5000)  # Actualizar cada 7 segundos
-    
+        self.timer.start(5000)  # Actualizar cada 5 segundos
+
     def load_config(self):
         """Carga la configuración del dispositivo"""
         try:
@@ -65,10 +65,6 @@ class phComponent(QWidget):
                     }
                     for registro in registros
                 ]
-                # Actualizar la gráfica con datos históricos
-                if self.graph_widget and hasattr(self.graph_widget, 'updateHp'):
-                    for registro in self.historial[-60:]:  # Últimos 60 registros
-                        self.graph_widget.updateHp(float(registro["valor"]))
             else:
                 self.historial = []
         except Exception as e:
@@ -157,6 +153,26 @@ class phComponent(QWidget):
         try:
             self.ph_value = float(new_value)
             print(f"Nuevo valor de pH establecido: {self.ph_value}")
-            self.update_ui()
+            
+            # Actualizar los componentes
+            if hasattr(self, 'summary_panel'):
+                self.summary_panel.set_ph_value(self.ph_value)
+            
+            if hasattr(self, 'history_panel'):
+                # Agregar el nuevo valor al inicio del historial
+                from datetime import datetime
+                new_entry = {
+                    "fecha_ingreso": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "valor": self.ph_value
+                }
+                self.historial.insert(0, new_entry)
+                if len(self.historial) > 100:
+                    self.historial = self.historial[:100]
+                self.history_panel.clear_and_update_table(self.historial)
+            
+            # Actualizar la gráfica
+            if self.graph_widget and hasattr(self.graph_widget, 'updateHp'):
+                self.graph_widget.updateHp(self.ph_value)
+                
         except Exception as e:
             print(f"Error al establecer valor de pH: {e}")

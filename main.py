@@ -28,7 +28,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 COLOR_C8F5F2 = os.getenv("COLOR_C8F5F2")
-COLOR_074E52 = os.getenv("COLOR_074E52")
+COLOR_LEYEND = os.getenv("COLOR_LEYEND")
 MEDIA = os.getenv("MEDIA")
 
 
@@ -94,7 +94,7 @@ class CustomMainWindow(QMainWindow):
         title_label = QLabel("Aquanova Monitor")
         title_label.setFont(QFont("Segoe UI", title_font_size, QFont.Weight.Medium))
         title_label.setStyleSheet(f"""
-            color: {COLOR_074E52}; 
+            color: {COLOR_LEYEND}; 
             margin-left: {int(header_margin * 0.6)}px;
         """)
 
@@ -103,7 +103,7 @@ class CustomMainWindow(QMainWindow):
         btn_style = f"""
             QPushButton {{
                 background-color: transparent;
-                color: {COLOR_074E52};
+                color: {COLOR_LEYEND};
                 font-size: {btn_font_size}px;
                 border: none;
                 min-width: {header_height}px;
@@ -130,7 +130,7 @@ class CustomMainWindow(QMainWindow):
         close_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: transparent;
-                color: {COLOR_074E52};
+                color: {COLOR_LEYEND};
                 font-size: {btn_font_size}px;
                 border: none;
                 min-width: {header_height}px;

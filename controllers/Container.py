@@ -1,19 +1,19 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
 from PyQt6.QtCore import QThread
-from .Graphs.Ambient.humidity import GraphHU as GraphHumidityAmbient
 from .Notification.NotificationWidget import NotificationWidget
+from .Graphs.Ambient.Humidity import GraphHumidity as GraphHumidityAmbient
 from .Graphs.Ambient.Temp import GraphTemp as GraphTempAmbient
 from .Graphs.Water.Temp import GraphTemp as GraphTempWater
-from views.conductivityE import conductivityComponent
 from .Graphs.Water.CE import GraphCE as GraphCEWater
 from .Graphs.Water.pH import GraphHp as GraphHpWater
+from .Graphs.Water.LvlWater import GraphLvlWater
 from components.lvlWater.WaterComponent import WaterComponent
 from .Serial.AsyncSerialWorker import SerialWorker
 from .Signal.SignalController import SignalController
 from components.ph.pHComponent import phComponent
-from .Graphs.Water.LvlWater import GraphLvlWater
 from views.waterTemp import tempWaterComponent
 from views.DevicesView import DevicesView
+from views.conductivityE import conductivityComponent
 from PyQt6.QtGui import QPalette, QColor
 from views.ambient import Ambient
 from PyQt6.QtCore import Qt
@@ -101,10 +101,6 @@ class ContentContainer(QWidget):
         # Pool de hilos para registro de datos
         self.executor = ThreadPoolExecutor(max_workers=5)  # Puedes ajustar el número
 
-        # Valores ambientales simulados
-        self.temp_value = 20.3
-        self.hum_value = 58
-
         # Inicialización de gráficas
         self.graph_ph_water = GraphHpWater()
         self.graph_temp_water = GraphTempWater()
@@ -120,8 +116,6 @@ class ContentContainer(QWidget):
         self.ce_component = conductivityComponent(self.graph_ce_water,ce_value)  # Nuevo componente
         self.ambient = Ambient(
             self.graph_temp_ambient,
-            self.temp_value,
-            self.hum_value,
             self.graph_humidity_ambient,
         )
 
@@ -239,7 +233,7 @@ class ContentContainer(QWidget):
             self.content_layout.addWidget(self.temp_water_component)
         elif self.content_state == 4:
             self.title_label.setText("Conductividad eléctrica")
-            self.content_layout.addWidget(self.ce_component)  # Usar el nuevo componente
+            self.content_layout.addWidget(self.ce_component) 
         elif self.content_state == 5:
             self.title_label.setText("Supervisión medioambiental")
             self.content_layout.addWidget(self.ambient)

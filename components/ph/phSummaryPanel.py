@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QPixmap, QColor
 from .phConstants import *
+from utils.theme_manager import theme_manager  # Importar el theme manager
 import os
 
 class PhSummaryPanel(QFrame):
@@ -14,7 +15,12 @@ class PhSummaryPanel(QFrame):
         self.title_text = "Potencial de hidrógeno (pH)   "
         self.title_index = 0
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Conectar al cambio de tema
+        theme_manager.theme_changed.connect(self.update_theme)
+        
         self.setup_ui()
+        self.update_theme()  # Aplicar tema inicial
         
     def setup_ui(self):
         # Configuración básica del panel
@@ -23,20 +29,12 @@ class PhSummaryPanel(QFrame):
         self.setMaximumWidth(280)
         self.setMinimumHeight(280)
         self.setFixedHeight(280)
-        self.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 12px;
-                border: none;
-            }
-        """)
         
         # Aplicar efecto de sombra
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(15)
-        shadow.setColor(SHADOW_COLOR)
-        shadow.setOffset(0, 3)
-        self.setGraphicsEffect(shadow)
+        self.shadow = QGraphicsDropShadowEffect()
+        self.shadow.setBlurRadius(15)
+        self.shadow.setOffset(0, 3)
+        self.setGraphicsEffect(self.shadow)
         
         # Layout principal
         layout = QVBoxLayout(self)
@@ -49,7 +47,6 @@ class PhSummaryPanel(QFrame):
         
         # Texto del título con carrusel
         self.title_label = QLabel(self.title_text)
-        self.title_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #045859;")
         self.title_label.setMinimumWidth(150)
         self.title_label.setMaximumWidth(200)
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
@@ -63,21 +60,19 @@ class PhSummaryPanel(QFrame):
         header_layout.addStretch()
         
         # Icono al lado del título
-        icon_label = QLabel()
+        self.icon_label = QLabel()
         icon_pixmap = QPixmap("./resources/icons/ph-metro.png")
         if not icon_pixmap.isNull():
-            icon_label.setPixmap(icon_pixmap.scaled(QSize(28, 28), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            self.icon_label.setPixmap(icon_pixmap.scaled(QSize(28, 28), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         else:
-            icon_label.setText("○")
-            icon_label.setStyleSheet("font-size: 20px; color: #045859;")
+            self.icon_label.setText("○")
         
-        header_layout.addWidget(icon_label)
+        header_layout.addWidget(self.icon_label)
         layout.addLayout(header_layout)
         
         # Descripción
-        description_label = QLabel("Monitoreo del nivel de ph del agua")
-        description_label.setStyleSheet("font-size: 12px; font-style: italic; color: #6b7280;")
-        layout.addWidget(description_label)
+        self.description_label = QLabel("Monitoreo del nivel de ph del agua")
+        layout.addWidget(self.description_label)
         layout.addSpacing(2)
         
         # Valor de pH
@@ -85,24 +80,21 @@ class PhSummaryPanel(QFrame):
         value_container.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         # Icono antes del valor
-        ph_icon_label = QLabel()
+        self.ph_icon_label = QLabel()
         ph_icon_pixmap = QPixmap("./resources/icons/ph_icon.png")
         if not ph_icon_pixmap.isNull():
-            ph_icon_label.setPixmap(ph_icon_pixmap.scaled(QSize(55, 55), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            self.ph_icon_label.setPixmap(ph_icon_pixmap.scaled(QSize(55, 55), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         else:
-            ph_icon_label.setText("○")
-            ph_icon_label.setStyleSheet("font-size: 24px; color: #045859;")
+            self.ph_icon_label.setText("○")
         
-        value_container.addWidget(ph_icon_label)
+        value_container.addWidget(self.ph_icon_label)
         
         # Valor de pH grande
         self.ph_value_label = QLabel(str(self.ph_value))
-        self.ph_value_label.setStyleSheet("font-size: 56px; font-weight: bold; color: #045859; text-align: center;")
         value_container.addWidget(self.ph_value_label)
 
-        ph_unit_label = QLabel("ph")
-        ph_unit_label.setStyleSheet("font-size: 24px; color: #045859; margin-left: 0px; margin-top: 20px; font-weight: bold;")
-        value_container.addWidget(ph_unit_label)
+        self.ph_unit_label = QLabel("ph")
+        value_container.addWidget(self.ph_unit_label)
         
         layout.addLayout(value_container)
         layout.addSpacing(5)
@@ -116,10 +108,6 @@ class PhSummaryPanel(QFrame):
         
         # Panel de estado con icono y texto
         self.status_container = QWidget()
-        self.status_container.setStyleSheet("""
-            background-color: #c5efeb; 
-            border-radius: 15px;
-        """)
         self.status_layout = QHBoxLayout(self.status_container)
         self.status_layout.setContentsMargins(10, 6, 10, 6)
         self.status_layout.setSpacing(5)
@@ -131,12 +119,6 @@ class PhSummaryPanel(QFrame):
         
         # Texto de estado
         self.status_text_label = QLabel(self.get_ph_status_text())
-        self.status_text_label.setStyleSheet("""
-            color: #2b6363;
-            font-size: 18px;
-            font-weight: bold;
-            background-color: transparent;
-        """)
         self.status_layout.addWidget(self.status_text_label)
         
         # Inicializar el estado
@@ -144,6 +126,135 @@ class PhSummaryPanel(QFrame):
         
         layout.addWidget(self.status_container)
         layout.addStretch()
+    
+    def update_theme(self):
+        """Actualiza los estilos según el tema actual"""
+        if theme_manager.is_dark_mode():
+            # Solo aplicar cambios en modo oscuro
+            colors = theme_manager.get_theme_colors()
+            
+            # Estilo del panel principal para modo oscuro
+            panel_style = f"""
+                QFrame {{
+                    background-color: {colors['panel_bg']};
+                    border-radius: 12px;
+                    border: none;
+                }}
+            """
+            self.setStyleSheet(panel_style)
+            
+            # Sombra más intensa para modo oscuro
+            shadow_color = QColor(0, 0, 0, 80)
+            self.shadow.setColor(shadow_color)
+            
+            # Estilos para modo oscuro
+            title_style = f"font-size: 22px; font-weight: bold; color: #FFFFFF;"
+            self.title_label.setStyleSheet(title_style)
+            
+            icon_style = f"font-size: 20px; color: {colors['accent']};"
+            if self.icon_label.pixmap() is None:
+                self.icon_label.setStyleSheet(icon_style)
+            
+            description_style = f"font-size: 12px; font-style: italic; color: {colors['text_secondary']};"
+            self.description_label.setStyleSheet(description_style)
+            
+            ph_icon_style = f"font-size: 24px; color: {colors['accent']};"
+            if self.ph_icon_label.pixmap() is None:
+                self.ph_icon_label.setStyleSheet(ph_icon_style)
+            
+            ph_value_style = f"font-size: 56px; font-weight: bold; color: {colors['text_primary']}; text-align: center;"
+            self.ph_value_label.setStyleSheet(ph_value_style)
+            
+            ph_unit_style = f"font-size: 24px; color: {colors['text_primary']}; margin-left: 0px; margin-top: 20px; font-weight: bold;"
+            self.ph_unit_label.setStyleSheet(ph_unit_style)
+            
+            # Actualizar estilos de MIN/MAX labels para modo oscuro
+            self.update_min_max_styles(colors)
+            
+            # Actualizar la barra de progreso para modo oscuro
+            self.update_progress_bar_style(colors)
+        else:
+            # Modo claro: usar estilos originales
+            panel_style = """
+                QFrame {
+                    background-color: white;
+                    border-radius: 12px;
+                    border: none;
+                }
+            """
+            self.setStyleSheet(panel_style)
+            
+            # Sombra suave para modo claro (original)
+            shadow_color = SHADOW_COLOR if 'SHADOW_COLOR' in globals() else QColor(0, 0, 0, 30)
+            self.shadow.setColor(shadow_color)
+            
+            # Estilos originales del modo claro
+            self.title_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #045859;")
+            
+            if self.icon_label.pixmap() is None:
+                self.icon_label.setStyleSheet("font-size: 20px; color: #045859;")
+            
+            self.description_label.setStyleSheet("font-size: 12px; font-style: italic; color: #6b7280;")
+            
+            if self.ph_icon_label.pixmap() is None:
+                self.ph_icon_label.setStyleSheet("font-size: 24px; color: #045859;")
+            
+            self.ph_value_label.setStyleSheet("font-size: 56px; font-weight: bold; color: #045859; text-align: center;")
+            self.ph_unit_label.setStyleSheet("font-size: 24px; color: #045859; margin-left: 0px; margin-top: 20px; font-weight: bold;")
+            
+            # Estilos originales MIN/MAX
+            for child in self.findChildren(QLabel):
+                if child.text() == "MÍN 0" or child.text() == "MÁX 14":
+                    child.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+            
+            # Estilo original de la barra de progreso
+            progress_bar = self.findChild(QProgressBar)
+            if progress_bar:
+                progress_style = """
+                    QProgressBar {
+                        background-color: #e2e8f0;
+                        border-radius: 6px;
+                        border: none;
+                    }
+                    QProgressBar::chunk {
+                        background-color: #4CA4A5;
+                        border-radius: 6px;
+                    }
+                """
+                progress_bar.setStyleSheet(progress_style)
+        
+        # Actualizar el chip de estado
+        self.update_status_chip()
+    
+    def update_min_max_styles(self, colors):
+        """Actualiza los estilos de las etiquetas MIN y MAX"""
+        min_max_style = f"font-size: 14px; color: {colors['text_primary']}; font-weight: bold;"
+        
+        # Encontrar y actualizar las etiquetas MIN y MAX
+        for child in self.findChildren(QLabel):
+            if child.text() == "MÍN 0" or child.text() == "MÁX 14":
+                child.setStyleSheet(min_max_style)
+    
+    def update_progress_bar_style(self, colors):
+        """Actualiza el estilo de la barra de progreso"""
+        # Encontrar la barra de progreso
+        progress_bar = self.findChild(QProgressBar)
+        if progress_bar:
+            # Color de fondo de la barra según el tema
+            bg_color = colors['surface'] if theme_manager.is_dark_mode() else "#e2e8f0"
+            
+            progress_style = f"""
+                QProgressBar {{
+                    background-color: {bg_color};
+                    border-radius: 6px;
+                    border: none;
+                }}
+                QProgressBar::chunk {{
+                    background-color: {colors['accent']};
+                    border-radius: 6px;
+                }}
+            """
+            progress_bar.setStyleSheet(progress_style)
     
     def load_icon(self, icon_name, size):
         """Función para cargar iconos desde la carpeta de recursos"""
@@ -168,44 +279,30 @@ class PhSummaryPanel(QFrame):
         labels_layout = QHBoxLayout()
         
         # Etiqueta MIN
-        min_label = QLabel("MÍN 0")
-        min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
-        min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        labels_layout.addWidget(min_label)
+        self.min_label = QLabel("MÍN 0")
+        self.min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        labels_layout.addWidget(self.min_label)
         
         # Espaciador
         labels_layout.addStretch()
         
         # Etiqueta MAX
-        max_label = QLabel("MÁX 14")
-        max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
-        max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        labels_layout.addWidget(max_label)
+        self.max_label = QLabel("MÁX 14")
+        self.max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        labels_layout.addWidget(self.max_label)
         
         layout.addLayout(labels_layout)
     
     def add_progress_bar(self, layout):
-        progress_bar = QProgressBar()
-        progress_bar.setFixedHeight(12)
-        progress_bar.setTextVisible(False)
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setFixedHeight(12)
+        self.progress_bar.setTextVisible(False)
         
         # Calcular el valor en porcentaje (0-100) basado en el rango pH (0-14)
         ph_percent = min(max(self.ph_value / 14.0, 0), 1) * 100
-        progress_bar.setValue(int(ph_percent))
+        self.progress_bar.setValue(int(ph_percent))
         
-        progress_bar.setStyleSheet("""
-            QProgressBar {
-                background-color: #e2e8f0;
-                border-radius: 6px;
-                border: none;
-            }
-            QProgressBar::chunk {
-                background-color: #4CA4A5;
-                border-radius: 6px;
-            }
-        """)
-        
-        layout.addWidget(progress_bar)
+        layout.addWidget(self.progress_bar)
     
     def get_ph_status_text(self):
         ph_value = float(self.ph_value)
@@ -219,67 +316,58 @@ class PhSummaryPanel(QFrame):
     def set_ph_value(self, new_value):
         self.ph_value = float(new_value)
         self.ph_value_label.setText(str(self.ph_value))
+        
+        # Actualizar la barra de progreso
+        ph_percent = min(max(self.ph_value / 14.0, 0), 1) * 100
+        self.progress_bar.setValue(int(ph_percent))
+        
         self.update_status_chip()
     
     def update_status_chip(self):
+        """Actualiza el chip de estado con colores apropiados para el tema"""
         status = self.get_ph_status_text()
         self.status_text_label.setText(status)
-        container_style = """
-            background-color: #c5efeb; 
+        
+        # Colores del chip según el tema
+        if theme_manager.is_dark_mode():
+            # Modo oscuro
+            chip_bg = "#c5efeb"  # Color claro 
+            text_color = "#2b6363"  # Texto blanco
+        else:
+            # Modo claro: colores originales
+            chip_bg = "#c5efeb"
+            text_color = "#2b6363"
+        
+        # Iconos según el estado
+        if status == "Ácido":
+            icon_name = "acido_status.png"
+        elif status == "Alcalino":
+            icon_name = "alcalino_status.png"
+        else:  # Óptimo
+            icon_name = "neutro_status.png"
+        
+        # Aplicar estilos al contenedor
+        container_style = f"""
+            background-color: {chip_bg}; 
             border-radius: 15px;
         """
         
-        if status == "Bajo":
-            icon_name = "acido_status.png"  # Nombre del icono para pH bajo
-            text_style = """
-                color: #045859;
-                font-size: 18px;
-                font-weight: bold;
-                background-color: transparent;
-            """
-        elif status == "Alto":
-            icon_name = "alcalino_status.png"  # Nombre del icono para pH alto
-            text_style = """
-                color: #045859;
-                font-size: 18px;
-                font-weight: bold;
-                background-color: transparent;
-            """
-        else:  # Óptimo
-            icon_name = "neutro_status.png"  # Nombre del icono para pH óptimo
-            text_style = """
-                color: #045859;
-                font-size: 18px;
-                font-weight: bold;
-                background-color: transparent;
-            """
+        # Aplicar estilos al texto
+        text_style = f"""
+            color: {text_color};
+            font-size: 18px;
+            font-weight: bold;
+            background-color: transparent;
+        """
         
         # Cargar el icono correspondiente
         status_pixmap = self.load_icon(icon_name, 20)
         if status_pixmap:
             self.status_icon_label.setPixmap(status_pixmap)
         else:
-            # Si no se encuentra el icono, usar un respaldo genérico
-            # Puedes adaptar esto para usar iconos que sepas que existen
-            if status == "Bajo":
-                fallback_icon = "warning_icon.png"
-            elif status == "Alto":
-                fallback_icon = "alert_icon.png"
-            else:
-                fallback_icon = "check_icon.png"
-            
-            fallback_pixmap = self.load_icon(fallback_icon, 20)
-            if fallback_pixmap:
-                self.status_icon_label.setPixmap(fallback_pixmap)
-            else:
-                # Si aún no hay iconos disponibles, mostrar un texto como respaldo
-                self.status_icon_label.setText("●")
-                if status == "Bajo":
-                    self.status_icon_label.setStyleSheet("color: #92400e; font-size: 16px;")
-                elif status == "Alto":
-                    self.status_icon_label.setStyleSheet("color: #b91c1c; font-size: 16px;")
-                else:
-                    self.status_icon_label.setStyleSheet("color: #166534; font-size: 16px;")
+            # Respaldo con texto coloreado
+            self.status_icon_label.setText("●")
+            self.status_icon_label.setStyleSheet(f"color: {text_color}; font-size: 16px; background-color: transparent;")
         
         # Aplicar estilos
         self.status_container.setStyleSheet(container_style)

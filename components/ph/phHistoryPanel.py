@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QIcon, QBrush
 from .phConstants import *
+from utils.theme_manager import theme_manager  # Importar el theme manager
 
 class PhHistoryPanel(QFrame):
     def __init__(self, historial=None, parent=None):
@@ -18,11 +19,14 @@ class PhHistoryPanel(QFrame):
         
         self.setup_ui()
         self.populate_table()
+        
+        # Conectar al cambio de tema
+        theme_manager.theme_changed.connect(self.apply_theme)
+        self.apply_theme()  # Aplicar tema inicial
     
     def setup_ui(self):
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
-
+        
         # Sombra
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(15)
@@ -36,32 +40,16 @@ class PhHistoryPanel(QFrame):
         # Encabezado con título y búsqueda
         header = QHBoxLayout()
         
-        history_label = QLabel("Lecturas")
-        history_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #074e52;")
-        header.addWidget(history_label)
+        self.history_label = QLabel("Lecturas")
+        header.addWidget(self.history_label)
         
         header.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         
-        filter_label = QLabel("Filtrar por:")
-        filter_label.setStyleSheet("font-size: 14px; color: #64748b;")
-        header.addWidget(filter_label)
+        self.filter_label = QLabel("Filtrar por:")
+        header.addWidget(self.filter_label)
         
         self.search_filter = QLineEdit()
         self.search_filter.setPlaceholderText("Fecha, valor o estado...")
-        self.search_filter.setStyleSheet("""
-            QLineEdit {
-                background-color: white;
-                border: 1px solid #4CA4A5;
-                color: #333;
-                padding: 5px 10px;
-                border-radius: 6px;
-                font-size: 14px;
-                max-width: 250px;
-            }
-            QLineEdit:focus {
-                border: 2px solid #4CA4A5;
-            }
-        """)
         
         self.search_filter.textChanged.connect(self.filter_data)
         header.addWidget(self.search_filter)
@@ -80,48 +68,6 @@ class PhHistoryPanel(QFrame):
         self.history_table.setAlternatingRowColors(True)
         self.history_table.verticalHeader().setVisible(False)
 
-        self.history_table.setStyleSheet("""
-            QTableWidget {
-                background-color: white;
-                gridline-color: #c5efec;
-                border: none;
-                border-radius: 6px;
-                selection-background-color: #d4f1f0;
-                selection-color: black;
-                alternate-background-color: #f8fafc;
-                color: #4CA4A5;
-                font-size: 14px;
-                padding-bottom: 0px;
-                margin-right: 5px;
-            }
-            QHeaderView::section {
-                background-color: #4CA4A5;
-                padding: 8px;
-                border: none;
-                font-weight: bold;
-                color: white;
-                font-size: 15px;
-            }
-            QTableWidget::item {
-                padding: 6px;
-                border-bottom: 1px solid #c5efec;
-            }
-            QScrollBar:vertical {
-                background: #f1f5f9;
-                width: 10px;
-                border-radius: 5px;
-                margin-left: 5px;
-            }
-            QScrollBar::handle:vertical {
-                background: #4CA4A5;
-                min-height: 30px;
-                border-radius: 5px;
-            }            QScrollBar::add-line:vertical, 
-            QScrollBar::sub-line:vertical {
-                height: 0;
-                background: none;
-            }
-        """)
         self.history_table.verticalHeader().setDefaultSectionSize(25)  
         self.history_table.verticalHeader().setMinimumSectionSize(25)
         self.history_table.setMinimumHeight(self.table_height)
@@ -134,45 +80,20 @@ class PhHistoryPanel(QFrame):
         pagination_layout.setContentsMargins(0, 4, 0, 4)
         
         # Contenedor para la paginación
-        pagination_container = QFrame()
-        pagination_container.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 8px;
-            }
-        """)
-        container_layout = QHBoxLayout(pagination_container)
+        self.pagination_container = QFrame()
+        container_layout = QHBoxLayout(self.pagination_container)
         container_layout.setContentsMargins(8, 4, 8, 4)
         container_layout.setSpacing(4)
         
         # Botón Anterior
         self.prev_button = QPushButton()
         self.prev_button.setIcon(QIcon("./resources/icons/previous.png"))
-        self.prev_button.setStyleSheet("""
-            QPushButton {
-                background-color: #f8fafc;
-                border: none;
-                padding: 4px;
-                border-radius: 4px;
-                min-width: 28px;
-                max-width: 28px;
-                min-height: 28px;
-                max-height: 28px;
-            }
-            QPushButton:hover {
-                background-color: #e2e8f0;
-            }
-            QPushButton:disabled {
-                background-color: #f1f5f9;
-                color: #94a3b8;
-            }
-        """)
         self.prev_button.clicked.connect(self.previous_page)
         
         # Contenedor para los botones de página
         self.page_buttons_container = QFrame()
         page_buttons_layout = QHBoxLayout(self.page_buttons_container)
-        page_buttons_layout.setSpacing(2)  # Reducir el espacio entre botones
+        page_buttons_layout.setSpacing(2)
         page_buttons_layout.setContentsMargins(0, 0, 0, 0)
         
         # Lista para mantener los botones de página
@@ -181,25 +102,6 @@ class PhHistoryPanel(QFrame):
         # Botón Siguiente
         self.next_button = QPushButton()
         self.next_button.setIcon(QIcon("./resources/icons/next.png"))
-        self.next_button.setStyleSheet("""
-            QPushButton {
-                background-color: #f8fafc;
-                border: none;
-                padding: 4px;
-                border-radius: 4px;
-                min-width: 28px;
-                max-width: 28px;
-                min-height: 28px;
-                max-height: 28px;
-            }
-            QPushButton:hover {
-                background-color: #e2e8f0;
-            }
-            QPushButton:disabled {
-                background-color: #f1f5f9;
-                color: #94a3b8;
-            }
-        """)
         self.next_button.clicked.connect(self.next_page)
         
         container_layout.addStretch()
@@ -208,8 +110,154 @@ class PhHistoryPanel(QFrame):
         container_layout.addWidget(self.next_button)
         container_layout.addStretch()
         
-        pagination_layout.addWidget(pagination_container)
+        pagination_layout.addWidget(self.pagination_container)
         layout.addLayout(pagination_layout)
+    
+    def apply_theme(self):
+        """Aplica el tema actual a todos los componentes"""
+        colors = theme_manager.get_theme_colors()
+        is_dark = theme_manager.is_dark_mode()
+        
+        # Estilo del panel principal
+        panel_bg = colors['surface'] if is_dark else "white"
+        self.setStyleSheet(f"""
+        QFrame {{ 
+            background-color: {panel_bg}; 
+            border-radius: 12px; 
+            border: none; 
+        }}
+        """)
+        
+        # Estilo del título
+        title_color = colors['text_primary']
+        self.history_label.setStyleSheet(f"""
+        font-size: 18px; 
+        font-weight: bold; 
+        color: {title_color};
+        """)
+        
+        # Estilo del label de filtro
+        self.filter_label.setStyleSheet(f"""
+        font-size: 14px; 
+        color: {colors['text_secondary']};
+        """)
+        
+        # Estilo del campo de búsqueda
+        search_bg = colors['surface'] if is_dark else "white"
+        search_border = colors['accent']
+        search_text = colors['text_primary']
+        self.search_filter.setStyleSheet(f"""
+        QLineEdit {{
+            background-color: {search_bg};
+            border: 1px solid {search_border};
+            color: {search_text};
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            max-width: 250px;
+        }}
+        QLineEdit:focus {{
+            border: 2px solid {search_border};
+        }}
+        """)
+        
+        # Estilo de la tabla
+        table_bg = colors['surface'] if is_dark else "white"
+        grid_color = "#2A5A5D" if is_dark else "#c5efec"
+        selection_bg = "#2A5A5D" if is_dark else "#d4f1f0"
+        alternate_bg = "#1A4A4D" if is_dark else "#f8fafc"
+        text_color = colors['text_primary']
+        header_bg = colors['accent']
+        
+        self.history_table.setStyleSheet(f"""
+        QTableWidget {{
+            background-color: {table_bg};
+            gridline-color: {grid_color};
+            border: none;
+            border-radius: 6px;
+            selection-background-color: {selection_bg};
+            selection-color: {text_color};
+            alternate-background-color: {alternate_bg};
+            color: {text_color};
+            font-size: 14px;
+            padding-bottom: 0px;
+            margin-right: 5px;
+        }}
+        QHeaderView::section {{
+            background-color: {header_bg};
+            padding: 8px;
+            border: none;
+            font-weight: bold;
+            color: white;
+            font-size: 15px;
+        }}
+        QTableWidget::item {{
+            padding: 6px;
+            border-bottom: 1px solid {grid_color};
+        }}
+        QScrollBar:vertical {{
+            background: {alternate_bg};
+            width: 10px;
+            border-radius: 5px;
+            margin-left: 5px;
+        }}
+        QScrollBar::handle:vertical {{
+            background: {colors['accent']};
+            min-height: 30px;
+            border-radius: 5px;
+        }}
+        QScrollBar::add-line:vertical, 
+        QScrollBar::sub-line:vertical {{
+            height: 0;
+            background: none;
+        }}
+        """)
+        
+        # Estilo del contenedor de paginación
+        self.pagination_container.setStyleSheet(f"""
+        QFrame {{
+            background-color: {table_bg};
+            border-radius: 8px;
+        }}
+        """)
+        
+        # Aplicar estilos a los botones de navegación
+        self.apply_navigation_button_styles()
+        
+        # Repoblar la tabla para aplicar los nuevos colores a los elementos
+        self.populate_table()
+    
+    def apply_navigation_button_styles(self):
+        """Aplica estilos a los botones de navegación"""
+        colors = theme_manager.get_theme_colors()
+        is_dark = theme_manager.is_dark_mode()
+        
+        button_bg = colors['button_bg']
+        button_hover = colors['button_hover_bg']
+        button_disabled = "#1A4A4D" if is_dark else "#f1f5f9"
+        
+        nav_button_style = f"""
+        QPushButton {{
+            background-color: {button_bg};
+            border: none;
+            padding: 4px;
+            border-radius: 4px;
+            min-width: 28px;
+            max-width: 28px;
+            min-height: 28px;
+            max-height: 28px;
+        }}
+        QPushButton:hover {{
+            background-color: {button_hover};
+        }}
+        QPushButton:disabled {{
+            background-color: {button_disabled};
+            color: #94a3b8;
+        }}
+        """
+        
+        self.prev_button.setStyleSheet(nav_button_style)
+        self.next_button.setStyleSheet(nav_button_style)
     
     def populate_table(self):
         # Iconos para estados
@@ -224,6 +272,10 @@ class PhHistoryPanel(QFrame):
         page_data = self.all_data[start_idx:end_idx]
 
         self.history_table.setRowCount(len(page_data))
+        
+        # Obtener colores del tema actual
+        colors = theme_manager.get_theme_colors()
+        text_color = colors['text_primary']
         
         for row, item in enumerate(page_data):
             if isinstance(item, dict):
@@ -241,32 +293,28 @@ class PhHistoryPanel(QFrame):
 
             fecha_item = QTableWidgetItem(fecha)
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft)
+            fecha_item.setForeground(QBrush(QColor(text_color)))
 
             valor_item = QTableWidgetItem(valor)
             valor_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft)
             valor_item.setIcon(icono_valor)
-
-            if ph_value < PH_MIN_NEUTRAL:
-                valor_item.setForeground(QBrush(QColor("#4ca4a5")))
-            elif ph_value > PH_MAX_NEUTRAL:
-                valor_item.setForeground(QBrush(QColor("#4ca4a5")))
-            else:
-                valor_item.setForeground(QBrush(QColor("#4ca4a5")))
+            valor_item.setForeground(QBrush(QColor(colors['accent'])))
 
             estado_item = QTableWidgetItem(estado)
             estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             
+            # Colores de estado que funcionan bien en ambos temas
             if estado == "Ácido":
                 estado_item.setBackground(QBrush(QColor("#fee2e2")))
-                estado_item.setForeground(QBrush(QColor("#d9536f")))
+                estado_item.setForeground(QBrush(QColor("#dc2626")))
                 estado_item.setIcon(icono_acido)
             elif estado == "Alcalino":
                 estado_item.setBackground(QBrush(QColor("#fef3c7")))
-                estado_item.setForeground(QBrush(QColor("#f4bc19")))
+                estado_item.setForeground(QBrush(QColor("#d97706")))
                 estado_item.setIcon(icono_alcalino)
             else:  # NEUTRO
                 estado_item.setBackground(QBrush(QColor("#dcfce7")))
-                estado_item.setForeground(QBrush(QColor("#27b061")))
+                estado_item.setForeground(QBrush(QColor("#16a34a")))
                 estado_item.setIcon(icono_neutro)
 
             self.history_table.setItem(row, 0, fecha_item)
@@ -279,24 +327,36 @@ class PhHistoryPanel(QFrame):
 
     def create_page_button(self, page_num, is_current=False):
         """Crea un botón de página con el estilo apropiado"""
+        colors = theme_manager.get_theme_colors()
+        
         button = QPushButton(str(page_num))
+        
+        if is_current:
+            bg_color = colors['accent']
+            text_color = "white"
+            hover_color = "#3B8A8B"
+        else:
+            bg_color = colors['button_bg']
+            text_color = colors['accent']
+            hover_color = colors['button_hover_bg']
+        
         button.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {('#4CA4A5' if is_current else '#f8fafc')};
-                color: {('white' if is_current else '#4CA4A5')};
-                border: none;
-                padding: 4px;
-                border-radius: 4px;
-                font-weight: {'bold' if is_current else 'normal'};
-                min-width: 28px;
-                max-width: 28px;
-                min-height: 28px;
-                max-height: 28px;
-                font-size: 12px;
-            }}
-            QPushButton:hover {{
-                background-color: {('#3B8A8B' if is_current else '#e2e8f0')};
-            }}
+        QPushButton {{
+            background-color: {bg_color};
+            color: {text_color};
+            border: none;
+            padding: 4px;
+            border-radius: 4px;
+            font-weight: {'bold' if is_current else 'normal'};
+            min-width: 28px;
+            max-width: 28px;
+            min-height: 28px;
+            max-height: 28px;
+            font-size: 12px;
+        }}
+        QPushButton:hover {{
+            background-color: {hover_color};
+        }}
         """)
         button.clicked.connect(lambda: self.go_to_page(page_num - 1))
         return button
@@ -314,18 +374,21 @@ class PhHistoryPanel(QFrame):
         # Determinar qué páginas mostrar
         visible_pages = self.get_visible_pages()
         
+        # Obtener colores del tema
+        colors = theme_manager.get_theme_colors()
+        
         # Crear y agregar los botones de página
         for page_num in visible_pages:
             if page_num == -1:  # Indicador de "..."
                 label = QLabel("...")
-                label.setStyleSheet("""
-                    QLabel {
-                        color: #4CA4A5;
-                        padding: 8px;
-                        min-width: 36px;
-                        max-width: 36px;
-                        qproperty-alignment: AlignCenter;
-                    }
+                label.setStyleSheet(f"""
+                QLabel {{
+                    color: {colors['accent']};
+                    padding: 8px;
+                    min-width: 36px;
+                    max-width: 36px;
+                    qproperty-alignment: AlignCenter;
+                }}
                 """)
                 self.page_buttons.append(label)
                 self.page_buttons_container.layout().addWidget(label)

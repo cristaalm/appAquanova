@@ -10,9 +10,18 @@ from .phHistoryPanel import PhHistoryPanel
 from historiales.controllers.HistorialController import HistorialController
 from dispositivos.controllers.deviceController import DispositivoController
 
+
 class phComponent(QWidget):
-    def __init__(self, graph_widget=None, parent=None):
+    def __init__(self, graph_widget=None, parent=None, theme_manager=None):
         super().__init__(parent)
+        
+        # Configurar theme_manager
+        if theme_manager is None:
+            from utils.theme_manager import theme_manager as tm
+            self.theme_manager = tm
+        else:
+            self.theme_manager = theme_manager
+            
         # Configuración inicial
         self.disp = 2  # ID del dispositivo de pH
         self.ph_value = 0
@@ -22,14 +31,21 @@ class phComponent(QWidget):
         # Controladores
         self.historial_controller = HistorialController(self.disp)
         self.device_controller = DispositivoController()
-        self.graph_widget = graph_widget if graph_widget else GraphHp()
+        # Pasar el theme_manager a la gráfica
+        self.graph_widget = graph_widget if graph_widget else GraphHp(self.theme_manager)
         
         # Cargar datos iniciales
         self.load_config()
         self.load_data()
         
+        # Conectar al cambio de tema
+        self.theme_manager.theme_changed.connect(self.apply_theme)
+        
         # Configurar UI
         self.setup_ui()
+        
+        # Aplicar tema inicial
+        self.apply_theme()
           
         # Configurar timer para actualización automática
         self.timer = QTimer(self)
@@ -88,11 +104,47 @@ class phComponent(QWidget):
             self.history_panel.clear_and_update_table(self.historial)
         if self.graph_widget and hasattr(self.graph_widget, 'updateHp'):
             self.graph_widget.updateHp(float(self.ph_value))
+
+    def apply_theme(self):
+        """Aplica el tema actual a todos los componentes"""
+        colors = self.theme_manager.get_theme_colors()
+        
+        # Aplicar tema al fondo principal
+        main_bg = colors['panel_bg'] if self.theme_manager.is_dark_mode() else "#f5f7fa"
+        self.setStyleSheet(f"background-color: {main_bg};")
+        
+        # Actualizar el panel de la gráfica si ya existe
+        if hasattr(self, 'graph_panel'):
+            self.update_graph_panel_theme()
+    
+    def update_graph_panel_theme(self):
+        """Actualiza el tema del panel de la gráfica"""
+        colors = self.theme_manager.get_theme_colors()
+        
+        # Aplicar nuevo estilo al panel de la gráfica
+        panel_bg = colors['panel_bg']
+        self.graph_panel.setStyleSheet(
+            f"QFrame {{ background-color: {panel_bg}; border-radius: 12px; border: none; }}"
+        )
+        
+        # Actualizar el color de la sombra según el tema
+        if self.theme_manager.is_dark_mode():
+            # Sombra más sutil para modo oscuro
+            shadow_color = QColor(0, 0, 0, 100)  # Negro semi-transparente
+        else:
+            # Sombra original para modo claro
+            shadow_color = QColor(197, 239, 236)
+        
+        # Crear nueva sombra con el color apropiado
+        graph_shadow = QGraphicsDropShadowEffect()
+        graph_shadow.setBlurRadius(15)
+        graph_shadow.setColor(shadow_color)
+        graph_shadow.setOffset(0, 3)
+        self.graph_panel.setGraphicsEffect(graph_shadow)
     
     def setup_ui(self):
         # Layout principal
         self.setMinimumSize(700, 500)
-        self.setStyleSheet("background-color: #f5f7fa;")
         
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(20, 0, 20, 0)
@@ -120,20 +172,14 @@ class phComponent(QWidget):
     
     def create_graph_panel(self):
         # Panel para gráfica de tendencia
-        graph_panel = QFrame()
-        graph_panel.setFrameShape(QFrame.Shape.StyledPanel)
-        graph_panel.setMinimumHeight(280)
-        graph_panel.setFixedHeight(280)
-        graph_panel.setStyleSheet("QFrame { background-color: white; border-radius: 12px; border: none; }")
+        self.graph_panel = QFrame()  # Guardar referencia como atributo de instancia
+        self.graph_panel.setFrameShape(QFrame.Shape.StyledPanel)
+        self.graph_panel.setMinimumHeight(280)
+        self.graph_panel.setFixedHeight(280)
         
-        # Sombra
-        graph_shadow = QGraphicsDropShadowEffect()
-        graph_shadow.setBlurRadius(15)
-        graph_shadow.setColor(QColor(197, 239, 236))
-        graph_shadow.setOffset(0, 3)
-        graph_panel.setGraphicsEffect(graph_shadow)
+        # El estilo se aplicará en apply_theme(), no aquí
         
-        graph_layout = QVBoxLayout(graph_panel)
+        graph_layout = QVBoxLayout(self.graph_panel)
         graph_layout.setContentsMargins(15, 15, 15, 15)
         graph_layout.setSpacing(10)
         
@@ -141,7 +187,7 @@ class phComponent(QWidget):
         self.graph_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         graph_layout.addWidget(self.graph_widget, 1)
         
-        return graph_panel
+        return self.graph_panel
     
     def stop_timer(self):
         """Detiene el timer de actualización"""
@@ -165,6 +211,7 @@ class phComponent(QWidget):
                     "fecha_ingreso": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "valor": self.ph_value
                 }
+                
                 self.historial.insert(0, new_entry)
                 if len(self.historial) > 100:
                     self.historial = self.historial[:100]

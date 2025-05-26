@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
-    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QLineEdit, QProgressBar, QGraphicsDropShadowEffect
+    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QLineEdit, QProgressBar, QGraphicsDropShadowEffect, QPushButton
 )
 from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QIcon, QBrush
@@ -16,6 +16,10 @@ class WaterComponent(QWidget):
         self.water_min = 0
         self.water_max = 50
         self.table_height = 400
+        self.page_buttons = []
+        self.all_data = []
+        self.items_per_page = 10
+        self.current_page = 0
         self.setup_ui()
         self.populate_table()
 
@@ -416,7 +420,131 @@ class WaterComponent(QWidget):
         self.history_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         layout.addWidget(self.history_table)
+        pagination_layout = QHBoxLayout()
+        pagination_layout.setContentsMargins(0, 4, 0, 4)
+
+        paging_container = QFrame()
+        paging_container.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 8px;
+            }
+        """)
+        container_layout = QHBoxLayout(paging_container)
+        container_layout.setContentsMargins(4, 0, 4, 0)
+        container_layout.setSpacing(4)
+
+        self.prev_button = QPushButton()
+        self.prev_button.setIcon(QIcon("./resources/icons/previous.png"))
+        self.prev_button.clicked.connect(self.previous_page)
+        self.prev_button.setStyleSheet(self.page_button_style())
+
+        self.page_buttons_container = QFrame()
+        self.page_buttons_layout = QHBoxLayout(self.page_buttons_container)
+        self.page_buttons_layout.setSpacing(2)
+        self.page_buttons_layout.setContentsMargins(0, 0, 0, 0)
+
+
+        self.next_button = QPushButton()
+        self.next_button.setIcon(QIcon("./resources/icons/next.png"))
+        self.next_button.clicked.connect(self.next_page)
+        self.next_button.setStyleSheet(self.page_button_style())
+
+        container_layout.addStretch()
+        container_layout.addWidget(self.prev_button)
+        container_layout.addWidget(self.page_buttons_container)
+        container_layout.addWidget(self.next_button)
+        container_layout.addStretch()
+
+        pagination_layout.addWidget(paging_container)
+        layout.addLayout(pagination_layout)
+        self.update_pagination_controls()
+
         return history_panel
+    
+    def page_button_style(self):
+        return """
+            QPushButton {
+                background-color: #f8fafc;
+                border: none;
+                padding: 4px;
+                border-radius: 4px;
+                min-width: 28px;
+                max-width: 28px;
+                min-height: 28px;
+                max-height: 28px;
+            }
+            QPushButton:hover {
+                background-color: #e2e8f0;
+            }
+            QPushButton:disabled {
+                background-color: #f1f5f9;
+                color: #94a3b8;
+            }
+        """
+    def create_page_button(self, page_num, is_current=False):
+        button = QPushButton(str(page_num))
+        button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {'#4CA4A5' if is_current else '#f8fafc'};
+                color: {'white' if is_current else '#4CA4A5'};
+                border: none;
+                padding: 4px;
+                border-radius: 6px;
+                min-width: 28px;
+                max-width: 28px;
+                min-height: 28px;
+                max-height: 28px;
+                font-size: 12px;
+                font-weight: {'bold' if is_current else 'normal'};
+            }}
+            QPushButton:hover {{
+                background-color: {'#3B8A8B' if is_current else '#e2e8f0'};
+            }}
+        """)
+        button.clicked.connect(lambda: self.go_to_page(page_num - 1))
+        return button
+
+    def update_pagination_controls(self):
+        self.total_pages = max(1, (len(self.all_data) + self.items_per_page - 1) // self.items_per_page)
+
+        # Limpiar botones anteriores
+        layout = self.page_buttons_layout
+        while layout.count():
+            widget = layout.takeAt(0).widget()
+            if widget:
+                widget.setParent(None)
+
+        self.page_buttons = []
+        for page_num in range(1, self.total_pages + 1):
+            button = self.create_page_button(page_num, page_num - 1 == self.current_page)
+            self.page_buttons.append(button)
+            layout.addWidget(button)
+
+        self.prev_button.setEnabled(self.current_page > 0)
+        self.next_button.setEnabled(self.current_page < self.total_pages - 1)
+
+
+    def go_to_page(self, page):
+        self.current_page = page
+        self.populate_table()
+        self.update_pagination_controls()
+
+
+    def next_page(self):
+        total_pages = max(1, (len(self.all_data) + self.items_per_page - 1) // self.items_per_page)
+        if self.current_page + 1 < total_pages:
+            self.current_page += 1
+            self.populate_table()
+            self.update_pagination_controls()
+
+
+    def previous_page(self):
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.populate_table()
+            self.update_pagination_controls()
+
 
     def populate_table(self):
         self.all_data = [
@@ -442,10 +570,12 @@ class WaterComponent(QWidget):
         ("27/04/2025 10:10", "9.0", "Bajo"),
         ("27/04/2025 10:20", "42.1", "Alto"),
     ]
-
-
-        self.history_table.setRowCount(len(self.all_data))
-        for row, (fecha, valor, estado) in enumerate(self.all_data):
+        self.history_table.setRowCount(0)
+        start = self.current_page * self.items_per_page
+        end = min(start + self.items_per_page, len(self.all_data))
+        page_data = self.all_data[start:end]
+        self.history_table.setRowCount(len(page_data))
+        for row, (fecha, valor, estado) in enumerate(page_data):
             # Columna 1: Fecha y hora
             fecha_item = QTableWidgetItem(fecha)
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
@@ -476,8 +606,7 @@ class WaterComponent(QWidget):
 
             self.history_table.setItem(row, 2, estado_item)
             self.history_table.setRowHeight(row, 31)
-
-
+        self.update_pagination_controls()
 
     def set_water_value(self, new_value):
         self.water_value = float(new_value)
@@ -563,14 +692,6 @@ class WaterComponent(QWidget):
             
             if show_row or search_text == "":
                 self.history_table.showRow(row)
-
-    def get_water_status(self):
-        if self.water_value < 20:
-            return "Bajo"
-        elif self.water_value > 40:
-            return "Alto"
-        else:
-            return "Óptimo"
 
 
     def get_status_style(self):

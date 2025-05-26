@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
 from PyQt6.QtCore import QThread
 from .Notification.NotificationWidget import NotificationWidget
-from .Graphs.Ambient.Humidity import GraphHumidity as GraphHumidityAmbient
+from controllers.Graphs.Ambient.humidity import GraphHumidity as GraphHumidityAmbient
 from .Graphs.Ambient.Temp import GraphTemp as GraphTempAmbient
 from .Graphs.Water.Temp import GraphTemp as GraphTempWater
 from .Graphs.Water.CE import GraphCE as GraphCEWater

@@ -11,15 +11,15 @@ from dotenv import load_dotenv
 load_dotenv()
 SHADOW = os.getenv("SHADOW")
 
-class CurrentTemp(QWidget):
+class CurrentCe(QWidget):
     QApplication.setStyle("Fusion")
-    def __init__(self, value, CE_min, CE_max, rango_max, rango_min):
+    def __init__(self, value, ce_min, ce_max, rango_max, rango_min):
         super().__init__()
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.value = value
         # Rangos de temperatura
-        self.CE_max = CE_max
-        self.CE_min = CE_min
+        self.ce_max = ce_max
+        self.ce_min = ce_min
         self.rango_max = rango_max
         self.rango_min = rango_min
         self.panel = self.create_summary_panel()
@@ -52,10 +52,10 @@ class CurrentTemp(QWidget):
             icon_name = "rojoElecricity.png"
         elif self.value > self.rango_max:  
             self.status = "Alto"
-            icon_name = "verdeElecricity.png"  #CAMBIARRRRRRRRRRRRRRRRRR
+            icon_name = "amarilloElecricity.png"  #CAMBIARRRRRRRRRRRRRRRRRR
         else: 
             self.status = "Optimo"
-            icon_name = "amarilloElecricity.png"
+            icon_name = "verdeElecricity.png"
 
         status_container = QWidget()
         status_container.setStyleSheet("""
@@ -199,14 +199,14 @@ class CurrentTemp(QWidget):
         labels_layout = QHBoxLayout()
         labels_layout.setContentsMargins(0, 0, 0, 0)  
 
-        min_label = QLabel(f"MÍN {self.CE_min}µS")
+        min_label = QLabel(f"MÍN {self.ce_min}µS")
         min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
 
         labels_layout.addStretch()
 
-        max_label = QLabel(f"MÁX {self.CE_max}µS")
+        max_label = QLabel(f"MÁX {self.ce_max}µS")
         max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)
@@ -218,8 +218,8 @@ class CurrentTemp(QWidget):
         self.progress_bar.setTextVisible(False)
 
         # Calcular el porcentaje de temperatura
-        CE_porcentage = (self.value - self.CE_min) * 100 / (self.CE_max - self.CE_min)
-        self.progress_bar.setValue(int(CE_porcentage))
+        ce_porcentage = (self.value - self.ce_min) * 100 / (self.ce_max - self.ce_min)
+        self.progress_bar.setValue(int(ce_porcentage))
         self.progress_bar.setStyleSheet("""
             QProgressBar {
                 background-color: #e2e8f0;
@@ -245,8 +245,8 @@ class CurrentTemp(QWidget):
         self.value = new_value
         self.value_label.setText(f"{new_value}")
         
-        CE_porcentage = (self.value - self.CE_min) * 100 / (self.CE_max - self.CE_min)
-        self.progress_bar.setValue(int(CE_porcentage))
+        ce_porcentage = (self.value - self.ce_min) * 100 / (self.ce_max - self.ce_min)
+        self.progress_bar.setValue(int(ce_porcentage))
         
         if hasattr(self, 'status_widget'):
             self.summary_layout.removeWidget(self.status_widget)

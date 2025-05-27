@@ -13,7 +13,7 @@ from .Signal.SignalController import SignalController
 from components.ph.pHComponent import phComponent
 from views.waterTemp import tempWaterComponent
 from views.DevicesView import DevicesView
-from views.conductivityE import conductivityComponent
+from views.conductivityCE import conductivityComponent
 from PyQt6.QtGui import QPalette, QColor
 from views.ambient import Ambient
 from PyQt6.QtCore import Qt
@@ -109,11 +109,13 @@ class ContentContainer(QWidget):
         self.graph_temp_ambient = GraphTempAmbient()
         self.graph_humidity_ambient = GraphHumidityAmbient()
 
+
+        water_temp = randint(25, 35)
         ce_value = randint(1000, 1500)        # Componentes
         self.water_component = WaterComponent(self.graph_lvl_water)
         self.ph_component = phComponent(self.graph_ph_water)
         self.temp_water_component = tempWaterComponent(self.graph_temp_water)
-        self.ce_component = conductivityComponent(self.graph_ce_water,ce_value)  # Nuevo componente
+        self.ce_component = conductivityComponent(self.graph_ce_water)  # Nuevo componente
         self.ambient = Ambient(
             self.graph_temp_ambient,
             self.graph_humidity_ambient,
@@ -252,3 +254,5 @@ class ContentContainer(QWidget):
         self.update_content()
 
     def get_container(self):        return self
+
+

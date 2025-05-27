@@ -13,16 +13,21 @@ import pyqtgraph as pg
 
 load_dotenv()
 SHADOW = os.getenv("SHADOW")
+CONDUCTIVITY_COLOR = os.getenv("CONDUCTIVITY_COLOR")
+GRAPH_POINT_SIZE = os.getenv("GRAPH_POINT_SIZE")
 
 
 class GraphCE(BaseGraph):
     def __init__(self):
         super().__init__(
             x_label="Tiempo (minutos)",
-            y_label="°C Temperatura",
+            y_label="°S/m Conductividad",
             line_color="#1E89CF",  # Color azul similar a TempGraph
             data_range=(20.0, 25.0),  # Rango inicial
+            initial_data_length=24,
         )
+        self.data_x = list(range(1, 25))  # De 1 a 24
+        self.curve.setData(self.data_x, self.data_y)
 
     def custom_config(self):
         """Configuración adicional específica para temperatura"""
@@ -46,19 +51,27 @@ class GraphCE(BaseGraph):
         self.getPlotItem().showGrid(x=True, y=True, alpha=0.3)
         
         # Modificar el estilo de la línea para añadir símbolos
-        pen = pg.mkPen(color="#2ECC71")
+        pen = pg.mkPen(color=CONDUCTIVITY_COLOR)
         self.curve.setPen(pen)
         self.curve.setSymbol('o')
-        self.curve.setSymbolSize(7)
-        self.curve.setSymbolBrush("#2ECC71")
+        self.curve.setSymbolSize(GRAPH_POINT_SIZE)
+        self.curve.setSymbolBrush(CONDUCTIVITY_COLOR)
         
-        # Habilitar auto-rango
-        self.enableAutoRange(axis=pg.ViewBox.XYAxes, enable=True)
-        self.getViewBox().autoRange()
 
     def updateCE(self, new_value: float):
-        """Alias para mantener compatibilidad con código existente"""
-        self.update_data(new_value)
+        """Actualiza los datos y ajusta el eje Y dinámicamente si es necesario."""
+        self.data_y = self.data_y[1:] + [new_value]
+        self.curve.setData(self.data_x, self.data_y)
+
+        # Obtener los límites actuales del eje Y
+        current_min, current_max = self.getPlotItem().viewRange()[1]
+
+        # Ajustar el rango si el nuevo valor está fuera de los límites
+        if new_value < current_min or new_value > current_max:
+            margin = 2.0  # Espacio extra arriba/abajo
+            new_min = min(self.data_y) - margin
+            new_max = max(self.data_y) + margin
+            self.getPlotItem().setYRange(new_min, new_max)
 
     def create_graph_panel(self):
         graph_panel = QFrame()

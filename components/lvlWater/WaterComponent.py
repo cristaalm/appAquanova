@@ -1,23 +1,91 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
-    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QLineEdit, QProgressBar, QGraphicsDropShadowEffect
+    QHeaderView, QSpacerItem, QSizePolicy, QFrame, QLineEdit, QProgressBar, QGraphicsDropShadowEffect, QPushButton
 )
 from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QIcon, QBrush
 from components.lvlWater.lvlWaterGraph import GraphLvlWater
+from historiales.controllers.HistorialController import HistorialController
+from dispositivos.controllers.deviceController import DispositivoController
 import os
 
 
 class WaterComponent(QWidget):
-    def __init__(self, graph_widget, parent=None):
+    def __init__(self, graph_widget=None, parent=None):
         super().__init__(parent)
-        self.graph_widget = GraphLvlWater()
-        self.water_value = 35
-        self.water_min = 0
-        self.water_max = 50
-        self.table_height = 400
+
+        self.disp = 5  # ID del sensor 'dist'
+        self.water_value = 0
+        self.rango_min = 0
+        self.rango_max = 100
+        self.water_min = self.rango_min
+        self.water_max = self.rango_max
+
+
+        self.historial_controller = HistorialController(self.disp)
+        self.device_controller = DispositivoController()
+
+        self.graph_widget = graph_widget if graph_widget else GraphLvlWater()
+        self.all_data = []
+        self.items_per_page = 10
+        self.current_page = 0
+
+        self.load_config()
         self.setup_ui()
-        self.populate_table()
+        self.load_data()
+        # Timer para actualizar cada 5 segundos desde la base de datos
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.refresh_data)
+        self.timer.start(5000)
+
+    def load_config(self):
+        config = self.device_controller.get_dispositivo(self.disp) or {}
+        self.rango_min = float(config.get("valor_minimo", 0))
+        self.rango_max = float(config.get("valor_maximo", 100))
+        self.water_min = self.rango_min
+        self.water_max = self.rango_max
+
+
+    def load_data(self):
+        """Carga el último valor y el historial desde la base de datos."""
+        last_value = self.historial_controller.get_last()
+        if last_value is not None:
+            self.water_value = float(last_value)
+
+        registros = self.historial_controller.get_historial()
+        self.all_data = []
+
+        for reg in registros:
+            fecha = reg.fecha_ingreso.strftime("%d/%m/%Y %H:%M")
+            valor = float(reg.valor)
+
+            if valor < self.rango_min:
+                estado = "Bajo"
+            elif valor > self.rango_max:
+                estado = "Alto"
+            else:
+                estado = "Óptimo"
+
+            self.all_data.append((fecha, f"{valor:.1f}", estado))
+        if hasattr(self, "history_table"):
+            self.populate_table()
+    def refresh_data(self):
+        try:
+            self.load_config()
+            self.load_data()         # Carga nuevos datos
+            self.update_ui()         # Refresca UI con esos datos
+        except Exception as e:
+            print(f"Error al actualizar datos de nivel de agua: {e}")
+
+    def update_ui(self):
+        self.set_water_value(self.water_value)  # Actualiza número, barra, iconos
+
+        if hasattr(self.graph_widget, "updateLvlWater") and self.water_value is not None:
+            self.graph_widget.updateLvlWater(self.water_value)
+
+        self.populate_table()  # <--- Asegura que esto esté al final
+
+
 
     def setup_ui(self):
         self.setMinimumSize(700, 500)
@@ -119,12 +187,6 @@ class WaterComponent(QWidget):
         water_icon_label.setContentsMargins(0, 6, 0, 0)
         value_container.addWidget(water_icon_label)
 
-        # Icono de estado
-        self.state_icon_label = QLabel()
-        self.state_icon_label.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-        self.state_icon_label.setContentsMargins(0, 8, 0, 0)  # Lo bajamos un poco
-        value_container.addWidget(self.state_icon_label)
-
         # Valor numérico
         self.water_value_label = QLabel(str(self.water_value))
         self.water_value_label.setStyleSheet("font-size: 56px; font-weight: bold; color: #045859; text-align: center;")
@@ -149,7 +211,7 @@ class WaterComponent(QWidget):
         min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         labels_layout.addWidget(min_label)
         labels_layout.addStretch()
-        max_label = QLabel("MÁX 50 CM")
+        max_label = QLabel("MÁX 100 CM")
         max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
         max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         labels_layout.addWidget(max_label)
@@ -416,36 +478,139 @@ class WaterComponent(QWidget):
         self.history_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         layout.addWidget(self.history_table)
+        pagination_layout = QHBoxLayout()
+        pagination_layout.setContentsMargins(0, 4, 0, 4)
+
+        paging_container = QFrame()
+        paging_container.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 8px;
+            }
+        """)
+        container_layout = QHBoxLayout(paging_container)
+        container_layout.setContentsMargins(4, 0, 4, 0)
+        container_layout.setSpacing(4)
+
+        self.prev_button = QPushButton()
+        self.prev_button.setIcon(QIcon("./resources/icons/previous.png"))
+        self.prev_button.clicked.connect(self.previous_page)
+        self.prev_button.setStyleSheet(self.page_button_style())
+
+        self.page_buttons_container = QFrame()
+        self.page_buttons_layout = QHBoxLayout(self.page_buttons_container)
+        self.page_buttons_layout.setSpacing(2)
+        self.page_buttons_layout.setContentsMargins(0, 0, 0, 0)
+
+
+        self.next_button = QPushButton()
+        self.next_button.setIcon(QIcon("./resources/icons/next.png"))
+        self.next_button.clicked.connect(self.next_page)
+        self.next_button.setStyleSheet(self.page_button_style())
+
+        container_layout.addStretch()
+        container_layout.addWidget(self.prev_button)
+        container_layout.addWidget(self.page_buttons_container)
+        container_layout.addWidget(self.next_button)
+        container_layout.addStretch()
+
+        pagination_layout.addWidget(paging_container)
+        layout.addLayout(pagination_layout)
+        self.update_pagination_controls()
+
         return history_panel
+    
+    def page_button_style(self):
+        return """
+            QPushButton {
+                background-color: #f8fafc;
+                border: none;
+                padding: 4px;
+                border-radius: 4px;
+                min-width: 28px;
+                max-width: 28px;
+                min-height: 28px;
+                max-height: 28px;
+            }
+            QPushButton:hover {
+                background-color: #e2e8f0;
+            }
+            QPushButton:disabled {
+                background-color: #f1f5f9;
+                color: #94a3b8;
+            }
+        """
+    def create_page_button(self, page_num, is_current=False):
+        button = QPushButton(str(page_num))
+        button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {'#4CA4A5' if is_current else '#f8fafc'};
+                color: {'white' if is_current else '#4CA4A5'};
+                border: none;
+                padding: 4px;
+                border-radius: 6px;
+                min-width: 28px;
+                max-width: 28px;
+                min-height: 28px;
+                max-height: 28px;
+                font-size: 12px;
+                font-weight: {'bold' if is_current else 'normal'};
+            }}
+            QPushButton:hover {{
+                background-color: {'#3B8A8B' if is_current else '#e2e8f0'};
+            }}
+        """)
+        button.clicked.connect(lambda: self.go_to_page(page_num - 1))
+        return button
+
+    def update_pagination_controls(self):
+        self.total_pages = max(1, (len(self.all_data) + self.items_per_page - 1) // self.items_per_page)
+
+        # Limpiar botones anteriores
+        layout = self.page_buttons_layout
+        while layout.count():
+            widget = layout.takeAt(0).widget()
+            if widget:
+                widget.setParent(None)
+
+        self.page_buttons = []
+        for page_num in range(1, self.total_pages + 1):
+            button = self.create_page_button(page_num, page_num - 1 == self.current_page)
+            self.page_buttons.append(button)
+            layout.addWidget(button)
+
+        self.prev_button.setEnabled(self.current_page > 0)
+        self.next_button.setEnabled(self.current_page < self.total_pages - 1)
+
+
+    def go_to_page(self, page):
+        self.current_page = page
+        self.populate_table()
+        self.update_pagination_controls()
+
+
+    def next_page(self):
+        total_pages = max(1, (len(self.all_data) + self.items_per_page - 1) // self.items_per_page)
+        if self.current_page + 1 < total_pages:
+            self.current_page += 1
+            self.populate_table()
+            self.update_pagination_controls()
+
+
+    def previous_page(self):
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.populate_table()
+            self.update_pagination_controls()
+
 
     def populate_table(self):
-        self.all_data = [
-        ("27/04/2025 08:00", "22.0", "Óptimo"),
-        ("27/04/2025 08:10", "28.5", "Óptimo"),
-        ("27/04/2025 08:20", "12.5", "Bajo"),
-        ("27/04/2025 08:30", "19.0", "Bajo"),
-        ("27/04/2025 08:40", "36.8", "Alto"),
-        ("27/04/2025 08:50", "40.2", "Alto"),
-        ("27/04/2025 09:00", "30.0", "Óptimo"),
-        ("27/04/2025 09:10", "15.7", "Bajo"),
-        ("27/04/2025 09:20", "38.0", "Alto"),
-        ("27/04/2025 09:30", "25.0", "Óptimo"),
-        ("27/04/2025 09:40", "10.0", "Bajo"),
-        ("27/04/2025 09:50", "35.5", "Alto"),
-        ("27/04/2025 10:00", "23.4", "Óptimo"),
-        ("27/04/2025 10:10", "9.0", "Bajo"),
-        ("27/04/2025 10:20", "42.1", "Alto"),
-        ("27/04/2025 10:30", "26.7", "Óptimo"),
-        ("27/04/2025 09:40", "10.0", "Bajo"),
-        ("27/04/2025 09:50", "35.5", "Alto"),
-        ("27/04/2025 10:00", "23.4", "Óptimo"),
-        ("27/04/2025 10:10", "9.0", "Bajo"),
-        ("27/04/2025 10:20", "42.1", "Alto"),
-    ]
-
-
-        self.history_table.setRowCount(len(self.all_data))
-        for row, (fecha, valor, estado) in enumerate(self.all_data):
+        self.history_table.setRowCount(0)
+        start = self.current_page * self.items_per_page
+        end = min(start + self.items_per_page, len(self.all_data))
+        page_data = self.all_data[start:end]
+        self.history_table.setRowCount(len(page_data))
+        for row, (fecha, valor, estado) in enumerate(page_data):
             # Columna 1: Fecha y hora
             fecha_item = QTableWidgetItem(fecha)
             fecha_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
@@ -476,13 +641,17 @@ class WaterComponent(QWidget):
 
             self.history_table.setItem(row, 2, estado_item)
             self.history_table.setRowHeight(row, 31)
-
-
+        self.update_pagination_controls()
 
     def set_water_value(self, new_value):
         self.water_value = float(new_value)
-        self.water_value_label.setText(str(self.water_value))
+        self.water_value_label.setText(f"{int(round(self.water_value))}")
         self.progress_bar.setValue(min(max(self.water_value / self.water_max, self.water_min), 1) * 100)
+        
+        # ✅ Asegura que la gráfica se actualice siempre que se actualiza el valor
+        if hasattr(self.graph_widget, "updateLvlWater"):
+            self.graph_widget.updateLvlWater(self.water_value)
+        
         estado = self.get_water_status()
         self.status_text.setText(estado)
 
@@ -503,6 +672,7 @@ class WaterComponent(QWidget):
 
         self.update_state_icon(self.get_water_status())
 
+
     def get_status_icon_path(self, estado):
         if estado == "Bajo":
             return "./resources/icons/low-water.png"
@@ -513,21 +683,9 @@ class WaterComponent(QWidget):
         return ""
 
     def get_status_bg_color(self, estado):
-        if estado == "Bajo":
-            return "#fef3c7"
-        elif estado == "Óptimo":
-            return "#dcfce7"
-        elif estado == "Alto":
-            return "#fee2e2"
         return "#c5efeb"
 
     def get_status_fg_color(self, estado):
-        if estado == "Bajo":
-            return "#92400e"
-        elif estado == "Óptimo":
-            return "#166534"
-        elif estado == "Alto":
-            return "#b91c1c"
         return "#2b6363"
 
     def update_state_icon(self, estado):
@@ -563,14 +721,6 @@ class WaterComponent(QWidget):
             
             if show_row or search_text == "":
                 self.history_table.showRow(row)
-
-    def get_water_status(self):
-        if self.water_value < 20:
-            return "Bajo"
-        elif self.water_value > 40:
-            return "Alto"
-        else:
-            return "Óptimo"
 
 
     def get_status_style(self):

@@ -6,6 +6,8 @@ from historiales.controllers.HistorialController import HistorialController
 from actuadores.models import Actuadores
 from django.utils import timezone
 from datetime import timedelta
+from django.utils.timezone import localtime
+from django.utils.timezone import is_aware
 import threading
 import time
 import json
@@ -47,16 +49,23 @@ class SignalController(QObject):
         max_val = dispositivo["valor_maximo"]
         tiempo_batido = dispositivo["tiempo_batido"] or 0
         nombre = dispositivo["nombre"].lower()
+        nombre_message = ""
 
-        # Comparar el valor recibido contra el rango permitido
+        if "ph" in nombre:
+            nombre_message = "del pH"
+        elif "tds" in nombre:
+            nombre_message = "de la conductividad"
+            
+
+        # Comparar el valor recibido contra el rango permitido  
         if valor < min_val:
             accion = "subir"
-            self.notification.show_message("El valor de la conductividad está por debajo del minimo permitido.", "warning")
+            self.notification.show_message(f"El valor {nombre_message} está por debajo del minimo permitido.", "warning")
         elif valor > max_val and id_dispositivo == 2:
             accion = "bajar"
-            self.notification.show_message("El valor de la conductividad está por encima del maximo permitido.", "warning")
+            self.notification.show_message(f"El valor del PH está por encima del maximo permitido.", "warning")
         elif valor > max_val and id_dispositivo == 1:
-            self.notification.show_message("El valor de la conductividad está por encima del maximo permitido.", "warning")
+            self.notification.show_message(f"El valor de la Conductividad está por encima del maximo permitido.", "warning")
             return
         else:
             # Dentro del rango, no hay que hacer nada
@@ -114,12 +123,28 @@ class SignalController(QObject):
         actuador.save()
         # Envía el diccionario como JSON y salto de línea para el Arduino
         json_data = json.dumps({"actuador": actuador.id_actuador}) + "\n"
+        print('\n')
+        print('------------------------------------------------------')
+        print(f"[SignalController] Activando actuador: {json_data}")
+        print(f"[SignalController] is_aware: {is_aware(actuador.activado)}")
+        print(f"[SignalController] local time: {localtime(actuador.activado)}")
+        print('------------------------------------------------------')
+        print('\n')
         self.serial_worker.send_data(json_data)
 
-    def _reciente(self, actuador, minutos=1):
+    def _reciente(self, actuador, minutos=20):
         """
         Verifica si el actuador fue activado recientemente.
         """
         if not actuador.activado:
             return False
+        
+        # imprimimos el tiempo actual y el tiempo de activacion
+        print(f"[SignalController] Tiempo actual: {timezone.now()}")
+        print(f"[SignalController] Tiempo de activacion: {actuador.activado}")
+        print(f"[SignalController] Diferencia: {timezone.now() - actuador.activado}")
+        print(f"[SignalController] Minutos: {minutos}")
+        print(f"[SignalController] Diferencia en minutos: {(timezone.now() - actuador.activado).total_seconds() / 60}")
+        print('------------------------------------------------------')
+        print('\n')
         return timezone.now() - actuador.activado < timedelta(minutes=minutos)

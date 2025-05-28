@@ -60,8 +60,6 @@ class Sidebar(QWidget):
         if not pixmap.isNull():
             scaled = pixmap.scaled(150, 150, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             self.logo_label.setPixmap(scaled)
-        else:
-            print("No se pudo cargar el logo")
 
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.logo_label.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -76,9 +74,9 @@ class Sidebar(QWidget):
         
         # Mapeo de id a seccion, nombre, iconos
         secciones = {
-            5: ("Nivel del agua", "subida-de-agua", "subida-de-agua_w", 1),
+            4: ("Temperatura del agua", "calor", "calor_w", 1),
+            5: ("Nivel del agua", "subida-de-agua", "subida-de-agua_w", 3),
             2: ("pH del agua", "humedad", "humedad_w", 2),
-            4: ("Temperatura del agua", "calor", "calor_w", 3),
             1: ("Conductividad eléctrica", "tapon-de-agua-circular", "tapon-de-agua-circular_w", 4),
             3: ("Ambiente", "temperatura-baja", "temperatura-baja_w", 5),
         }
@@ -235,8 +233,12 @@ class Sidebar(QWidget):
 
     def handle_logo_click(self):
         self.clear_button_selection()
-        self.change_content(0)
+        if (self.get_content_state() != 1):
+            self.change_content(1)
 
     def change_content(self, state_id):
         if hasattr(self.content_container, "set_content_state"):
             self.content_container.set_content_state(state_id)
+
+    def get_content_state(self):
+        return self.content_container.content_state

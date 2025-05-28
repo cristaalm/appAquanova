@@ -124,7 +124,7 @@ class ContentContainer(QWidget):
         self.devices_view = DevicesView(self.notification)
         self.card_dashboard = CardDashboard()
         # Estado inicial
-        self.content_state = 0
+        self.content_state = 1
 
         # Serial
         self.serial_worker = SerialWorker()
@@ -152,7 +152,7 @@ class ContentContainer(QWidget):
         {"sensor":"temp_dht","valor":20}
         {"sensor":"ph","valor":20}
         """
-        print(data)
+        print(f"[Container] Datos recibidos: {data}")
         try:
             sensor = data["sensor"]
             valor = data["valor"]
@@ -240,13 +240,13 @@ class ContentContainer(QWidget):
         if self.content_state == 0:
             self.title_label.setText("Bienvenido a el monitor de AquaNova")
             self.content_layout.addWidget(self.card_dashboard)
-        elif self.content_state == 1:
+        elif self.content_state == 3:
             self.title_label.setText("Gestión de niveles de agua")
             self.content_layout.addWidget(self.water_component)
         elif self.content_state == 2:
             self.title_label.setText("Nivel de pH del agua")
             self.content_layout.addWidget(self.ph_component)
-        elif self.content_state == 3:
+        elif self.content_state == 1:
             self.title_label.setText("Temperatura del Agua")
             self.content_layout.addWidget(self.temp_water_component)
         elif self.content_state == 4:

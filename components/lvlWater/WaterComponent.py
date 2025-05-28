@@ -74,6 +74,7 @@ class WaterComponent(QWidget):
             self.load_config()
             self.load_data()         # Carga nuevos datos
             self.update_ui()         # Refresca UI con esos datos
+            self.update_range_config()  # Actualiza rangos y barra de progreso
         except Exception as e:
             print(f"Error al actualizar datos de nivel de agua: {e}")
 
@@ -85,7 +86,18 @@ class WaterComponent(QWidget):
 
         self.populate_table()  # <--- Asegura que esto esté al final
 
-
+    def update_range_config(self):
+        """Actualiza la configuración de rangos y la UI relacionada"""
+        # Actualizar etiquetas MIN y MAX
+        if hasattr(self, 'min_label'):
+            self.min_label.setText(f"MÍN {int(self.water_min)} CM")
+        if hasattr(self, 'max_label'):
+            self.max_label.setText(f"MÁX {int(self.water_max)} CM")
+        
+        # Recalcular y actualizar la barra de progreso
+        if hasattr(self, 'progress_bar'):
+            percent = max(0, min(100, (self.water_value / self.water_max) * 100))
+            self.progress_bar.setValue(int(percent))
 
     def setup_ui(self):
         self.setMinimumSize(700, 500)
@@ -202,23 +214,19 @@ class WaterComponent(QWidget):
         value_container.addWidget(unit_label)
 
         # Agregar al layout principal
-        layout.addLayout(value_container)
-
-        # Etiquetas MIN y MAX
+        layout.addLayout(value_container)        # Etiquetas MIN y MAX con valores dinámicos
         labels_layout = QHBoxLayout()
-        min_label = QLabel("MÍN 0 CM")
-        min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
-        min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        labels_layout.addWidget(min_label)
+        self.min_label = QLabel(f"MÍN {int(self.water_min)} CM")
+        self.min_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        self.min_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        labels_layout.addWidget(self.min_label)
         labels_layout.addStretch()
-        max_label = QLabel("MÁX 100 CM")
-        max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
-        max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        labels_layout.addWidget(max_label)
-        layout.addLayout(labels_layout)
-
-        # Barra con ícono dinámico encima
-        percent = min(max(self.water_value / self.water_max, self.water_min), 1) * 100
+        self.max_label = QLabel(f"MÁX {int(self.water_max)} CM")
+        self.max_label.setStyleSheet("font-size: 14px; color: #045859; font-weight: bold;")
+        self.max_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        labels_layout.addWidget(self.max_label)
+        layout.addLayout(labels_layout)        # Barra con ícono dinámico encima
+        percent = max(0, min(100, (self.water_value / self.water_max) * 100))
 
         progress_container = QWidget()
         progress_layout = QVBoxLayout(progress_container)
@@ -275,11 +283,11 @@ class WaterComponent(QWidget):
         self.update_status_chip()
 
         return summary_panel
-
+    
     def get_water_status(self):
-        if self.water_value < 20:
+        if self.water_value < 30:
             return "Bajo"
-        elif self.water_value > 35:
+        elif self.water_value > 70:
             return "Alto"
         else:
             return "Óptimo"
@@ -620,12 +628,10 @@ class WaterComponent(QWidget):
             valor_item = QTableWidgetItem(valor)
             valor_item.setIcon(QIcon("./resources/icons/botella-de-agua.png"))  # <- Aquí se agrega el ícono
             valor_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-            self.history_table.setItem(row, 1, valor_item)
-
-            # Columna 3: Estado con íconos por nivel
+            self.history_table.setItem(row, 1, valor_item)            # Columna 3: Estado con íconos por nivel
             estado_item = QTableWidgetItem(estado)
             estado_item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-
+            
             if estado == "Bajo":
                 estado_item.setIcon(QIcon("./resources/icons/low-water-blue.png"))
                 estado_item.setBackground(QBrush(QColor("#1E89CF")))
@@ -646,7 +652,16 @@ class WaterComponent(QWidget):
     def set_water_value(self, new_value):
         self.water_value = float(new_value)
         self.water_value_label.setText(f"{int(round(self.water_value))}")
-        self.progress_bar.setValue(min(max(self.water_value / self.water_max, self.water_min), 1) * 100)
+        
+        # Calcular el porcentaje correctamente
+        percent = max(0, min(100, (self.water_value / self.water_max) * 100))
+        self.progress_bar.setValue(int(percent))
+        
+        # Actualizar etiquetas MIN y MAX dinámicamente
+        if hasattr(self, 'min_label'):
+            self.min_label.setText(f"MÍN {int(self.water_min)} CM")
+        if hasattr(self, 'max_label'):
+            self.max_label.setText(f"MÁX {int(self.water_max)} CM")
         
         # ✅ Asegura que la gráfica se actualice siempre que se actualiza el valor
         if hasattr(self.graph_widget, "updateLvlWater"):

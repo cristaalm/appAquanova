@@ -49,9 +49,6 @@ class Sidebar(QWidget):
         self.sidebar_layout.setSpacing(8)
         self.setLayout(self.sidebar_layout)
 
-        # Botón de alternancia de tema (agregado al inicio)
-        self.create_theme_toggle()
-
         # Logo de la compañía
         self.logo_container = QWidget()
         self.logo_layout = QVBoxLayout(self.logo_container)
@@ -135,8 +132,6 @@ class Sidebar(QWidget):
         theme_layout.addStretch()
         theme_layout.addWidget(self.theme_toggle_btn)
         theme_layout.addStretch()
-        
-        self.sidebar_layout.addWidget(theme_container)
 
     def update_theme_button_text(self):
         """Actualiza el texto del botón de tema"""

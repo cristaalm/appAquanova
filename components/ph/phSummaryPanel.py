@@ -162,7 +162,7 @@ class PhSummaryPanel(QFrame):
             if self.ph_icon_label.pixmap() is None:
                 self.ph_icon_label.setStyleSheet(ph_icon_style)
             
-            ph_value_style = f"font-size: 56px; font-weight: bold; color: {colors['text_primary']}; text-align: center;"
+            ph_value_style = f"font-size: 48px; font-weight: bold; color: {colors['text_primary']}; text-align: center;"
             self.ph_value_label.setStyleSheet(ph_value_style)
             
             ph_unit_style = f"font-size: 24px; color: {colors['text_primary']}; margin-left: 0px; margin-top: 20px; font-weight: bold;"

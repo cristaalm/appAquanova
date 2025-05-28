@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
 from PyQt6.QtCore import QThread
 from .Notification.NotificationWidget import NotificationWidget
-from controllers.Graphs.Ambient.humidity import GraphHumidity as GraphHumidityAmbient
+from .Graphs.Ambient.Humidity import GraphHumidity as GraphHumidityAmbient
 from .Graphs.Ambient.Temp import GraphTemp as GraphTempAmbient
 from .Graphs.Water.Temp import GraphTemp as GraphTempWater
 from .Graphs.Water.CE import GraphCE as GraphCEWater
@@ -10,8 +10,9 @@ from .Graphs.Water.LvlWater import GraphLvlWater
 from components.lvlWater.WaterComponent import WaterComponent
 from .Serial.AsyncSerialWorker import SerialWorker
 from .Signal.SignalController import SignalController
-from components.ph.pHComponent import phComponent
+from components.ambient.historyAmbient import historyAmbient
 from views.waterTemp import tempWaterComponent
+from components.ph.pHComponent import phComponent
 from views.DevicesView import DevicesView
 from views.conductivityCE import conductivityComponent
 from PyQt6.QtGui import QPalette, QColor
@@ -101,13 +102,21 @@ class ContentContainer(QWidget):
         # Pool de hilos para registro de datos
         self.executor = ThreadPoolExecutor(max_workers=5)  # Puedes ajustar el número
 
+        # Inicialización de valores de ambiente
+        self.temp_value = 22
+        self.temp_min = 0
+        self.temp_max = 50
+        self.hum_value = 50
+        self.hum_min = 0
+        self.hum_max = 100
+
         # Inicialización de gráficas
         self.graph_ph_water = GraphHpWater()
         self.graph_temp_water = GraphTempWater()
         self.graph_lvl_water = GraphLvlWater()
         self.graph_ce_water = GraphCEWater()
-        self.graph_temp_ambient = GraphTempAmbient()
-        self.graph_humidity_ambient = GraphHumidityAmbient()
+        self.graph_temp_ambient = GraphTempAmbient(self.temp_value, self.temp_min, self.temp_max)
+        self.graph_humidity_ambient = GraphHumidityAmbient(self.hum_value, self.hum_min, self.hum_max)
 
 
         water_temp = randint(25, 35)
@@ -118,7 +127,9 @@ class ContentContainer(QWidget):
         self.ce_component = conductivityComponent(self.graph_ce_water)  # Nuevo componente
         self.ambient = Ambient(
             self.graph_temp_ambient,
+            self.temp_value, self.temp_min, self.temp_max,
             self.graph_humidity_ambient,
+            self.hum_value, self.hum_min, self.hum_max
         )
 
         self.devices_view = DevicesView(self.notification)
@@ -270,5 +281,3 @@ class ContentContainer(QWidget):
         self.update_content()
 
     def get_container(self):        return self
-
-

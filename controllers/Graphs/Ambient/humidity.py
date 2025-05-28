@@ -19,12 +19,19 @@ COLOR_LEYEND = os.getenv("COLOR_LEYEND")
 
 
 class GraphHumidity(BaseGraph):
-    def __init__(self):
+    def __init__(self, parent=None, hum_value=None, hum_min=None, hum_max=None):
+        # Valores por defecto para evitar None
+        if hum_min is None:
+            hum_min = 30
+        if hum_max is None:
+            hum_max = 90
+        self.hum_min = hum_min   # Guarda como atributo
+        self.hum_max = hum_max   # Guarda como atributo
         super().__init__(
             x_label="Tiempo (horas)",
             y_label="% Humedad",
             line_color=HUMIDITY_COLOR,  # Color para humedad
-            data_range=(30.0, 90.0),
+            data_range=(hum_min, hum_max),
             initial_data_length=24,  # Mostrar 24 puntos
         )
         # Ajustar los valores del eje X para que comiencen desde 1
@@ -34,7 +41,7 @@ class GraphHumidity(BaseGraph):
     def custom_config(self):
         """Configuración adicional específica para humedad"""
         # Configuración de rango de humedad
-        self.set_data_range(0, 100)  # Rango razonable para humedad relativa
+        self.set_data_range(self.hum_min, self.hum_max)  # Rango razonable para humedad relativa
         
         style = {"color": COLOR_LEYEND, "font-size": "11px"}
         
@@ -58,13 +65,13 @@ class GraphHumidity(BaseGraph):
         self.curve.setSymbolSize(GRAPH_POINT_SIZE)
         self.curve.setSymbolBrush(HUMIDITY_COLOR)
 
-    def updateHumidity(self, new_value: float):
+    def updateHumidity(self, hum_value: float):
         """Alias para mantener compatibilidad con código existente"""
-        self.update_data(new_value)
+        self.update_data(hum_value)
 
     def create_graph_panel(self):
         graph_panel = QFrame()
-        self.setMinimumHeight(0)
+        # graph_panel.setFixedHeight(150) 
         # No se fija altura máxima, se adapta al contenedor
         graph_panel.setFrameShape(QFrame.Shape.StyledPanel)
         graph_panel.setStyleSheet("""
@@ -75,17 +82,6 @@ class GraphHumidity(BaseGraph):
             }
         """)
         
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(15)
-        r, g, b = map(int, SHADOW.split(","))
-        shadow_color = QColor(r, g, b)
-        shadow.setColor(shadow_color)
-        shadow.setOffset(0, 3)
-        graph_panel.setGraphicsEffect(shadow)
-        
-        graph_layout = QVBoxLayout(graph_panel)
-        
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
-        graph_layout.addWidget(self, 1)  # Añadir el widget de gráfica directamente
         return graph_panel

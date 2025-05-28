@@ -38,16 +38,22 @@ class MarqueeLabel(QLabel):
 
 
 class CurrentAmbient(QWidget):
-    def __init__(self, temperature_value, humidity_value, parent=None):
+    def __init__(self, temperature_value, 
+                        temp_min, temp_max, humidity_value, 
+                        hum_min, hum_max, parent=None):
         super().__init__(parent)
 
         self.temperature_value = temperature_value
         self.humidity_value = humidity_value
 
+        self.temp_min = temp_min
+        self.temp_max = temp_max
+
+        self.hum_min = hum_min
+        self.hum_max = hum_max
+
         # Diseño principal vertical
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(20)
 
         # Tarjeta de temperatura
         self.temperature_card = self.create_card(
@@ -72,8 +78,6 @@ class CurrentAmbient(QWidget):
         frame.setFrameShape(QFrame.Shape.StyledPanel)
         frame.setMinimumWidth(220)
         frame.setMaximumWidth(280)
-        frame.setMinimumHeight(155)
-        frame.setMaximumHeight(155)
         frame.setStyleSheet(
             """
             QFrame {
@@ -94,7 +98,7 @@ class CurrentAmbient(QWidget):
 
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(10)
+        layout.setSpacing(15)
 
         # Título con ícono
         title_layout = QHBoxLayout()
@@ -175,11 +179,11 @@ class CurrentAmbient(QWidget):
 
         # Etiquetas MÍN y MAX dinámicas según el tipo de card
         if is_temperature:
-            min_label_text = "MÍN 0°C"
-            max_label_text = "MÁX 50°C"
+            min_label_text = f"MÍN {self.temp_min}°C"
+            max_label_text = f"MÁX {self.temp_max}°C"
         else:
-            min_label_text = "MÍN 0%"
-            max_label_text = "MÁX 100%"
+            min_label_text = f"MÍN {self.hum_min}%"
+            max_label_text = f"MÁX {self.hum_max}%"
 
         labels_layout = QHBoxLayout()
         labels_layout.setContentsMargins(0, 0, 0, 0)
@@ -201,9 +205,9 @@ class CurrentAmbient(QWidget):
 
         num_value = float(value.split()[0])
         if is_temperature:
-            percentage = min(max(num_value / 50.0, 0), 1) * 100  # supongamos máximo 50°C
+            percentage = min(max(num_value / self.temp_max, 0), 1) * 100  # supongamos máximo 50°C
         else:
-            percentage = min(max(num_value / 100.0, 0), 1) * 100  # humedad sobre 100%
+            percentage = min(max(num_value / self.hum_max, 0), 1) * 100  # humedad sobre 100%
 
         progress_bar.setValue(int(percentage))
 
@@ -221,36 +225,56 @@ class CurrentAmbient(QWidget):
         
         layout.addWidget(progress_bar)
 
-        # Panel de estado dinámico
-        status = self.get_status(num_value, is_temperature)
+        # Obtener estado y nombre de ícono
+        status_text, icon_name = self.get_status(num_value, is_temperature)
 
-        self.status_chip = QLabel(status)
-        self.status_chip.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_chip.setStyleSheet("""
-            background-color: #c5efeb;
+        status_layout = QHBoxLayout()
+        status_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        icon_label = QLabel()
+        icon_label.setFixedSize(24, 24)
+        status_icon_path = os.path.join(ICONS, icon_name)
+        status_pixmap = QPixmap(status_icon_path).scaled(
+            24, 24, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+        )
+        icon_label.setPixmap(status_pixmap)
+
+        status_text_label = QLabel(status_text)
+        status_text_label.setStyleSheet("""
             color: #2b6363;
-            border-radius: 15px;
-            padding: 6px;
             font-size: 18px;
             font-weight: bold;
         """)
-        
-        layout.addWidget(self.status_chip)
+
+        status_layout.addWidget(icon_label)
+        status_layout.addSpacing(8)
+        status_layout.addWidget(status_text_label)
+
+        status_container = QWidget()
+        status_container.setLayout(status_layout)
+        status_container.setStyleSheet("""
+            background-color: #c5efeb;
+            border-radius: 15px;
+            padding: 6px;
+        """)
+
+        layout.addWidget(status_container)
+
         layout.addStretch()
         return frame
 
     def get_status(self, value, is_temperature):
         if is_temperature:
-            if value > 30:
-                return "ALERTA: Temperatura Alta"
-            elif value < 10:
-                return "ALERTA: Temperatura Baja"
+            if value > self.temp_max:
+                return "ALERTA: Temperatura Alta", "alerta_temp.png"
+            elif value < self.temp_min:
+                return "ALERTA: Temperatura Baja", "alerta_temp.png"
             else:
-                return "Óptima Temperatura"
+                return "Ambiente", "ok_temp.png"
         else:
-            if value > 80:
-                return "ALERTA: Humedad Alta"
-            elif value < 30:
-                return "ALERTA: Humedad Baja"
+            if value > self.hum_max:
+                return "ALERTA: Humedad Alta", "alerta_hum.png"
+            elif value < self.hum_min:
+                return "ALERTA: Humedad Baja", "alerta_hum.png"
             else:
-                return "Óptima Humedad"
+                return "Óptima Humedad", "ok_hum.png"

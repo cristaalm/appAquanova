@@ -19,12 +19,19 @@ COLOR_LEYEND = os.getenv("COLOR_LEYEND")
 
 
 class GraphTemp(BaseGraph):
-    def __init__(self):
+    def __init__(self, parent=None, temp_value=None, temp_min=None, temp_max=None):
+        # Valores por defecto para evitar None
+        if temp_min is None:
+            temp_min = 10
+        if temp_max is None:
+            temp_max = 50
+        self.temp_min = temp_min   # Guarda como atributo
+        self.temp_max = temp_max   # Guarda como atributo
         super().__init__(
             x_label="Tiempo (horas)",
             y_label="°C Temperatura",
             line_color=TEMP_COLOR,
-            data_range=(20.0, 40.0),
+            data_range=(temp_min, temp_max),
             initial_data_length=24,  # Mostrar 24 puntos
         )
 
@@ -35,7 +42,7 @@ class GraphTemp(BaseGraph):
     def custom_config(self):
         """Configuración adicional específica para temperatura"""
         # Configuración de rango de temperatura
-        self.set_data_range(10, 50)  # Rango razonable para temperatura ambiente
+        self.set_data_range(self.temp_min, self.temp_max)
         
         style = {"color": COLOR_LEYEND, "font-size": "11px"}
         
@@ -59,13 +66,13 @@ class GraphTemp(BaseGraph):
         self.curve.setSymbolSize(GRAPH_POINT_SIZE)
         self.curve.setSymbolBrush(TEMP_COLOR)
 
-    def updateTemp(self, new_value: float):
+    def updateTemp(self, temp_value: float):
         """Alias para mantener compatibilidad con código existente"""
-        self.update_data(new_value)
+        self.update_data(temp_value)
 
     def create_graph_panel(self):
         graph_panel = QFrame()
-        self.setMinimumHeight(0)
+        # graph_panel.setFixedHeight(150)
         # No se fija altura máxima, se adapta al contenedor
         graph_panel.setFrameShape(QFrame.Shape.StyledPanel)
         graph_panel.setStyleSheet("""
@@ -76,17 +83,6 @@ class GraphTemp(BaseGraph):
             }
         """)
         
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(15)
-        r, g, b = map(int, SHADOW.split(","))
-        shadow_color = QColor(r, g, b)
-        shadow.setColor(shadow_color)
-        shadow.setOffset(0, 3)
-        graph_panel.setGraphicsEffect(shadow)
-        
-        graph_layout = QVBoxLayout(graph_panel)
-        
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         
-        graph_layout.addWidget(self, 1)  # Añadir el widget de gráfica directamente
         return graph_panel

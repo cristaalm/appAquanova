@@ -8,7 +8,6 @@ from PyQt6.QtCore import QThread, pyqtSignal, QMutex, QMutexLocker
 # Cargar variables del .env
 load_dotenv()
 BAUD_RATE = int(os.getenv("BAUD_RATE", 9600))  # Valor por defecto: 9600
-print(f"Baud rate: {BAUD_RATE}")
 
 
 class SerialWorker(QThread):

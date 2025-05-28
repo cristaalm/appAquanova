@@ -128,10 +128,7 @@ class HistorialController:
             return False
 
         try:
-            print(url)
-            print(API)
             response = requests.post(url, json=payload, timeout=30)
-            print(response.json())
             response.raise_for_status()
             return True
         except Exception as e:

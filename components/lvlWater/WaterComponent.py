@@ -81,8 +81,8 @@ class WaterComponent(QWidget):
     def update_ui(self):
         self.set_water_value(self.water_value)  # Actualiza número, barra, iconos
 
-        if hasattr(self.graph_widget, "updateLvlWater") and self.water_value is not None:
-            self.graph_widget.updateLvlWater(self.water_value)
+        # if hasattr(self.graph_widget, "updateLvlWater") and self.water_value is not None:
+        #     self.graph_widget.updateLvlWater(self.water_value)
 
         self.populate_table()  # <--- Asegura que esto esté al final
 
@@ -664,8 +664,8 @@ class WaterComponent(QWidget):
             self.max_label.setText(f"MÁX {int(self.water_max)} CM")
         
         # ✅ Asegura que la gráfica se actualice siempre que se actualiza el valor
-        if hasattr(self.graph_widget, "updateLvlWater"):
-            self.graph_widget.updateLvlWater(self.water_value)
+        # if hasattr(self.graph_widget, "updateLvlWater"):
+        #     self.graph_widget.updateLvlWater(self.water_value)
         
         estado = self.get_water_status()
         self.status_text.setText(estado)
@@ -713,7 +713,9 @@ class WaterComponent(QWidget):
         else:
             pixmap = QPixmap()
 
-        self.state_icon_label.setPixmap(pixmap.scaled(55, 55, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        # verificamos si existe state_icon_label
+        if hasattr(self, "state_icon_label"):
+            self.state_icon_label.setPixmap(pixmap.scaled(55, 55, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
     def filter_data(self, text):
         #Filtra los datos de la tabla según el texto ingresado en el campo de búsqueda

@@ -67,10 +67,8 @@ class phComponent(QWidget):
             last_value = self.historial_controller.get_last()
             if last_value is not None:
                 self.ph_value = float(last_value)
-                print(f"Valor de pH cargado: {self.ph_value}")
             else:
                 self.ph_value = 7.0  # Valor neutral por defecto
-                print("No se encontró valor de pH, usando valor por defecto")
 
             registros = self.historial_controller.get_historial()
             if registros:
@@ -198,7 +196,6 @@ class phComponent(QWidget):
         """Actualiza el valor de pH y todos los componentes relacionados"""
         try:
             self.ph_value = float(new_value)
-            print(f"Nuevo valor de pH establecido: {self.ph_value}")
             
             # Actualizar los componentes
             if hasattr(self, 'summary_panel'):

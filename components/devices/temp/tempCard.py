@@ -235,7 +235,6 @@ class TempCard(QFrame):
         config = self._config_model.load() or {}
         min_val = config.get("valor_minimo", self.min_slider.value())
         max_val = config.get("valor_maximo", self.max_slider.value())
-        print(min_val, max_val)
 
         # Variables privadas para los valores
         self._min_val = min_val

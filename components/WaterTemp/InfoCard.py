@@ -174,7 +174,7 @@ class CurrentTemp(QWidget):
         # Valor de la temperatura
         self.value_label = QLabel(f"{self.value}")
         self.value_label.setStyleSheet("""
-            font-size: 46px;
+            font-size: 43px;
             font-weight: bold;
             color: #045859;
             text-align: center;

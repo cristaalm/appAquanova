@@ -157,32 +157,48 @@ class ContentContainer(QWidget):
             sensor = data["sensor"]
             valor = data["valor"]
             if sensor == "ph":
-                self.graph_ph_water.updateHp(float(valor))
-                self.executor.submit(self.ph_controller.set_history, float(valor))
+                try:
+                    self.graph_ph_water.updateHp(float(valor))
+                    self.executor.submit(self.ph_controller.set_history, float(valor))
 
-                self.ph_component.set_ph_value(valor)  # Actualizar componente pH
+                    self.ph_component.set_ph_value(valor)  # Actualizar componente pH
+                except Exception as e:
+                    print(f"[Container] Error al actualizar datos de pH: {e}")
+                
             elif sensor == "temp":
-                self.graph_temp_water.updateTemp(float(valor))
-                self.executor.submit(self.temp_water_controller.set_history, float(valor))
-
+                try:
+                    self.graph_temp_water.updateTemp(float(valor))
+                    self.executor.submit(self.temp_water_controller.set_history, float(valor))
+                except Exception as e:
+                    print(f"[Container] Error al actualizar datos de temperatura: {e}")
             elif sensor == "dist":
-                self.graph_lvl_water.updateLvlWater(float(valor))
-                self.executor.submit(self.distance_controller.set_history, float(valor))
-
+                try:
+                    self.graph_lvl_water.updateLvlWater(float(valor))
+                    self.executor.submit(self.distance_controller.set_history, float(valor))
+                except Exception as e:
+                    print(f"[Container] Error al actualizar datos de distancia: {e}")
             elif sensor == "ec":
-                self.graph_ce_water.updateCE(float(valor))
-                self.executor.submit(self.ce_controller.set_history, float(valor))
-
+                try:
+                    self.graph_ce_water.updateCE(float(valor))
+                    self.executor.submit(self.ce_controller.set_history, float(valor))
+                except Exception as e:
+                    print(f"[Container] Error al actualizar datos de conductividad: {e}")
             elif sensor == "humedad_dht":
-                self.graph_humidity_ambient.updateHU(float(valor))
-                self.executor.submit(self.humidity_controller.set_history, float(valor))
+                try:
+                    self.graph_humidity_ambient.updateHU(float(valor))
+                    self.executor.submit(self.humidity_controller.set_history, float(valor))
+                except Exception as e:
+                    print(f"[Container] Error al actualizar datos de humedad: {e}")
 
             elif sensor == "temp_dht":
-                self.graph_temp_ambient.updateTemp(float(valor))
-                self.executor.submit(self.temp_ambient_controller.set_history, float(valor))
+                try:
+                    self.graph_temp_ambient.updateTemp(float(valor))
+                    self.executor.submit(self.temp_ambient_controller.set_history, float(valor))
+                except Exception as e:
+                    print(f"[Container] Error al actualizar datos de temperatura ambiente: {e}")
 
         except (ValueError, TypeError) as e:
-            print(f"Error procesando datos: {e}")
+            print(f"[Container] Error procesando datos: {e}")
 
     def handle_serial_error(self, error_msg):
         print(f"ERROR SERIAL: {error_msg}")

@@ -199,7 +199,7 @@ class PhSummaryPanel(QFrame):
             if self.ph_icon_label.pixmap() is None:
                 self.ph_icon_label.setStyleSheet("font-size: 24px; color: #045859;")
             
-            self.ph_value_label.setStyleSheet("font-size: 56px; font-weight: bold; color: #045859; text-align: center;")
+            self.ph_value_label.setStyleSheet("font-size: 38px; font-weight: bold; color: #045859; text-align: center;")
             self.ph_unit_label.setStyleSheet("font-size: 24px; color: #045859; margin-left: 0px; margin-top: 20px; font-weight: bold;")
             
             # Estilos originales MIN/MAX

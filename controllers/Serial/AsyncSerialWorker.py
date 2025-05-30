@@ -1,0 +1,107 @@
+import serial
+import serial.tools.list_ports
+import json
+import os
+from dotenv import load_dotenv
+from PyQt6.QtCore import QThread, pyqtSignal, QMutex, QMutexLocker
+
+# Cargar variables del .env
+load_dotenv()
+BAUD_RATE = int(os.getenv("BAUD_RATE", 9600))  # Valor por defecto: 9600
+
+
+class SerialWorker(QThread):
+    data_received = pyqtSignal(dict)
+    error_occurred = pyqtSignal(str)
+    status_changed = pyqtSignal(str)
+
+    def __init__(self, baud_rate=BAUD_RATE):
+        super().__init__()
+        self.baud_rate = baud_rate
+        self.serial_conn = None
+        self._is_running = False
+        self.mutex = QMutex()
+
+    def run(self):
+        self._is_running = True
+
+        while self._is_running:
+            available_ports = [p.device for p in serial.tools.list_ports.comports()]
+            if not available_ports:
+                self.error_occurred.emit(
+                    "⚠️ No se detectaron puertos disponibles. Esperando..."
+                )
+                self.sleep(5)
+                continue
+
+            connected = False
+            for port in available_ports:
+                try:
+                    self.status_changed.emit(f"🔄 Intentando conectar a {port}...")
+                    self.serial_conn = serial.Serial(
+                        port=port, baudrate=self.baud_rate, timeout=1, write_timeout=1
+                    )
+                    self.status_changed.emit(f"✅ Conectado en {port}")
+                    connected = True
+                    break
+                except serial.SerialException as e:
+                    self.error_occurred.emit(
+                        f"❌ No se pudo conectar a {port}: {str(e)}"
+                    )
+                    continue
+
+            if not connected:
+                self.error_occurred.emit(
+                    "⚠️ No se pudo conectar a ningún puerto. Reintentando..."
+                )
+                self.sleep(5)
+                continue
+
+            while self._is_running and self.serial_conn and self.serial_conn.is_open:
+                try:
+                    if self.serial_conn.in_waiting > 0:
+                        raw_data = self.serial_conn.readline()
+                        line = raw_data.decode("utf-8").strip()
+                        if line:
+                            data = json.loads(line)
+                            self.data_received.emit(data)
+                except (UnicodeDecodeError, json.JSONDecodeError) as e:
+                    self.error_occurred.emit(f"⚠️ Error en los datos: {str(e)}")
+                except serial.SerialException:
+                    self.error_occurred.emit("⚠️ Desconexión detectada. Reintentando...")
+                    break
+
+            self.close_serial()
+            self.error_occurred.emit("🔴 Se ha desconectado. Intentando reconectar...")
+            self.sleep(5)
+
+    def close_serial(self):
+        with QMutexLocker(self.mutex):
+            if self.serial_conn:
+                try:
+                    self.serial_conn.close()
+                except serial.SerialException:
+                    pass
+                finally:
+                    self.serial_conn = None
+
+    def send_data(self, data):
+        """
+        Envía datos por el puerto serial de forma segura.
+        Si data es str, se codifica a bytes en UTF-8.
+        Si ocurre un error, emite la señal error_occurred.
+        """
+        with QMutexLocker(self.mutex):
+            if self.serial_conn and self.serial_conn.is_open:
+                if isinstance(data, str):
+                    data = data.encode("utf-8")
+                try:
+                    self.serial_conn.write(data)
+                except serial.SerialException as e:
+                    self.error_occurred.emit(f"❌ Error al enviar datos: {str(e)}")
+            else:
+                self.error_occurred.emit("❌ Puerto serial no disponible para enviar datos.")
+
+    def stop(self):
+        self._is_running = False
+        self.wait(1000)
